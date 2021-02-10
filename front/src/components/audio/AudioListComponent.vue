@@ -16,13 +16,15 @@
 
 
     </div>
+
+
     <!-- TODO Bouton "Modifier un son à inclure dans chaque element de la liste-->
     <!-- TODO Ajouter l'icone quand on l'aura = remplacer "baku-button" par "icon-name baku-button"-->
     <i class="baku-button" @click="openEditSoundPopop">Modifier un son</i>
 
-
-    <button class="button is-primary" @click="openRecordPopup">Enregistrer un son</button>
-
+    <div class="record-Button">
+      <button class="button is-primary" @click="openRecordPopup">Enregistrer un son</button>
+    </div>
   </div>
 </template>
 
