@@ -16,6 +16,8 @@ export enum BakuAction {
   SHOT_MOVE,
   AUDIO_ADD,
   AUDIO_REMOVE,
+  AUDIO_UPDATE_TITLE,
+  AUDIO_UPDATE_SOUND,
 }
 
 export interface BakuEvent {

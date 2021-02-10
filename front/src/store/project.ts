@@ -184,6 +184,16 @@ export const ProjectStore: BakuModule<ProjectState> = {
       loadEvents(context, [event]);
       await store.dispatch('user/updateCurrentSeenProject');
     },
+
+    async changeAudioTitle(context, params : {audioId : string, title : string}) {
+      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_TITLE, params);
+      loadEvents(context, [event]);
+    },
+
+    async changeAudioSound(context, params : {audioId : string, sound : Blob}) {
+      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_SOUND, params);
+      loadEvents(context, [event]);
+    },
   },
   getters: {
     movie: (state): Movie =>
@@ -278,7 +288,6 @@ export const ProjectStore: BakuModule<ProjectState> = {
         seconds: getters.getSeconds(),
       }
     },
-
   },
   modules: {},
 };

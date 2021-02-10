@@ -49,7 +49,7 @@ export interface Shot {
 
 export interface Audio {
   readonly id: string;
-  readonly title : string;
+  readonly title: string;
   readonly sound: Blob;
 }
 
@@ -149,6 +149,14 @@ export class MovieService {
       shots.splice(shotIndex, 1, updateFn(shot));
     };
 
+    const updateAudio = (audioId: string, updateFn: (audio: Audio) => Audio) => {
+      const audioIndex = audios.findIndex((p) => p.id === audioId);
+      const audio = audios.find((p) => p.id === audioId);
+      if (!audio) {
+        throw new Error(`audio ${audioId} should exist for project ${title}`);
+      }
+      audios.splice(audioIndex, 1, updateFn(audio));
+    };
     
     events.forEach((event) => {
       switch (event.action) {
@@ -250,6 +258,18 @@ export class MovieService {
         case BakuAction.AUDIO_REMOVE: {
           const audioIndex = audios.findIndex((audio) => audio.id === event.value.audioId);
           shots.splice(audioIndex, 1);
+          break;
+        }
+        case BakuAction.AUDIO_UPDATE_SOUND: {
+          updateAudio(event.value.audioId, (audio: Audio) =>
+            ({...audio, synopsis: event.value.sound})
+          )
+          break;
+        }
+        case BakuAction.AUDIO_UPDATE_TITLE: {
+          updateAudio(event.value.audioId, (audio: Audio) =>
+            ({...audio, synopsis: event.value.title})
+          )
           break;
         }
         default:
