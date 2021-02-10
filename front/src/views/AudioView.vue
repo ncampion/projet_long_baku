@@ -1,5 +1,5 @@
 <style lang="scss" scoped>
-  @import "@/styles/capture.scss"; // Changer ça
+  @import "@/styles/audio.scss"; 
 </style>
 
 <template>
@@ -10,8 +10,8 @@
         <AudioListComponent
         />
 
-        <button class="create-button" @click="openRecordPopup">Enregistrer un son</button>
-        <button class="create-button" @click="openEditSoundPopop">Modifier un son</button>
+        <button class="button is-primary" @click="openRecordPopup">Enregistrer un son</button>
+        <i class="baku-button" @click="openEditSoundPopop">Modifier un son</i>
 
       
         <div class="preview-container">
@@ -150,7 +150,7 @@
         
         </div>
       
-      
+
         <HistoryComponent/>
 
       </div>

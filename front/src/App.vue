@@ -53,7 +53,8 @@
         </b-dropdown>
 
         <b-dropdown append-to-body aria-role="list"
-                    v-if="$route.params.projectId && ($route.name === 'captureShot' || $route.name === 'movie') ">
+                    v-if="$route.params.projectId && ($route.name === 'captureShot' || $route.name === 'movie'|| $route.name === 'audio') ">
+          
           <div class="label-menu label-menu-sep-left" slot="trigger" role="button">
             <p v-if="$route.name === 'captureShot'">Capture <i
               class=" icon-angle-down baku-button"/></p>
@@ -63,6 +64,9 @@
             <!--              class=" icon-angle-down baku-button"/></p>-->
             <!--            <p v-else-if="$route.name === 'library'">Mes films <i-->
             <!--              class=" icon-angle-down baku-button"/></p>-->
+
+            <p v-else-if="$route.name === 'audio'">Audio <i
+              class=" icon-angle-down baku-button"/></p>
             <p v-else>{{$route.name}} <i class="icon-angle-down baku-button"/></p>
           </div>
 
@@ -267,7 +271,7 @@ export default class App extends Vue {
     }
 
     public async onOpenPlan() {
-      if (this.$route.name === 'captureShot') {
+      if (this.$route.name === 'captureShot' || 'audio') {
         await this.$router.push({
           name: 'movie',
         });
@@ -298,15 +302,6 @@ export default class App extends Vue {
         },
       });
       // return this.$store.dispatch('project/changeActiveShot', shotId);
-    }
-
-    private async moveToAudio() {
-      return this.$router.push({
-        name: 'audio',
-        params: {
-          projectId: this.id,
-        },
-      });
     }
 
 
@@ -355,7 +350,16 @@ export default class App extends Vue {
     }
 
     public async goToAudio() {
-      await this.moveToAudio();
+      if (this.$route.name === 'captureShot' || 'movie') {
+        await this.$router.push({
+          name: 'audio',
+          params: {
+            projectId: this.id,
+          },
+        });
+      }
     }
+
+
 }
 </script>
