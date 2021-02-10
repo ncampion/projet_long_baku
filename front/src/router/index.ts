@@ -7,6 +7,7 @@ import TodoView from '@/views/TodoView.vue';
 import LibraryView from '@/views/LibraryView.vue';
 import MovieView from '@/views/MovieView.vue';
 import SmartphoneView from '@/views/SmartphoneView.vue';
+import AudioView from '@/views/AudioView.vue';
 
 const Capture = () => import('@/views/CaptureView.vue');
 
@@ -40,7 +41,12 @@ const routes = [
     name: 'movieEditing',
     path: '/movies/:projectId/movieEditing',
     component: TodoView,
-  }
+  },
+  {
+    name: 'audio',
+    path: '/movies/:projectId/audio',
+    component: AudioView,
+  },
 ];
 
 Vue.use(VueRouter);
