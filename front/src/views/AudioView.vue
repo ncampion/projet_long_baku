@@ -5,15 +5,17 @@
 <template>
   <div class="main-frame">
     <template>
+      <div class="preview-bloc">
+
+        <AudioListComponent
+        />
+
         <button class="create-button" @click="openRecordPopup">Enregistrer un son</button>
         <button class="create-button" @click="openEditSoundPopop">Modifier un son</button>
-        <div class="preview-bloc">
-        <StoryboardPreviewComponent
-          ref="previewComponent"
-          :shots="movie.shots"
-          :activeShot="getActiveShot"
-        />
+
+      
         <div class="preview-container">
+          <!--
           <div class="preview-content-wrapper">
             <div class="preview-content">
               <template v-if="onionSkinDisplay">
@@ -132,6 +134,7 @@
               :class="{'active-capture': activeDevice, 'disabled' : !!isPlaying}"
               @click="setactiveDevice(activeDevice)"
               >Mode Capture</div>-->
+              <!--
               <div class="toolbar-button toolbox-control">
                 <img
                   style="height: 28px; width:28px"
@@ -143,10 +146,18 @@
                 <CaptureToolboxComponent v-if="getActiveShot && canEdit" :isCapturing="true"/>
               </div>
             </div>
-          </div>
+          </div> -->
+        
         </div>
+      
+      
         <HistoryComponent/>
+
       </div>
+
+      <AudioDisplayComponent
+      />
+
     </template>
   </div>
 </template>
@@ -159,9 +170,16 @@ import { createProject, getVersion } from '@/api';
 import RecordPopup from '@/components/RecordPopup.vue';
 import EditSoundPopup from '@/components/EditSoundPopup.vue';
 
+import HistoryComponent from '@/components/capture/HistoryComponent.vue';
+import AudioDisplayComponent from '@/components/audio/AudioDisplayComponent.vue';
+import AudioListComponent from '@/components/audio/AudioListComponent.vue';
+
 @Component({
     components: {
         ProjectSettingsPopup,
+        HistoryComponent,
+        AudioListComponent,
+        AudioDisplayComponent,
     },
 })
 
