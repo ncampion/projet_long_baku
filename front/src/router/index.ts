@@ -44,7 +44,7 @@ const routes = [
   },
   {
     name: 'audio',
-    path: '/movies/:projectId/audio',
+    path: '/movies/:projectId/audio/(admin)?',
     component: AudioView,
   },
 ];
