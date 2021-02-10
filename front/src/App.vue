@@ -81,6 +81,14 @@
             </div>
           </b-dropdown-item>
 
+          <b-dropdown-item class aria-role="listitem">
+            <div class="option-logo" @click="goToAudio()">
+              <i class="icon-grid baku-button"/>
+              <span>Audio</span>
+            </div>
+          </b-dropdown-item>
+
+
           <!--          <b-dropdown-item class aria-role="listitem">-->
           <!--            <div class="option-logo" @click="onCreatePlan()">-->
           <!--              <i class="icon-plus baku-button"/>-->
@@ -292,6 +300,16 @@ export default class App extends Vue {
       // return this.$store.dispatch('project/changeActiveShot', shotId);
     }
 
+    private async moveToAudio() {
+      return this.$router.push({
+        name: 'audio',
+        params: {
+          projectId: this.id,
+        },
+      });
+    }
+
+
     public openIssue() {
       this.$buefy.modal.open({
         parent: this,
@@ -334,6 +352,10 @@ export default class App extends Vue {
 
     public async goToShot() {
       await this.moveToShot(this.activeShotId);
+    }
+
+    public async goToAudio() {
+      await this.moveToAudio();
     }
 }
 </script>
