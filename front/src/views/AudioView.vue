@@ -6,6 +6,7 @@
   <div class="main-frame">
     <template>
         <button class="create-button" @click="openRecordPopup">Enregistrer un son</button>
+        <button class="create-button" @click="openEditSoundPopop">Modifier un son</button>
     </template>
   </div>
 </template>
@@ -16,6 +17,7 @@ import ProjectSettingsPopup from '@/components/ProjectSettingsPopup.vue';
 import { namespace } from 'vuex-class';
 import { createProject, getVersion } from '@/api';
 import RecordPopup from '@/components/RecordPopup.vue';
+import EditSoundPopup from '@/components/EditSoundPopup.vue';
 
 @Component({
     components: {
@@ -29,6 +31,15 @@ export default class AudioView extends Vue {
         this.$buefy.modal.open({
         parent: this,
         component: RecordPopup,
+        hasModalCard: true,
+        canCancel: ['escape', 'outside'],
+      });
+    }
+
+    public async openEditSoundPopop() {
+        this.$buefy.modal.open({
+        parent: this,
+        component: EditSoundPopup,
         hasModalCard: true,
         canCancel: ['escape', 'outside'],
       });
