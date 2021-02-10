@@ -169,7 +169,21 @@ export const ProjectStore: BakuModule<ProjectState> = {
 
     async addToLocalHistory(context, event: BakuEvent) {
       context.commit('addToLocalHistory', event);
-    }
+    },
+
+    async createAudio(context, params: { sound : Blob, title : String}): Promise<string> {
+      const audioId = uuid.v4();
+      const event = makeEvent(context, BakuAction.AUDIO_ADD, {audioId, params});
+      loadEvents(context, [event]);
+      await store.dispatch('user/updateCurrentSeenProject');
+      return audioId;
+    },
+
+    async removeAudio(context, audioId: string) {
+      const event = makeEvent(context, BakuAction.AUDIO_REMOVE, {audioId});
+      loadEvents(context, [event]);
+      await store.dispatch('user/updateCurrentSeenProject');
+    },
   },
   getters: {
     movie: (state): Movie =>

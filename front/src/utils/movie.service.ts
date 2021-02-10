@@ -27,12 +27,13 @@ export enum KeyCodes {
   C = 67,
   V = 86
 }
-
+//Modifications pour l'audio
 export interface Movie {
   readonly title: string;
   readonly synopsis: string;
   readonly poster?: ImageRef;
   readonly shots: Shot[];
+  readonly audios: Audio[];
   readonly fps: number;
   readonly locked: boolean;
 }
@@ -44,6 +45,14 @@ export interface Shot {
   readonly synopsis: string;
   readonly storyboard?: ImageRef;
 }
+
+
+export interface Audio {
+  readonly id: string;
+  readonly title : string;
+  readonly sound: Blob;
+}
+
 
 export interface ReadingSliderBoundaries {
   left: number;
@@ -129,6 +138,7 @@ export class MovieService {
     let fps = 12;
     let locked = false;
     const shots: Shot[] = [];
+    const audios: Audio[] = [];
 
     const updateShot = (shotId: string, updateFn: (shot: Shot) => Shot) => {
       const shotIndex = shots.findIndex((p) => p.id === shotId);
@@ -139,6 +149,7 @@ export class MovieService {
       shots.splice(shotIndex, 1, updateFn(shot));
     };
 
+    
     events.forEach((event) => {
       switch (event.action) {
         case BakuAction.MOVIE_UPDATE_TITLE:
@@ -228,12 +239,25 @@ export class MovieService {
           })
           break;
         }
+        case BakuAction.AUDIO_ADD: {
+          audios.push({
+            id: event.value.audioId,
+            title: event.value.titre,
+            sound: event.value.son
+          });
+          break;
+        }
+        case BakuAction.AUDIO_REMOVE: {
+          const audioIndex = audios.findIndex((audio) => audio.id === event.value.audioId);
+          shots.splice(audioIndex, 1);
+          break;
+        }
         default:
           break;
       }
     });
     return {
-      title, synopsis, poster, shots, fps, locked
+      title, synopsis, poster, shots, audios, fps, locked
     };
   }
 
