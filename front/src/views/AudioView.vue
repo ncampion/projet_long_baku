@@ -10,9 +10,7 @@
         <AudioListComponent
         />
 
-        <button class="button is-primary" @click="openRecordPopup">Enregistrer un son</button>
-        <i class="baku-button" @click="openEditSoundPopop">Modifier un son</i>
-
+        
       
         <div class="preview-container">
           <!--
@@ -167,8 +165,6 @@ import { Component, Vue, Watch, Prop, } from 'vue-property-decorator';
 import ProjectSettingsPopup from '@/components/ProjectSettingsPopup.vue';
 import { namespace } from 'vuex-class';
 import { createProject, getVersion } from '@/api';
-import RecordPopup from '@/components/RecordPopup.vue';
-import EditSoundPopup from '@/components/EditSoundPopup.vue';
 
 import HistoryComponent from '@/components/capture/HistoryComponent.vue';
 import AudioDisplayComponent from '@/components/audio/AudioDisplayComponent.vue';
@@ -185,23 +181,7 @@ import AudioListComponent from '@/components/audio/AudioListComponent.vue';
 
 export default class AudioView extends Vue {
 
-    public async openRecordPopup() {
-        this.$buefy.modal.open({
-        parent: this,
-        component: RecordPopup,
-        hasModalCard: true,
-        canCancel: ['escape', 'outside'],
-      });
-    }
 
-    public async openEditSoundPopop() {
-        this.$buefy.modal.open({
-        parent: this,
-        component: EditSoundPopup,
-        hasModalCard: true,
-        canCancel: ['escape', 'outside'],
-      });
-    }
 }
 </script>
 
