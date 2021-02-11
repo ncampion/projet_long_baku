@@ -51,15 +51,8 @@ export default class RecordPopup extends Vue {
 
   public selectedDeviceId: string | null = null;
 
+
   public async mounted() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach((track: MediaStreamTrack) => {
-        track.stop();
-      });
-    } catch (e) {
-      console.info(e);
-    }
     const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
 
     const audioDevices = devices
@@ -70,6 +63,26 @@ export default class RecordPopup extends Vue {
     this.selectedDeviceId = this.devices[0].id ?? undefined;
   }
 
+  private record: boolean = false;
+  public async recordAction() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({audio: this.selectedDeviceId});
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks = [];
+    } catch (e) {
+      console.info(e);
+    }
+
+
+
+    const elem = document.getElementById("recordAction");
+    this.record = !this.record;
+    if(this.record){
+      elem.innerHTML = "Stop";
+    }else{
+      elem.innerHTML = "Record";
+    }
+  }
 }
 
 </script>
