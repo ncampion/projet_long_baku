@@ -7,7 +7,6 @@
       <b-field>
         <b-select
           :loading="!devices.length"
-          @input="onRecordDeviceChange()"
           v-model="selectedDeviceId"
           placeholder="Sélectionner un microphone"
         >
@@ -69,9 +68,6 @@ export default class RecordPopup extends Vue {
       );
     this.devices = audioDevices.map((input: MediaDeviceInfo) => new AudioDevice(input));
     this.selectedDeviceId = this.devices[0].id ?? undefined;
-  }
-  public async onRecordDeviceChange() {
-    this.selectedDeviceId = this.devices.find((d) => d.id == this.selectedDeviceId) || null;
   }
 
 }
