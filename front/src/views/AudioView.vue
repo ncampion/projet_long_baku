@@ -32,8 +32,8 @@
                   />
                 </div>
               </template>
-
-              -->
+              
+              
             <div class="preview-content">
               
               <template>
@@ -71,7 +71,7 @@
                 src="@/assets/baku-cloud-spinner.svg"
               />
             </div>
-
+-->
 
 
                         <div class="preview-content">
@@ -92,7 +92,7 @@
               />
             </div>
 
-            
+
           </div>
           <div class="preview-actions">
             <ImagesSelectorComponent

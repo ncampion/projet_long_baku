@@ -10,7 +10,11 @@
           class="sounds"
         >
           
-          <div class="horizontal-align">
+          <div
+            class="horizontal-align"
+            draggable="true"
+            ondragstart="handleDragStart(event);"
+          >
               Son 1
           </div>
           
@@ -29,7 +33,7 @@
     </div>
 
 
-    <!-- TODO Bouton "Modifier un son à inclure dans chaque element de la liste-->
+
     <!-- TODO Ajouter l'icone quand on l'aura = remplacer "baku-button" par "icon-name baku-button"-->
     
 
@@ -47,51 +51,33 @@ import { Audio, Shot } from '@/utils/movie.service';
 // import { ImageCacheService } from "@/utils/imageCache.service";
 import RecordPopup from '@/components/RecordPopup.vue';
 import EditSoundPopup from '@/components/EditSoundPopup.vue';
-
-
 const ProjectNS = namespace('project');
-
 @Component
-export default class StoryboardPreviewComponent extends Vue {
+export default class AudioListComponent extends Vue {
     
     @Prop()
     public activeShot!: Shot;
-
     @Prop()
     public shots!: Shot[];
-
     @ProjectNS.State
     public id!: string;
-
     mounted() {
     }
-
     public async createNewAudio(title : string, sound : Blop) {
       const shotId = await this.$store.dispatch('project/createAudio', { sound, title, });
       //await this.$store.dispatch('project/changeActiveShot', audioId);
       //this.$emit('close');
     }
-
     get sounds() {
-        if (this.$store.audios == null) {
+        if (this.$store.audios == null) {  
           return [null, null, null];
         }
         return this.$store.audios;
     }
-
-    
-
-    public async changeShotSynopsis() {
-        const shotId = this.activeShot?.id;
-        const synopsis = (this.$refs.shotSynopsis as any).value;
-
-        await this.$store.dispatch('project/changeShotSynopsis', {
-        shotId,
-        synopsis,
-        });
+    handleDragStart(event) {
+      console.log('Started dragging');
     }
-
-        public async openRecordPopup() {
+    public async openRecordPopup() {
         this.$buefy.modal.open({
         parent: this,
         component: RecordPopup,
@@ -99,7 +85,6 @@ export default class StoryboardPreviewComponent extends Vue {
         canCancel: ['escape', 'outside'],
       });
     }
-
     public async openEditSoundPopup() {
         this.$buefy.modal.open({
         parent: this,
@@ -109,6 +94,4 @@ export default class StoryboardPreviewComponent extends Vue {
       });
     }
 }
-
-
 </script>
