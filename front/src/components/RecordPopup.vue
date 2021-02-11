@@ -6,13 +6,12 @@
     <section class="modal-card-body">
       <b-field>
         <b-select
-          icon="video"
           :loading="!devices.length"
-          @input="onCaptureDeviceChange()"
+          @input="onRecordDeviceChange()"
           v-model="selectedDeviceId"
           placeholder="Sélectionner un microphone"
         >
-          <option v-for="device in devices" :key="device.id" :value="device.label">{{device.label}}</option>
+          <option v-for="device in devices" :key="device.id" :value="device.id">{{device.label}}</option>
         </b-select>
       </b-field>
       <button class="button" id="recordAction" type="button" @click="recordAction()">Record</button>
@@ -69,8 +68,12 @@ export default class RecordPopup extends Vue {
         (input: MediaDeviceInfo) => input.kind === 'audioinput' && input.deviceId !== '',
       );
     this.devices = audioDevices.map((input: MediaDeviceInfo) => new AudioDevice(input));
-    // this.devicesLabel = audioDevices.map((input: MediaDeviceInfo) => input.label);
+    this.selectedDeviceId = this.devices[0].id ?? undefined;
   }
+  public async onRecordDeviceChange() {
+    this.selectedDeviceId = this.devices.find((d) => d.id == this.selectedDeviceId) || null;
+  }
+
 }
 
 </script>
