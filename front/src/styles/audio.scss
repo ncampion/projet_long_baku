@@ -39,17 +39,6 @@
                     left: 50%;
                     transform: translateX(-50%);
                 }
-                .onion-skin {
-                    width: 100%;
-                    height: 100%;
-                    position: absolute;
-                    opacity: 0.3;
-                }
-                #video-capture {
-                    width: 100%;
-                    height: 100%;
-                    position: absolute;
-                }
             }
         }
         .preview-actions {
@@ -115,6 +104,8 @@
         color: lightgray !important;
         cursor: not-allowed;
     }
+
+
 }
 
 // Little heights

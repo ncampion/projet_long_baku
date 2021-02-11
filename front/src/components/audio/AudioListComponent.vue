@@ -64,7 +64,6 @@ export default class StoryboardPreviewComponent extends Vue {
     public id!: string;
 
     mounted() {
-      create
     }
 
     public async createNewAudio(title : string, sound : Blop) {
