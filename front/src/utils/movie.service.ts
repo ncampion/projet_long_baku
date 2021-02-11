@@ -251,7 +251,7 @@ export class MovieService {
           audios.push({
             id: event.value.audioId,
             title: event.value.titre,
-            sound: event.value.son
+            sound: event.value.sound
           });
           break;
         }

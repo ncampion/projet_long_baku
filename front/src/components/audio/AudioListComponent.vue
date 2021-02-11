@@ -5,14 +5,25 @@
 <template>
   <div class="audio-list">
     <div class="audio-list-container">
-        <!--
         <div
-          v-for="(audio, index) in audios"
-          :key="`audio-${index}`"
-          class="movie-card" // ???
+          v-for="audio in sounds"
+          class="sounds"
         >
+          
+          <div class="horizontal-align">
+              Son 1
+          </div>
+          
+          <div class="horizontal-align">
+            <i class="baku-button" @click="openEditSoundPopup">Modifier un son</i>
+          </div>
+
+
+          <div class="horizontal-align">
+            <i class="baku-button" @click="openEditSoundPopup">Jouer un son</i>
+          </div>
         </div>
-        -->
+        
 
 
     </div>
@@ -20,7 +31,7 @@
 
     <!-- TODO Bouton "Modifier un son à inclure dans chaque element de la liste-->
     <!-- TODO Ajouter l'icone quand on l'aura = remplacer "baku-button" par "icon-name baku-button"-->
-    <i class="baku-button" @click="openEditSoundPopop">Modifier un son</i>
+    
 
     <div class="record-Button">
       <button class="button is-primary" @click="openRecordPopup">Enregistrer un son</button>
@@ -37,11 +48,11 @@ import { Audio, Shot } from '@/utils/movie.service';
 import RecordPopup from '@/components/RecordPopup.vue';
 import EditSoundPopup from '@/components/EditSoundPopup.vue';
 
+
 const ProjectNS = namespace('project');
 
 @Component
 export default class StoryboardPreviewComponent extends Vue {
-
     
     @Prop()
     public activeShot!: Shot;
@@ -52,16 +63,24 @@ export default class StoryboardPreviewComponent extends Vue {
     @ProjectNS.State
     public id!: string;
 
-    @Prop()
-    public audios!: Audio[];
-
     mounted() {
+      create
     }
 
-    get audios() {
-        return this.audiosList;
+    public async createNewAudio(title : string, sound : Blop) {
+      const shotId = await this.$store.dispatch('project/createAudio', { sound, title, });
+      //await this.$store.dispatch('project/changeActiveShot', audioId);
+      //this.$emit('close');
     }
 
+    get sounds() {
+        if (this.$store.audios == null) {
+          return [null, null, null];
+        }
+        return this.$store.audios;
+    }
+
+    
 
     public async changeShotSynopsis() {
         const shotId = this.activeShot?.id;
@@ -82,7 +101,7 @@ export default class StoryboardPreviewComponent extends Vue {
       });
     }
 
-    public async openEditSoundPopop() {
+    public async openEditSoundPopup() {
         this.$buefy.modal.open({
         parent: this,
         component: EditSoundPopup,
