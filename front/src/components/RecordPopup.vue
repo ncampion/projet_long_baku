@@ -7,12 +7,12 @@
       <b-field>
         <b-select
           icon="video"
-          :loading="!devices.length"
+          :loading="!devicesId.length"
           @input="onCaptureDeviceChange()"
           v-model="selectedDeviceId"
-          placeholder="Sélectionner une caméra"
+          placeholder="Sélectionner un microphone"
         >
-          <option>tamer</option>
+          <option v-for="device in devicesLabel" :key="device" :value="device">{{device}}</option>
         </b-select>
       </b-field>
       <button class="button" id="recordAction" type="button" @click="recordAction()">Record</button>
@@ -28,14 +28,37 @@
 
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import {
+  Component, Prop, Vue, Watch,
+} from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
-import WaveSurfer from "wavesurfer.js";
 
 const UserNS = namespace('user');
 
 @Component
 export default class RecordPopup extends Vue {
-  public devices: Device[] = [];
+  public devicesId: string[] = [];
+  public devicesLabel: string[] = [];
+
+  public selectedDeviceId: string | null = null;
+
+  public async mounted() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track: MediaStreamTrack) => {
+        track.stop();
+      });
+    } catch (e) {
+      console.info(e);
+    }
+    const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
+
+    const audioDevices = devices
+      .filter(
+        (input: MediaDeviceInfo) => input.kind === 'audioinput' && input.deviceId !== '',
+      );
+    this.devicesId = audioDevices.map((input: MediaDeviceInfo) => input.deviceId);
+    this.devicesLabel = audioDevices.map((input: MediaDeviceInfo) => input.label);
+  }
 
 </script>
