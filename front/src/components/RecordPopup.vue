@@ -50,7 +50,12 @@ export default class RecordPopup extends Vue {
   public devices: AudioDevice[] = [];
 
   public selectedDeviceId: string | null = null;
+  
+  private isRecording: boolean = false;
 
+  mediaRecorder: MediaRecorder;
+  
+  audioChunks = [];
 
   public async mounted() {
     const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
@@ -61,28 +66,33 @@ export default class RecordPopup extends Vue {
       );
     this.devices = audioDevices.map((input: MediaDeviceInfo) => new AudioDevice(input));
     this.selectedDeviceId = this.devices[0].id ?? undefined;
+    const stream = await navigator.mediaDevices.getUserMedia({audio: this.selectedDeviceId});
+    this.mediaRecorder = new MediaRecorder(stream);
   }
 
-  private record: boolean = false;
-  public async recordAction() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({audio: this.selectedDeviceId});
-      const mediaRecorder = new MediaRecorder(stream);
-      const audioChunks = [];
-    } catch (e) {
-      console.info(e);
-    }
 
-
-
+  public recordAction() {
     const elem = document.getElementById("recordAction");
-    this.record = !this.record;
-    if(this.record){
-      elem.innerHTML = "Stop";
-    }else{
+    
+    if(this.isRecording){
       elem.innerHTML = "Record";
+      this.mediaRecorder.stop();
+    }else{
+      elem.innerHTML = "Stop";
+      this.audioChunks = [];
+      this.mediaRecorder.start();
+      this.mediaRecorder.addEventListener("dataavailable", event => {
+      this.audioChunks.push(event.data);
+      }
     }
-  }
+  this.isRecording = !this.isRecording;
 }
 
-</script>
+  public playAction() {
+      const audioBlob = new Blob(this.audioChunks);
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.play();
+  }
+  
+  </script>
