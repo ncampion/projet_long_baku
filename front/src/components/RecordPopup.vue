@@ -7,12 +7,12 @@
       <b-field>
         <b-select
           icon="video"
-          :loading="!devicesId.length"
+          :loading="!devices.length"
           @input="onCaptureDeviceChange()"
           v-model="selectedDeviceId"
           placeholder="Sélectionner un microphone"
         >
-          <option v-for="device in devicesLabel" :key="device" :value="device">{{device}}</option>
+          <option v-for="device in devices" :key="device.id" :value="device.label">{{device.label}}</option>
         </b-select>
       </b-field>
       <button class="button" id="recordAction" type="button" @click="recordAction()">Record</button>
@@ -35,10 +35,21 @@ import { namespace } from 'vuex-class';
 
 const UserNS = namespace('user');
 
+
+export class AudioDevice{
+  public id: string;
+  public label: string;
+
+  constructor(input: MediaDeviceInfo) {
+    this.id = input.deviceId;
+    this.label = input.label;
+  }
+}
+
 @Component
 export default class RecordPopup extends Vue {
-  public devicesId: string[] = [];
-  public devicesLabel: string[] = [];
+
+  public devices: AudioDevice[] = [];
 
   public selectedDeviceId: string | null = null;
 
@@ -57,8 +68,9 @@ export default class RecordPopup extends Vue {
       .filter(
         (input: MediaDeviceInfo) => input.kind === 'audioinput' && input.deviceId !== '',
       );
-    this.devicesId = audioDevices.map((input: MediaDeviceInfo) => input.deviceId);
-    this.devicesLabel = audioDevices.map((input: MediaDeviceInfo) => input.label);
+    this.devices = audioDevices.map((input: MediaDeviceInfo) => new AudioDevice(input));
+    // this.devicesLabel = audioDevices.map((input: MediaDeviceInfo) => input.label);
   }
+}
 
 </script>
