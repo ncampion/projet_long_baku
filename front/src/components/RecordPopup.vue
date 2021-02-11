@@ -1,9 +1,22 @@
 <template>
-  <div class="modal-card" style="width: auto">
+  <div class="modal-card" style="width: 700px; height: 500px;">
     <header class="modal-card-head">
       <p class="modal-card-title">Capturer un son</p>
     </header>
     <section class="modal-card-body">
+      <b-field>
+        <b-select
+          icon="video"
+          :loading="!devices.length"
+          @input="onCaptureDeviceChange()"
+          v-model="selectedDeviceId"
+          placeholder="Sélectionner une caméra"
+        >
+          <option>tamer</option>
+        </b-select>
+      </b-field>
+      <button class="button" id="recordAction" type="button" @click="recordAction()">Record</button>
+      <button class="button" id="playAction" type="button" @click="playAction()">Play</button>
       
     </section>
     <footer class="modal-card-foot">
@@ -17,20 +30,12 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
+import WaveSurfer from "wavesurfer.js";
 
 const UserNS = namespace('user');
 
 @Component
-export default class SmartphoneSynchroPopupComponent extends Vue {
-  @UserNS.State
-  public username!: string;
+export default class RecordPopup extends Vue {
+  public devices: Device[] = [];
 
-  @UserNS.Action('updateUsername')
-  public updateUsername!: (username: string) => Promise<void>;
-
-  public async recordSound() {
-    this.updateUsername((this.$refs.usrname as any).value);
-    (this.$parent as any).close();
-  }
-}
 </script>
