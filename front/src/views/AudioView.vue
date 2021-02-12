@@ -163,10 +163,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, Prop, } from 'vue-property-decorator';
+import { Component, Vue} from 'vue-property-decorator';
 import ProjectSettingsPopup from '@/components/ProjectSettingsPopup.vue';
-import { namespace } from 'vuex-class';
-import { createProject, getVersion } from '@/api';
+// import { namespace } from 'vuex-class';
+// import { createProject, getVersion } from '@/api';
 import RecordPopup from '@/components/RecordPopup.vue';
 import EditSoundPopup from '@/components/EditSoundPopup.vue';
 

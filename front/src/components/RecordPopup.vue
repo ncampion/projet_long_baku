@@ -49,7 +49,7 @@ export default class RecordPopup extends Vue {
 
   public devices: AudioDevice[] = [];
 
-  public selectedDeviceId: string | null = null;
+  public selectedDeviceId: string = "";
   
   private isRecording: boolean = false;
 
@@ -57,13 +57,10 @@ export default class RecordPopup extends Vue {
 
   private mediaRecorder: any;
 
-  private elem_StartRecordAction: any = document.getElementById("StartRecordAction");
-  private elem_StopRecordAction: any = document.getElementById("StartRecordAction");
-  private elem_PlayAction: any = document.getElementById("PlayAction");
   
-  audioChunks = [];
+  audioChunks = Array();
 
-  //private var waveSurfer;
+  //private waveSurfer: any;
 
   public async mounted() {
     const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
@@ -75,7 +72,7 @@ export default class RecordPopup extends Vue {
     this.devices = audioDevices.map((input: MediaDeviceInfo) => new AudioDevice(input));
     
     this.selectedDeviceId = this.devices[0].id ?? undefined;
-    // this.wavesurfer = WaveSurfer.create({
+    // this.waveSurfer = WaveSurfer.create({
     //     container: document.querySelector('#waveform'),
     //     waveColor: '#D9DCFF',
     //     progressColor: '#4353FF',
@@ -90,36 +87,41 @@ export default class RecordPopup extends Vue {
   }
 
   public async startRecordAction() {
-    if(this.elem_StartRecordAction){
-      this.elem_StartRecordAction.style.display = 'none';
+    let el: HTMLElement | null = document.getElementById("StartRecordAction");
+    if(el){
+      el.style.display = 'none';
     }
-    if(this.elem_StopRecordAction){
-      this.elem_StopRecordAction.style.display = 'inline';
+    el = document.getElementById("StopRecordAction");
+    if(el){
+      el.style.display = 'inline';
     }
     this.isRecording = true;
-    this.audioChunks = [];
+    this.audioChunks = Array();
 
     this.stream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: this.selectedDeviceId}});
     this.mediaRecorder = new MediaRecorder(this.stream);
     this.mediaRecorder.start(); // pass optionnal timeslice in ms as parameter
     this.mediaRecorder.addEventListener("dataavailable", (event: any) => {
-      this.audioChunks.push(event.data);
+    this.audioChunks.push(event.data);
     });
   }
 
   public stopRecordAction() {
-    if(this.elem_StartRecordAction){
-      this.elem_StartRecordAction.style.display = 'inline';
+    let el: HTMLElement | null = document.getElementById("StartRecordAction");
+    if(el){
+      el.style.display = 'inline';
     }
-    if(this.elem_StopRecordAction){
-      this.elem_StopRecordAction.style.display = 'none';
+    el = document.getElementById("StopRecordAction");
+    if(el){
+      el.style.display = 'none';
     }
-    if(this.elem_PlayAction){
-      this.elem_PlayAction.style.display = 'inline';
+    el = document.getElementById("PlayAction");
+    if(el){
+      el.style.display = 'inline';
     }
     this.isRecording = false;
     this.mediaRecorder.stop();
-    this.stream.getTracks().forEach(function(track) {
+    this.stream.getTracks().forEach(function(track: MediaStreamTrack) {
       track.stop();
     });
   }
