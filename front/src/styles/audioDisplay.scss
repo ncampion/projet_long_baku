@@ -3,7 +3,7 @@
     height: 145px;
 }
 
-.toolbar{
+.toolbar {
     display: inline-flex;
     width: 100%;
     background: #ffffff;
@@ -12,7 +12,7 @@
     padding: 6px 28px;
 }
 
-.soundContainer{
+.soundContainer {
     background: white;
     width: 100%;
     height: calc(100% - 40px);
@@ -23,7 +23,7 @@
     justify-content: space-between;
 }
 
-.movieContainer{
+.movieContainer {
     background: white;
     width: 100%;
     height: calc(100% - 40px);
@@ -32,4 +32,9 @@
     padding: 12px 21px;
     align-items: center;
     justify-content: space-between;
+}
+
+.sounds {
+    display: inline-block;
+    padding: 10px 10px
 }

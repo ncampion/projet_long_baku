@@ -1,7 +1,7 @@
 import store from "@/store";
 import * as api from '@/api';
 import { BakuAction, BakuEvent, Duration } from '@/utils/types';
-import { Movie, MovieService, Shot } from '@/utils/movie.service';
+import { Movie, MovieService, Shot, Audio } from '@/utils/movie.service';
 import { BakuActionContext, BakuModule, ProjectState } from '@/store/store.types';
 import uuid from 'uuid';
 
@@ -171,12 +171,11 @@ export const ProjectStore: BakuModule<ProjectState> = {
       context.commit('addToLocalHistory', event);
     },
 
-    async createAudio(context, params: { sound : Blob, title : String}): Promise<string> {
+    async createAudio(context, params: {title : String, sound : Blob}) {
       const audioId = uuid.v4();
       const event = makeEvent(context, BakuAction.AUDIO_ADD, {audioId, params});
       loadEvents(context, [event]);
       await store.dispatch('user/updateCurrentSeenProject');
-      return audioId;
     },
 
     async removeAudio(context, audioId: string) {
@@ -192,6 +191,24 @@ export const ProjectStore: BakuModule<ProjectState> = {
 
     async changeAudioSound(context, params : {audioId : string, sound : Blob}) {
       const event = makeEvent(context, BakuAction.AUDIO_UPDATE_SOUND, params);
+      loadEvents(context, [event]);
+    },
+
+    async createAudioTimeline(context, params: {title : string, sound : Blob}) {
+      const audioId = uuid.v4();
+      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_ADD, {audioId, params});
+      loadEvents(context, [event]);
+      await store.dispatch('user/updateCurrentSeenProject');
+    },
+
+    async removeAudioTimeline(context, audioId: string) {
+      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_REMOVE, {audioId});
+      loadEvents(context, [event]);
+      await store.dispatch('user/updateCurrentSeenProject');
+    },
+
+    async changeAudioTimecode(context, params : {audioId : string, timeCode : string}) {
+      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_TIMECODE, params);
       loadEvents(context, [event]);
     },
   },
@@ -288,6 +305,12 @@ export const ProjectStore: BakuModule<ProjectState> = {
         seconds: getters.getSeconds(),
       }
     },
+
+    getAudioRecord: (state, getters: ProjectGetters): Audio[] | undefined =>
+      getters.movie.audios,
+
+    getAudioTimeline: (state, getters: ProjectGetters): Audio[] | undefined =>
+      getters.movie.audioTimeline,     
   },
   modules: {},
 };

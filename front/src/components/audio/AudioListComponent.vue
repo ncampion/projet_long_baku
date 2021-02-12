@@ -6,16 +6,16 @@
   <div class="audio-list">
     <div class="audio-list-container">
         <div
-          v-for="audio in sounds"
+          v-for="audio in getAudioRecord"
           class="sounds"
         >
           
           <div
             class="horizontal-align"
             draggable="true"
-            ondragstart="handleDragStart(event);"
+            @dragstart="handleDragStart($event,audio.id);"
           >
-              Son 1
+              {{ audio.title }}
           </div>
           
           <div class="horizontal-align">
@@ -46,7 +46,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
-import { Audio, Shot } from '@/utils/movie.service';
+import { Shot } from '@/utils/movie.service';
 // import { Spinner } from "@/utils/spinner.class";
 // import { ImageCacheService } from "@/utils/imageCache.service";
 import RecordPopup from '@/components/RecordPopup.vue';
@@ -57,36 +57,65 @@ export default class AudioListComponent extends Vue {
     
     @Prop()
     public activeShot!: Shot;
+
     @Prop()
     public shots!: Shot[];
+
     @ProjectNS.State
     public id!: string;
-    mounted() {
+
+    @ProjectNS.Getter
+    protected getAudioRecord!: any;
+
+    public async mounted() {
+      const sound = new Blob();
+      await this.$store.dispatch('project/createAudio', { title : "son 1", sound, });
+      await this.$store.dispatch('project/createAudio', { title : "son 2", sound, });
+      await this.$store.dispatch('project/createAudio', { title : "son 3", sound, });
+      await this.$store.dispatch('project/createAudio', { title : "son 4", sound, });
     }
-    public async createNewAudio(title : string, sound : Blop) {
-      const shotId = await this.$store.dispatch('project/createAudio', { sound, title, });
+
+    public async createNewAudio(title: string, sound: Blob) {
+      //const shotId = 
       //await this.$store.dispatch('project/changeActiveShot', audioId);
       //this.$emit('close');
     }
-    get sounds() {
-        if (this.$store.audios == null) {  
-          return [null, null, null];
-        }
-        return this.$store.audios;
-    }
-    handleDragStart(event) {
+
+    /*get sounds() {
+      type sound = Array<{id: string, title: string, blob: Blob}>;
+      const bloby = new Blob();
+      
+      const mySounds: sound = [
+        {id: "1", title: "son 1", blob: bloby},
+        {id: "2", title: "son 2", blob: bloby},
+        {id: "3", title: "son 3", blob: bloby},
+        {id: "4", title: "son 4", blob: bloby}
+      ];
+
+      /*if (this.$store.audios == null) {  
+        return [null, null, null];
+      }
+      return this.$store.audios;
+      return mySounds;
+    }*/
+
+    handleDragStart(event: any, id: string) {
       console.log('Started dragging');
+      event.dataTransfer.setData("text", id );
+
     }
+
     public async openRecordPopup() {
-        this.$buefy.modal.open({
+      this.$buefy.modal.open({
         parent: this,
         component: RecordPopup,
         hasModalCard: true,
         canCancel: ['escape', 'outside'],
       });
     }
+
     public async openEditSoundPopup() {
-        this.$buefy.modal.open({
+      this.$buefy.modal.open({
         parent: this,
         component: EditSoundPopup,
         hasModalCard: true,

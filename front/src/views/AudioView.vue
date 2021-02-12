@@ -178,10 +178,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, Prop, } from 'vue-property-decorator';
+import { Component, Vue, Watch, } from 'vue-property-decorator';
 import ProjectSettingsPopup from '@/components/ProjectSettingsPopup.vue';
 import { namespace } from 'vuex-class';
-import { createProject, getVersion } from '@/api';
+
 
 import HistoryComponent from '@/components/capture/HistoryComponent.vue';
 import AudioDisplayComponent from '@/components/audio/AudioDisplayComponent.vue';
@@ -190,14 +190,14 @@ import AudioListComponent from '@/components/audio/AudioListComponent.vue';
 
 import * as _ from 'lodash';
 
-import store from '@/store';
-import AbstractProjectView from '@/views/AbstractProjectView.vue';
+//import store from '@/store';
+//import AbstractProjectView from '@/views/AbstractProjectView.vue';
 import CarrouselComponent from '@/components/capture/CarrouselComponent.vue';
 import ImagesSelectorComponent from '@/components/image-selector/ImagesSelectorComponent.vue';
 import CaptureToolboxComponent from '@/components/capture/CaptureToolboxComponent.vue';
 import CaptureButtonComponent from '@/components/capture/CaptureButtonComponent.vue';
 import StoryboardPreviewComponent from '@/components/capture/StoryboardPreviewComponent.vue';
-import { Device } from '@/utils/device.class';
+//import { Device } from '@/utils/device.class';
 import { ImageCacheService } from '@/utils/imageCache.service';
 import { Movie, ReadingSliderBoundaries, Shot } from '@/utils/movie.service';
 import { UploadedImage } from '@/utils/uploadedImage.class';
@@ -468,9 +468,9 @@ export default class AudioView extends Vue {
       }
     }
 
-    get onionSkinAsArray() {
+    /*get onionSkinAsArray() {
       return _.range(this.onionSkinValue - 2, -1, -1);
-    }
+    }*/
 
     get IsFrameLiveView() {
       return !this.isPlaying && this.activeFrame === this.getActiveShot?.images.length;
