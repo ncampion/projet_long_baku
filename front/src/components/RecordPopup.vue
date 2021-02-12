@@ -13,7 +13,8 @@
           <option v-for="device in devices" :key="device.id" :value="device.id">{{device.label}}</option>
         </b-select>
       </b-field>
-      <button class="button" id="recordAction" type="button" @click="recordAction()">Record</button>
+      <button class="button" id="StartRecordAction" type="button" @click="StartRecordAction()">Record</button>
+      <button class="button" id="StopRecordAction" style="display:none;" type="button" @click="StopRecordAction()">Stop</button>
       <button class="button" id="playAction" type="button" @click="playAction()">Play</button>
       
     </section>
@@ -53,7 +54,9 @@ export default class RecordPopup extends Vue {
   
   private isRecording: boolean = false;
 
-  mediaRecorder: MediaRecorder;
+  private stream: MediaSteam;
+
+  private mediaRecorder: MediaRecorder;
   
   audioChunks = [];
 
@@ -66,33 +69,43 @@ export default class RecordPopup extends Vue {
       );
     this.devices = audioDevices.map((input: MediaDeviceInfo) => new AudioDevice(input));
     this.selectedDeviceId = this.devices[0].id ?? undefined;
-    const stream = await navigator.mediaDevices.getUserMedia({audio: this.selectedDeviceId});
-    this.mediaRecorder = new MediaRecorder(stream);
+    
   }
 
+  public async StartRecordAction() {
+    document.getElementById("StartRecordAction").style.display = 'none';
+    document.getElementById("StopRecordAction").style.display = 'inline';
+    this.isRecording = true;
+    this.audioChunks = [];
 
-  public recordAction() {
-    const elem = document.getElementById("recordAction");
-    
-    if(this.isRecording){
-      elem.innerHTML = "Record";
-      this.mediaRecorder.stop();
-    }else{
-      elem.innerHTML = "Stop";
-      this.audioChunks = [];
-      this.mediaRecorder.start();
-      this.mediaRecorder.addEventListener("dataavailable", event => {
+    this.stream = await navigator.mediaDevices.getUserMedia({audio: this.selectedDeviceId});
+    this.mediaRecorder = new MediaRecorder(this.stream);
+    this.mediaRecorder.start();
+    this.mediaRecorder.addEventListener("dataavailable", event => {
       this.audioChunks.push(event.data);
-      }
-    }
-  this.isRecording = !this.isRecording;
-}
+    });
+  }
+
+  public StopRecordAction() {
+    document.getElementById("StartRecordAction").style.display = 'inline';
+    document.getElementById("StopRecordAction").style.display = 'none';
+    this.isRecording = false;
+    this.mediaRecorder.stop();
+    this.stream.getTracks().forEach(function(track) {
+      track.stop();
+    });
+  }
 
   public playAction() {
+    if(!this.isRecording){
       const audioBlob = new Blob(this.audioChunks);
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       audio.play();
+    }
   }
   
+
+
+
   </script>
