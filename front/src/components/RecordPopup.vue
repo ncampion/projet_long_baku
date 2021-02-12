@@ -15,7 +15,7 @@
       </b-field>
       <button class="button" id="StartRecordAction" type="button" @click="startRecordAction()">Record</button>
       <button class="button" id="StopRecordAction" style="display:none;" type="button" @click="stopRecordAction()">Stop</button>
-      <button class="button" id="PlayAction" style="display:none;" type="button" @click="playAction()">Play</button>
+      <br><button class="button" id="PlayAction" style="display:none;" type="button" @click="playAction()">Play</button>
       <div id="waveform"></div>
     </section>
     <footer class="modal-card-foot">
@@ -50,6 +50,8 @@ export default class RecordPopup extends Vue {
   public devices: AudioDevice[] = [];
 
   public selectedDeviceId: string = "";
+  
+  private isRecording: boolean = false;
 
   private stream: any;
 
@@ -93,6 +95,11 @@ export default class RecordPopup extends Vue {
     if(el){
       el.style.display = 'inline';
     }
+    el = document.getElementById("PlayAction");
+    if(el){
+      el.style.display = 'none';
+    }
+    this.isRecording = true;
     this.audioChunks = Array();
 
     this.stream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: this.selectedDeviceId}});
@@ -116,12 +123,12 @@ export default class RecordPopup extends Vue {
     if(el){
       el.style.display = 'inline';
     }
-    
+    this.isRecording = false;
+
     this.mediaRecorder.stop();
     this.stream.getTracks().forEach(function(track: MediaStreamTrack) {
       track.stop();
     });
-
     this.mediaRecorder.addEventListener("stop", () => {
       const audioBlob = new Blob(this.audioChunks);
       const audioUrl = URL.createObjectURL(audioBlob);
@@ -131,9 +138,9 @@ export default class RecordPopup extends Vue {
   }
   
   public playAction() {
-      this.waveSurfer.on('ready', function () {
-        this.waveSurfer.play();
-      });
+    if(!this.isRecording){
+      this.waveSurfer.play();
+    }
   }
 }
 </script>
