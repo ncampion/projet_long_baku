@@ -13,10 +13,10 @@
           <option v-for="device in devices" :key="device.id" :value="device.id">{{device.label}}</option>
         </b-select>
       </b-field>
-      <button class="button" id="StartRecordAction" type="button" @click="StartRecordAction()">Record</button>
-      <button class="button" id="StopRecordAction" style="display:none;" type="button" @click="StopRecordAction()">Stop</button>
-      <button class="button" id="playAction" type="button" @click="playAction()">Play</button>
-      
+      <button class="button" id="StartRecordAction" type="button" @click="startRecordAction()">Record</button>
+      <button class="button" id="StopRecordAction" style="display:none;" type="button" @click="stopRecordAction()">Stop</button>
+      <button class="button" id="PlayAction" style="display:none;" type="button" @click="playAction()">Play</button>
+      <div id="waveform"></div>
     </section>
     <footer class="modal-card-foot">
       <button class="button" type="button" @click="$parent.close()">Annuler</button>
@@ -31,6 +31,8 @@ import {
   Component, Prop, Vue, Watch,
 } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
+import WaveSurfer from "wavesurfer.js";
+
 
 const UserNS = namespace('user');
 
@@ -44,6 +46,9 @@ export class AudioDevice{
     this.label = input.label;
   }
 }
+
+
+
 
 @Component
 export default class RecordPopup extends Vue {
@@ -60,6 +65,8 @@ export default class RecordPopup extends Vue {
   
   audioChunks = [];
 
+  private var waveSurfer;
+
   public async mounted() {
     const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
 
@@ -69,10 +76,21 @@ export default class RecordPopup extends Vue {
       );
     this.devices = audioDevices.map((input: MediaDeviceInfo) => new AudioDevice(input));
     this.selectedDeviceId = this.devices[0].id ?? undefined;
+    this.wavesurfer = WaveSurfer.create({
+        container: document.querySelector('#waveform'),
+        waveColor: '#D9DCFF',
+        progressColor: '#4353FF',
+        cursorColor: '#4353FF',
+        barWidth: 3,
+        barRadius: 3,
+        cursorWidth: 1,
+        height: 200,
+        barGap: 3
+    });
     
   }
 
-  public async StartRecordAction() {
+  public async startRecordAction() {
     document.getElementById("StartRecordAction").style.display = 'none';
     document.getElementById("StopRecordAction").style.display = 'inline';
     this.isRecording = true;
@@ -80,15 +98,16 @@ export default class RecordPopup extends Vue {
 
     this.stream = await navigator.mediaDevices.getUserMedia({audio: this.selectedDeviceId});
     this.mediaRecorder = new MediaRecorder(this.stream);
-    this.mediaRecorder.start();
+    this.mediaRecorder.start(); // pass optionnal timeslice in ms as parameter
     this.mediaRecorder.addEventListener("dataavailable", event => {
       this.audioChunks.push(event.data);
     });
   }
 
-  public StopRecordAction() {
+  public stopRecordAction() {
     document.getElementById("StartRecordAction").style.display = 'inline';
     document.getElementById("StopRecordAction").style.display = 'none';
+    document.getElementById("PlayAction").style.display = 'inline';
     this.isRecording = false;
     this.mediaRecorder.stop();
     this.stream.getTracks().forEach(function(track) {
@@ -105,7 +124,4 @@ export default class RecordPopup extends Vue {
     }
   }
   
-
-
-
-  </script>
+</script>
