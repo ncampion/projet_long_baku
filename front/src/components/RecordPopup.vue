@@ -30,7 +30,7 @@
 import {
   Component, Vue,
 } from 'vue-property-decorator';
-// import WaveSurfer from "wavesurfer.js";
+import WaveSurfer from "wavesurfer.js";
 
 
 export class AudioDevice{
@@ -50,8 +50,6 @@ export default class RecordPopup extends Vue {
   public devices: AudioDevice[] = [];
 
   public selectedDeviceId: string = "";
-  
-  private isRecording: boolean = false;
 
   private stream: any;
 
@@ -60,7 +58,7 @@ export default class RecordPopup extends Vue {
   
   audioChunks = Array();
 
-  //private waveSurfer: any;
+  private waveSurfer: any;
 
   public async mounted() {
     const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
@@ -72,17 +70,17 @@ export default class RecordPopup extends Vue {
     this.devices = audioDevices.map((input: MediaDeviceInfo) => new AudioDevice(input));
     
     this.selectedDeviceId = this.devices[0].id ?? undefined;
-    // this.waveSurfer = WaveSurfer.create({
-    //     container: document.querySelector('#waveform'),
-    //     waveColor: '#D9DCFF',
-    //     progressColor: '#4353FF',
-    //     cursorColor: '#4353FF',
-    //     barWidth: 3,
-    //     barRadius: 3,
-    //     cursorWidth: 1,
-    //     height: 200,
-    //     barGap: 3
-    // });
+    this.waveSurfer = WaveSurfer.create({
+        container: document.querySelector('#waveform'),
+        waveColor: '#D9DCFF',
+        progressColor: '#4353FF',
+        cursorColor: '#4353FF',
+        barWidth: 3,
+        barRadius: 3,
+        cursorWidth: 1,
+        height: 200,
+        barGap: 3
+    });
     
   }
 
@@ -95,7 +93,6 @@ export default class RecordPopup extends Vue {
     if(el){
       el.style.display = 'inline';
     }
-    this.isRecording = true;
     this.audioChunks = Array();
 
     this.stream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: this.selectedDeviceId}});
@@ -106,7 +103,7 @@ export default class RecordPopup extends Vue {
     });
   }
 
-  public stopRecordAction() {
+  public async stopRecordAction() {
     let el: HTMLElement | null = document.getElementById("StartRecordAction");
     if(el){
       el.style.display = 'inline';
@@ -119,20 +116,24 @@ export default class RecordPopup extends Vue {
     if(el){
       el.style.display = 'inline';
     }
-    this.isRecording = false;
+    
     this.mediaRecorder.stop();
     this.stream.getTracks().forEach(function(track: MediaStreamTrack) {
       track.stop();
     });
-  }
 
-  public playAction() {
-    if(!this.isRecording){
+    this.mediaRecorder.addEventListener("stop", () => {
       const audioBlob = new Blob(this.audioChunks);
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
-      audio.play();
-    }
+      this.waveSurfer.loadBlob(audioBlob);
+    });
+  }
+  
+  public playAction() {
+      this.waveSurfer.on('ready', function () {
+        this.waveSurfer.play();
+      });
   }
 }
 </script>
