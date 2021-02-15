@@ -55,7 +55,7 @@ export default class RecordPopup extends Vue {
   @ProjectNS.Getter
   protected getAudioRecord!: any;
 
-  private numberOfSounds: number;
+  private numberOfSounds: number = 0;
   public nameSound: string = "";
 
   public devices: AudioDevice[] = [];
@@ -73,7 +73,7 @@ export default class RecordPopup extends Vue {
 
   private waveSurfer: any;
 
-  private audioBlob: Blob;
+  private audioBlob: any;
 
   public async mounted() {
     this.numberOfSounds = this.getAudioRecord.length + 1;
@@ -172,12 +172,12 @@ export default class RecordPopup extends Vue {
     if(this.waveSurfer.isPlaying()){
       await this.waveSurfer.stop();
     }
-    this.$parent.close();
+    (this.$parent as any).close();
   }
 
   public async storeSound(){
     if(this.audioBlob != undefined){
-      var title: string = this.$refs.nameSound.value;
+      var title: string = (this.$refs.nameSound as any).value;
       if(title == ""){
         title = this.nameSound;
       }
