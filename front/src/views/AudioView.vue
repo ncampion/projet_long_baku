@@ -9,91 +9,74 @@
 
         <AudioListComponent
         />
+        
         <div class="preview-container">
-          
+
           <div class="preview-content-wrapper">
 
-
-            <!--<template v-for="(image, index) in computedPreviousShotImages">
-              <template v-if="getActiveShot.images[activeFrame] !== null">
-                <div class="image-container">
+            <div class="preview-side-content-wrapper">
+              <div class="small-preview-content">
+                
+                <template>
                   <img
-                    class="carrousel-thumb"
-                    :alt="getActiveShot.images[activeFrame]"
-                    :src="ImageCacheService.getThumbnail(getActiveShot.images[activeFrame-1].id)"
+                    v-if="getActiveShot && getActiveShot.images[activeFrame-1.0]  > 0"
+                    :src="ImageCacheService.getImage(getActiveShot.images[activeFrame-1.0].id)"
+                    alt="prevGhostImg"
+                    id="prev-ghost-img"
                   />
-                </div>
-              </template>
-              <template v-else>
-                <div :key="'left'+index+'-prev'" class="image-container image-container-empty">
-                  <div
-                    class="carrousel-thumb"
-                    style="width:100%; border:none"
-                  />
-                </div>
-              </template>
-              
-              
-            <div class="preview-content">
-              
-              <template>
-                <img
-                  v-if="getActiveShot && getActiveShot.images[activeFrame]  > 0"
-                  :src="ImageCacheService.getImage(getActiveShot.images[activeFrame].id)"
-                  alt="ghostImg"
-                  id="ghost-img"
-                />
-              </template>
+                </template>
 
-              <img
-                id="preview-img"
-                ref="previewImg"
-                src="@/assets/baku-cloud-spinner.svg"
-              />
+                <img
+                  id="prev-preview-img"
+                  ref="prevPreviewImg"
+                  src="@/assets/baku-cloud-spinner.svg"
+                />
+              </div>
             </div>
 
+            <div class="preview-center-content-wrapper">
+              <div class="preview-content">
+                <template>
+                  <img
+                    v-if="getActiveShot && getActiveShot.images[activeFrame]  > 0"
+                    :src="ImageCacheService.getImage(getActiveShot.images[activeFrame].id)"
+                    alt="ghostImg"
+                    id="ghost-img"
+                  />
+                </template>
 
-
-            <div class="preview-content">
-              
-              <template>
                 <img
-                  v-if="getActiveShot && getActiveShot.images[activeFrame]  > 0"
-                  :src="ImageCacheService.getImage(getActiveShot.images[activeFrame].id)"
-                  alt="ghostImg"
-                  id="ghost-img"
+                  id="preview-img"
+                  ref="previewImg"
+                  src="@/assets/baku-cloud-spinner.svg"
                 />
-              </template>
-
-              <img
-                id="preview-img"
-                ref="previewImg"
-                src="@/assets/baku-cloud-spinner.svg"
-              />
+                  
+              </div>
             </div>
--->
 
+            <div class="preview-side-content-wrapper">
+              <div class="small-preview-content">
+                
+                <template>
+                  <img
+                    v-if="getActiveShot && getActiveShot.images[activeFrame+1.0]  > 0"
+                    :src="ImageCacheService.getImage(getActiveShot.images[activeFrame+1.0].id)"
+                    alt="nextGhostImg"
+                    id="next-ghost-img"
+                  />
+                </template>
 
-                        <div class="preview-content">
-              
-              <template>
                 <img
-                  v-if="getActiveShot && getActiveShot.images[activeFrame]  > 0"
-                  :src="ImageCacheService.getImage(getActiveShot.images[activeFrame].id)"
-                  alt="ghostImg"
-                  id="ghost-img"
+                  id="next-preview-img"
+                  ref="nextPreviewImg"
+                  src="@/assets/baku-cloud-spinner.svg"
                 />
-              </template>
-
-              <img
-                id="preview-img"
-                ref="previewImg"
-                src="@/assets/baku-cloud-spinner.svg"
-              />
+              </div>
             </div>
 
 
           </div>
+
           <div class="preview-actions">
             <ImagesSelectorComponent
               ref="imageSelector"
@@ -162,9 +145,9 @@
 
             </div>
           </div>
-        
+              
         </div>
-      
+
 
         <HistoryComponent/>
 
@@ -205,17 +188,15 @@ import { Movie, ReadingSliderBoundaries, Shot } from '@/utils/movie.service';
 import { UploadedImage } from '@/utils/uploadedImage.class';
 
 
-//const CaptureNS = namespace('capture');
 const ProjectNS = namespace('project');
-//const WebRTCNS = namespace('webrtc');
 
 
 @Component({
     components: {
-        ProjectSettingsPopup,
-        HistoryComponent,
-        AudioListComponent,
-        AudioDisplayComponent,
+      ProjectSettingsPopup,
+      HistoryComponent,
+      AudioListComponent,
+      AudioDisplayComponent,
 
       CarrouselComponent,
       CaptureButtonComponent,
@@ -244,41 +225,46 @@ export default class AudioView extends Vue {
     public getActiveShot!: Shot;
 
     @ProjectNS.Getter
+    public getActiveShotIndex!: Shot;
+
+    @ProjectNS.Getter
     public getActiveShotImgCount!: number;
 
     @ProjectNS.Getter('canEditActiveShot')
     public canEdit!: boolean;
 
-    // Carroussel Frame
-     public activeFrame: number = 0;
+    @ProjectNS.Getter
+    public getFirstShot!: Shot;
 
-    // Displayed Frame (previewImg + imageSelector)
-    public playingFrame: number = 0;
-/*
-    @CaptureNS.State
-    public activeDevice!: Device;
+    @ProjectNS.Getter
+    public getFirstShotId!: number;
 
-    @CaptureNS.State
-    public stream!: MediaStream | null;
+    @ProjectNS.Getter
+    public getPreviousShotId!: number;
 
-    @CaptureNS.State
-    public scaleX!: number | 1;
+    @ProjectNS.Getter
+    public getNextShotId!: number;
 
-    @CaptureNS.State
-    public scaleY!: number | 1;
+    @ProjectNS.Getter
+    public getShotCount!: number;
 
-    @CaptureNS.State('onionSkinDisplay')
-    protected onionSkinDisplay!: number;
+    @ProjectNS.Getter
+    public getAllShots!: Shot[];
 
-    @CaptureNS.State('onionSkinValue')
-    protected onionSkinValue!: number;
-
+    
     @ProjectNS.Action('addImagesToShot')
     protected addImagesToShot!: ({}) => Promise<void>;
 
-    @WebRTCNS.State
-    protected dataChannel!: RTCDataChannel;
-*/
+    @ProjectNS.Action('changeActiveShot')
+    protected changeActiveShot!: (number) => Promise<void>;
+
+
+    // Carroussel Frame
+    public activeFrame: number = 0;
+
+    // Displayed Frame (previewImg + imageSelector)
+    public playingFrame: number = 0;
+
     public selectedImages: ReadingSliderBoundaries = { left: 0, right: 0 };
 
     public animationFrame!: number;
@@ -291,14 +277,32 @@ export default class AudioView extends Vue {
 
     public isPlaying: 'animation' | 'selection' | null = null;
 
+    public allImages!: any[];
+
     private previewImg!: HTMLImageElement;
+    private prevPreviewImg!: HTMLImageElement;
+    private nextPreviewImg!: HTMLImageElement;
 
     public mounted() {
-      /*this.$store
-        .dispatch('project/changeActiveShot', this.$route.params.shotId)
+
+      this.$store
+        .dispatch('project/changeActiveShot', this.getFirstShotId)
         .then(() => this.displayFrame(0));
-        */
+      
       this.previewImg = this.$refs.previewImg as HTMLImageElement;
+      this.prevPreviewImg = this.$refs.prevPreviewImg as HTMLImageElement;
+      this.nextPreviewImg = this.$refs.nextPreviewImg as HTMLImageElement;
+
+      this.allImages = [];
+      //stockage de toutes les images dans allImages
+      for(var shot of this.getAllShots){
+        for(var image of shot.images){
+          this.allImages.push({image});
+        }
+      }
+      console.log(this.allImages);
+      
+
     }
 
     public animate(timestamp: number) {
@@ -311,6 +315,7 @@ export default class AudioView extends Vue {
           this.animationStartFrame = this.animationBoundaries.left;
         }
       }
+
 
       const nextFrame = this.getNextFrame(timestamp);
 
@@ -326,24 +331,44 @@ export default class AudioView extends Vue {
       this.animationFrame = requestAnimationFrame(this.animate);
     }
 
-    private displayFrame(frame: number) {
-      const activeShot = this.getActiveShot;
-      if (activeShot) {
-        const image = activeShot.images[frame];
+    private displayFrame(timeCode: number) {
+
+      
+      //const activeShot = this.getActiveShot;
+      //if(activeShot){
+      if (this.allImages) {
+
+        var image = undefined;
+        if(this.allImages[timeCode]){
+          image = this.allImages[timeCode].image;
+        }
+
+        var prevImage = undefined;
+        if(this.allImages[timeCode-1.0]){
+          prevImage = this.allImages[timeCode-1.0].image;
+        }
+
+        var nextImage = undefined;
+        if(this.allImages[timeCode+1.0]){
+          nextImage = this.allImages[timeCode+1.0].image;
+        }
+
         if (image) {
-          console.log("this.previewImg!");
-          console.log(this.previewImg!);
-          console.log("ImageCacheService.getImage(image.id)");
-          console.log(ImageCacheService.getImage(image.id));
           this.previewImg!.src = ImageCacheService.getImage(image.id);
+        }
+        if(prevImage) {
+          this.prevPreviewImg!.src = ImageCacheService.getImage(prevImage.id);
+        }
+        if(nextImage) {
+          this.nextPreviewImg!.src = ImageCacheService.getImage(nextImage.id);
         }
         const imageSelector = this.$refs.imageSelector as ImagesSelectorComponent;
         if (imageSelector) {
-          imageSelector!.setFrame(frame);
+          imageSelector!.setFrame(timeCode);
         }
 
-        (this.$refs.minutes as HTMLElement).textContent = this.nbMins(frame);
-        (this.$refs.seconds as HTMLElement).textContent = this.nbSecs(frame);
+        (this.$refs.minutes as HTMLElement).textContent = this.nbMins(timeCode);
+        (this.$refs.seconds as HTMLElement).textContent = this.nbSecs(timeCode);
       }
     }
 
@@ -373,7 +398,7 @@ export default class AudioView extends Vue {
       }
     }
 
-    public playAnimation() {
+    public async playAnimation() {
       if (!this.isPlaying && this.getActiveShot.images.length > 0) {
         if (this.activeFrame === this.getActiveShotImgCount) {
           this.moveFrame(0);
@@ -469,10 +494,6 @@ export default class AudioView extends Vue {
         this.displayFrame(this.activeFrame);
       }
     }
-
-    /*get onionSkinAsArray() {
-      return _.range(this.onionSkinValue - 2, -1, -1);
-    }*/
 
     get IsFrameLiveView() {
       return !this.isPlaying && this.activeFrame === this.getActiveShot?.images.length;

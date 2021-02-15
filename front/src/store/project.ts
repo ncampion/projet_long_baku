@@ -257,6 +257,18 @@ export const ProjectStore: BakuModule<ProjectState> = {
       return getters.movie.shots[index].id;
     },
 
+    getFirstShot: (state, getters: ProjectGetters): Shot | undefined => {
+      return getters.movie.shots[0];
+    },
+
+    getFirstShotId: (state, getters: ProjectGetters): string | undefined => {
+      return getters.movie.shots[0].id;
+    },
+
+    getAllShots:(state, getters: ProjectGetters): Shot[] | undefined => {
+      return getters.movie.shots;
+    },
+
     getShotCount: (state, getters: ProjectGetters): number | undefined => {
       return getters.movie.shots.length;
     },
