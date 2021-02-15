@@ -14,6 +14,8 @@
         </b-select>
       </b-field>
       <p v-else style="color:red;font-size:14px;">Veuillez autoriser l'accès à votre microphone.</p>
+      <input type="text" ref="nameSound" :value="nameSound"/>
+      
       <button class="button" id="StartRecordAction" type="button" @click="startRecordAction()">Record</button>
       <button class="button" id="StopRecordAction" style="display:none;" type="button" @click="stopRecordAction()">Stop</button>
       <br><button class="button" id="PlayAction" style="display:none;" type="button" @click="playAction()">Play</button>
@@ -21,7 +23,7 @@
     </section>
     <footer class="modal-card-foot">
       <button class="button" type="button" @click="closeMedia();$parent.close()">Annuler</button>
-      <button class="button is-primary" @click="closeMedia();recordSound()">Valider</button>
+      <button class="button is-primary" id="RecordAction" style="display:none;" @click="closeMedia();storeSound();$parent.close()">Valider</button>
     </footer>
   </div>
 </template>
@@ -31,6 +33,7 @@
 import {
   Component, Vue,
 } from 'vue-property-decorator';
+import { namespace } from 'vuex-class';
 import WaveSurfer from "wavesurfer.js";
 
 
@@ -44,9 +47,16 @@ export class AudioDevice{
   }
 }
 
+const ProjectNS = namespace('project');
 
 @Component
 export default class RecordPopup extends Vue {
+
+  @ProjectNS.Getter
+  protected getAudioRecord!: any;
+
+  private numberOfSounds: number;
+  public nameSound: string = "";
 
   public devices: AudioDevice[] = [];
 
@@ -63,7 +73,11 @@ export default class RecordPopup extends Vue {
 
   private waveSurfer: any;
 
+  private audioBlob: Blob;
+
   public async mounted() {
+    this.numberOfSounds = this.getAudioRecord.length + 1;
+    this.nameSound = "Son " + this.numberOfSounds.toString();
 
     this.stream = await navigator.mediaDevices.getUserMedia({audio: true});
     const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
@@ -126,6 +140,10 @@ export default class RecordPopup extends Vue {
     if(el){
       el.style.display = 'inline';
     }
+    el = document.getElementById("RecordAction");
+    if(el){
+      el.style.display = 'inline';
+    }
     this.isRecording = false;
 
     this.mediaRecorder.stop();
@@ -133,10 +151,8 @@ export default class RecordPopup extends Vue {
       track.stop();
     });
     this.mediaRecorder.addEventListener("stop", () => {
-      const audioBlob = new Blob(this.audioChunks);
-      //const audioUrl = URL.createObjectURL(audioBlob);
-      //const audio = new Audio(audioUrl);
-      this.waveSurfer.loadBlob(audioBlob);
+      this.audioBlob = new Blob(this.audioChunks);
+      this.waveSurfer.loadBlob(this.audioBlob);
     });
   }
   
@@ -155,6 +171,16 @@ export default class RecordPopup extends Vue {
     }
     if(this.waveSurfer.isPlaying()){
       this.waveSurfer.stop();
+    }
+  }
+
+  public async storeSound(){
+    if(this.audioBlob != undefined){
+      var title: string = this.$refs.nameSound.value;
+      if(title == ""){
+        title = this.nameSound;
+      }
+      await this.$store.dispatch('project/createAudio', { title, sound: this.audioBlob, });
     }
   }
 }

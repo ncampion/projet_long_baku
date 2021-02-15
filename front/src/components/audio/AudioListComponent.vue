@@ -69,10 +69,10 @@ export default class AudioListComponent extends Vue {
 
     public async mounted() {
       const sound = new Blob();
-      await this.$store.dispatch('project/createAudio', { title : "son 1", sound, });
-      await this.$store.dispatch('project/createAudio', { title : "son 2", sound, });
-      await this.$store.dispatch('project/createAudio', { title : "son 3", sound, });
-      await this.$store.dispatch('project/createAudio', { title : "son 4", sound, });
+      // await this.$store.dispatch('project/createAudio', { title : "son 1", sound, });
+      // await this.$store.dispatch('project/createAudio', { title : "son 2", sound, });
+      // await this.$store.dispatch('project/createAudio', { title : "son 3", sound, });
+      // await this.$store.dispatch('project/createAudio', { title : "son 4", sound, });
     }
 
 
