@@ -63,6 +63,8 @@ export default class RecordPopup extends Vue {
   private waveSurfer: any;
 
   public async mounted() {
+
+    this.stream = await navigator.mediaDevices.getUserMedia({audio: true});
     const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
 
     const audioDevices = devices
