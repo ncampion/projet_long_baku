@@ -82,7 +82,7 @@
               ref="imageSelector"
               v-if="this.allImages"
               :projectId="id"
-              :activeShot="this.getCurrentShot.id"
+              :activeShot="getCurrentShot(this.activeFrame).id"
               :images="this.allImages"
               :activeImage="activeFrame"
               :canEdit="canEdit"
@@ -275,7 +275,7 @@ export default class AudioView extends Vue {
 
     public isPlaying: 'animation' | 'selection' | null = null;
 
-    public allImages!: any[] = null;
+    public allImages: Array();
 
     private previewImg!: HTMLImageElement;
     private prevPreviewImg!: HTMLImageElement;
