@@ -165,8 +165,8 @@
 import { Component, Vue, Watch, } from 'vue-property-decorator';
 import ProjectSettingsPopup from '@/components/ProjectSettingsPopup.vue';
 import { namespace } from 'vuex-class';
-import RecordPopup from '@/components/RecordPopup.vue';
-import EditSoundPopup from '@/components/EditSoundPopup.vue';
+//import RecordPopup from '@/components/RecordPopup.vue';
+//import EditSoundPopup from '@/components/EditSoundPopup.vue';
 
 import HistoryComponent from '@/components/capture/HistoryComponent.vue';
 import AudioDisplayComponent from '@/components/audio/AudioDisplayComponent.vue';
@@ -256,7 +256,7 @@ export default class AudioView extends Vue {
     protected addImagesToShot!: ({}) => Promise<void>;
 
     @ProjectNS.Action('changeActiveShot')
-    protected changeActiveShot!: (number) => Promise<void>;
+    protected changeActiveShot!: (arg0: number) => Promise<void>;
 
 
     // Carroussel Frame
