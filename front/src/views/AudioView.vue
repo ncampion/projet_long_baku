@@ -19,8 +19,8 @@
                 
                 <template>
                   <img
-                    v-if="getActiveShot && getActiveShot.images[activeFrame-1.0]  > 0"
-                    :src="ImageCacheService.getImage(getActiveShot.images[activeFrame-1.0].id)"
+                    v-if="this.allImages && this.allImages[activeFrame-1.0]  > 0"
+                    :src="ImageCacheService.getImage(this.allImages[activeFrame-1.0].id)"
                     alt="prevGhostImg"
                     id="prev-ghost-img"
                   />
@@ -38,8 +38,8 @@
               <div class="preview-content">
                 <template>
                   <img
-                    v-if="getActiveShot && getActiveShot.images[activeFrame]  > 0"
-                    :src="ImageCacheService.getImage(getActiveShot.images[activeFrame].id)"
+                    v-if="this.allImages && this.allImages[activeFrame]  > 0"
+                    :src="ImageCacheService.getImage(this.allImages[activeFrame].id)"
                     alt="ghostImg"
                     id="ghost-img"
                   />
@@ -59,8 +59,8 @@
                 
                 <template>
                   <img
-                    v-if="getActiveShot && getActiveShot.images[activeFrame+1.0]  > 0"
-                    :src="ImageCacheService.getImage(getActiveShot.images[activeFrame+1.0].id)"
+                    v-if="this.allImages && this.allImages[activeFrame+1.0]  > 0"
+                    :src="ImageCacheService.getImage(this.allImages[activeFrame+1.0].id)"
                     alt="nextGhostImg"
                     id="next-ghost-img"
                   />
@@ -80,10 +80,10 @@
           <div class="preview-actions">
             <ImagesSelectorComponent
               ref="imageSelector"
-              v-if="getActiveShot"
+              v-if="this.allImages"
               :projectId="id"
-              :activeShot="getActiveShot.id"
-              :images="getActiveShot.images"
+              :activeShot="this.getCurrentShot.id"
+              :images="this.allImages"
               :activeImage="activeFrame"
               :canEdit="canEdit"
               @activeImageChange="onActiveFrameChange"
@@ -254,7 +254,7 @@ export default class AudioView extends Vue {
     protected addImagesToShot!: ({}) => Promise<void>;
 
     @ProjectNS.Action('changeActiveShot')
-    protected changeActiveShot!: (number) => Promise<void>;
+    protected changeActiveShot!: (arg0: number) => Promise<void>;
 
 
     // Carroussel Frame
@@ -275,7 +275,7 @@ export default class AudioView extends Vue {
 
     public isPlaying: 'animation' | 'selection' | null = null;
 
-    public allImages!: any[];
+    public allImages!: any[] = null;
 
     private previewImg!: HTMLImageElement;
     private prevPreviewImg!: HTMLImageElement;
@@ -294,13 +294,11 @@ export default class AudioView extends Vue {
       this.allImages = [];
       //stockage de toutes les images dans allImages
       for(var shot of this.getAllShots){
+        this.onActiveShotChange(shot);
         for(var image of shot.images){
           this.allImages.push({image});
         }
       }
-      console.log(this.allImages);
-      
-
     }
 
     public animate(timestamp: number) {
@@ -309,7 +307,7 @@ export default class AudioView extends Vue {
       }
       if (!this.animationStartFrame) {
         this.animationStartFrame = this.activeFrame - this.animationBoundaries.left;
-        if (this.activeFrame === this.getActiveShotImgCount) {
+        if (this.activeFrame === this.allImages.length) {
           this.animationStartFrame = this.animationBoundaries.left;
         }
       }
@@ -322,7 +320,7 @@ export default class AudioView extends Vue {
         this.displayFrame(nextFrame);
       }
       if (this.isPlaying === 'animation'
-        && nextFrame === this.getActiveShotImgCount /* - (this.canEdit ? 0 : 1)*/) {
+        && nextFrame === this.allImages.length /* - (this.canEdit ? 0 : 1)*/) {
         this.pauseAnimation();
         return;
       }
@@ -331,9 +329,7 @@ export default class AudioView extends Vue {
 
     private displayFrame(timeCode: number) {
 
-      
-      //const activeShot = this.getActiveShot;
-      //if(activeShot){
+  
       if (this.allImages) {
 
         var image = undefined;
@@ -386,6 +382,29 @@ export default class AudioView extends Vue {
       );
     }
 
+    private getCurrentShot(timestamp: number) {
+      const totalImageNumber = this.allImages.length;
+      var imageNumberCalculation = totalImageNumber;
+
+      const allShots = this.getAllShots;
+
+      var shotLengths = Array();
+
+      for(var shot of allShots){
+        shotLengths.push(shot.images.length);
+      }
+
+      for(var i=0; i< shotLengths.length; i++){
+        imageNumberCalculation = imageNumberCalculation - shotLengths[i];
+        if (imageNumberCalculation<=0){
+          if(allShots){
+            return allShots[i];
+          }
+        }
+      }
+      return undefined;
+    }
+
     public togglePlay() {
       if (this.isPlaying) {
         this.pauseAnimation();
@@ -397,22 +416,22 @@ export default class AudioView extends Vue {
     }
 
     public async playAnimation() {
-      if (!this.isPlaying && this.getActiveShot.images.length > 0) {
-        if (this.activeFrame === this.getActiveShotImgCount) {
+      if (!this.isPlaying && this.allImages.length > 0) {
+        if (this.activeFrame === this.allImages.length) {
           this.moveFrame(0);
           this.syncActiveFrame();
         }
         this.initPlay('animation');
         this.animationBoundaries = {
           left: 0,
-          right: this.getActiveShot.images.length + 1,
+          right: this.allImages.length + 1,
         };
         this.animationFrame = requestAnimationFrame(this.animate);
       }
     }
 
     public playSelection() {
-      if (!this.isPlaying && this.getActiveShot.images.length > 0) {
+      if (!this.isPlaying && this.allImages.length > 0) {
         if (
           this.activeFrame < this.selectedImages.left
           || this.activeFrame > this.selectedImages.right
@@ -452,7 +471,7 @@ export default class AudioView extends Vue {
         if (this.activeFrame !== this.playingFrame) {
           this.activeFrame = this.playingFrame;
           ImageCacheService.startPreloading(
-            this.getActiveShot.images,
+            this.allImages,
             this.activeFrame,
             this.onImagePreloaded,
           );
@@ -494,11 +513,11 @@ export default class AudioView extends Vue {
     }
 
     get IsFrameLiveView() {
-      return !this.isPlaying && this.activeFrame === this.getActiveShot?.images.length;
+      return !this.isPlaying && this.activeFrame === this.allImages.length;
     }
 
     private onImagePreloaded(imageId: string): void {
-      if (this.getActiveShot.images[this.activeFrame].id === imageId) {
+      if (this.allImages[this.activeFrame].id === imageId) {
         this.displayFrame(this.activeFrame);
       }
       if (this.$refs.carrousel) {
@@ -525,11 +544,11 @@ export default class AudioView extends Vue {
 
     public moveToCapture() {
       this.pauseAnimation();
-      this.onActiveFrameChange(this.getActiveShot.images.length);
+      this.onActiveFrameChange(this.allImages.length);
     }
 
     public moveEnd() {
-      this.onActiveFrameChange(this.getActiveShot.images.length - 1);
+      this.onActiveFrameChange(this.allImages.length - 1);
     }
 
     private computeMoveFrame(frame: number): number {
@@ -537,8 +556,8 @@ export default class AudioView extends Vue {
       if (frame < minFrame) {
         return minFrame;
       }
-      if (frame > this.getActiveShot.images.length) {
-        return this.getActiveShot.images.length;
+      if (frame > this.allImages.length) {
+        return this.allImages.length;
       }
       return frame;
     }
