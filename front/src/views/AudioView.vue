@@ -298,6 +298,8 @@ export default class AudioView extends Vue {
           this.allImages.push({image});
         }
       }
+      console.log(this.allImages);
+      
 
     }
 
@@ -328,14 +330,27 @@ export default class AudioView extends Vue {
     }
 
     private displayFrame(timeCode: number) {
-      const activeShot = this.getActiveShot;
 
-      //const allImages = 
+      
+      //const activeShot = this.getActiveShot;
+      //if(activeShot){
+      if (this.allImages) {
 
-      if (activeShot) {
-        const image = activeShot.images[timeCode];
-        const prevImage = activeShot.images[timeCode-1.0];
-        const nextImage = activeShot.images[timeCode+1.0];
+        var image = undefined;
+        if(this.allImages[timeCode]){
+          image = this.allImages[timeCode].image;
+        }
+
+        var prevImage = undefined;
+        if(this.allImages[timeCode-1.0]){
+          prevImage = this.allImages[timeCode-1.0].image;
+        }
+
+        var nextImage = undefined;
+        if(this.allImages[timeCode+1.0]){
+          nextImage = this.allImages[timeCode+1.0].image;
+        }
+
         if (image) {
           this.previewImg!.src = ImageCacheService.getImage(image.id);
         }
