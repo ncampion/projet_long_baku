@@ -33,6 +33,8 @@ export interface Movie {
   readonly synopsis: string;
   readonly poster?: ImageRef;
   readonly shots: Shot[];
+  readonly audios: Audio[];
+  readonly audioTimeline: Audio[];
   readonly fps: number;
   readonly locked: boolean;
 }
@@ -44,6 +46,16 @@ export interface Shot {
   readonly synopsis: string;
   readonly storyboard?: ImageRef;
 }
+
+
+export interface Audio {
+  readonly id: string;
+  readonly idTimeline?: string;
+  readonly title?: string;
+  readonly sound?: Blob;
+  readonly timeCode?: number;
+}
+
 
 export interface ReadingSliderBoundaries {
   left: number;
@@ -129,6 +141,8 @@ export class MovieService {
     let fps = 12;
     let locked = false;
     const shots: Shot[] = [];
+    const audios: Audio[] = [];
+    const audioTimeline : Audio[] = [];
 
     const updateShot = (shotId: string, updateFn: (shot: Shot) => Shot) => {
       const shotIndex = shots.findIndex((p) => p.id === shotId);
@@ -139,6 +153,24 @@ export class MovieService {
       shots.splice(shotIndex, 1, updateFn(shot));
     };
 
+    const updateAudio = (audioId: string, updateFn: (audio: Audio) => Audio) => {
+      const audioIndex = audios.findIndex((p) => p.id === audioId);
+      const audio = audios.find((p) => p.id === audioId);
+      if (!audio) {
+        throw new Error(`audio ${audioId} should exist for project ${title}`);
+      }
+      audios.splice(audioIndex, 1, updateFn(audio));
+    };
+
+    const updateAudioTimeline = (audioId: string, updateFn: (audio: Audio) => Audio) => {
+      const audioIndex = audios.findIndex((p) => p.id === audioId);
+      const audio = audios.find((p) => p.id === audioId);
+      if (!audio) {
+        throw new Error(`audio ${audioId} should exist for project ${title}`);
+      }
+      audioTimeline.splice(audioIndex, 1, updateFn(audio));
+    };
+    
     events.forEach((event) => {
       switch (event.action) {
         case BakuAction.MOVIE_UPDATE_TITLE:
@@ -228,12 +260,57 @@ export class MovieService {
           })
           break;
         }
+        case BakuAction.AUDIO_ADD: {
+          const {title, sound} = event.value.params as { title: string, sound: Blob };
+          audios.push({
+            id: event.value.audioId,
+            title: title,
+            sound: sound,
+          });
+          break;
+        }
+        case BakuAction.AUDIO_REMOVE: {
+          const audioIndex = audios.findIndex((audio) => audio.id === event.value.audioId);
+          audios.splice(audioIndex, 1);
+          break;
+        }
+        case BakuAction.AUDIO_UPDATE_SOUND: {
+          updateAudio(event.value.audioId, (audio: Audio) =>
+            ({...audio, sound: event.value.sound})
+          )
+          break;
+        }
+        case BakuAction.AUDIO_UPDATE_TITLE: {
+          updateAudio(event.value.audioId, (audio: Audio) =>
+            ({...audio, title: event.value.title})
+          )
+          break;
+        }
+        case BakuAction.AUDIO_TIMELINE_ADD: {
+          audioTimeline.push({
+            id: event.value.audioId,
+            idTimeline: event.value.idAudioTimeline,
+            timeCode: 0,
+          });
+          break;
+        }
+        case BakuAction.AUDIO_TIMELINE_REMOVE: {
+          const audioIndex = audioTimeline.findIndex((audio) => audio.id === event.value.audioId);
+          audioTimeline.splice(audioIndex, 1);
+          break;
+        }
+        case BakuAction.AUDIO_UPDATE_TIMECODE: {
+          updateAudioTimeline(event.value.audioId, (audio: Audio) =>
+            ({...audio, timeCode: event.value.timeCode})
+          )
+          break;
+        }
         default:
           break;
       }
     });
     return {
-      title, synopsis, poster, shots, fps, locked
+      title, synopsis, poster, shots, audios, audioTimeline, fps, locked
     };
   }
 
@@ -243,5 +320,9 @@ export class MovieService {
     } else if (movie && movie.shots && movie.shots.length > 0 && movie.shots[0].images && movie.shots[0].images.length > 0) {
       return movie.shots[0].images[0].getUrl(Quality.Original);
     }
+  }
+
+  public static getAudio(movie:Movie, index: number) {
+    return movie.audios[index];
   }
 }

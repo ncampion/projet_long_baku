@@ -1,7 +1,7 @@
 import store from "@/store";
 import * as api from '@/api';
 import { BakuAction, BakuEvent, Duration } from '@/utils/types';
-import { Movie, MovieService, Shot } from '@/utils/movie.service';
+import { Movie, MovieService, Shot, Audio } from '@/utils/movie.service';
 import { BakuActionContext, BakuModule, ProjectState } from '@/store/store.types';
 import uuid from 'uuid';
 
@@ -169,7 +169,48 @@ export const ProjectStore: BakuModule<ProjectState> = {
 
     async addToLocalHistory(context, event: BakuEvent) {
       context.commit('addToLocalHistory', event);
-    }
+    },
+
+    async createAudio(context, params: {title : String, sound : Blob}) {
+      const audioId = uuid.v4();
+      const event = makeEvent(context, BakuAction.AUDIO_ADD, {audioId, params});
+      loadEvents(context, [event]);
+      await store.dispatch('user/updateCurrentSeenProject');
+    },
+
+    async removeAudio(context, audioId: string) {
+      const event = makeEvent(context, BakuAction.AUDIO_REMOVE, {audioId});
+      loadEvents(context, [event]);
+      await store.dispatch('user/updateCurrentSeenProject');
+    },
+
+    async changeAudioTitle(context, params : {audioId : string, title : string}) {
+      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_TITLE, params);
+      loadEvents(context, [event]);
+    },
+
+    async changeAudioSound(context, params : {audioId : string, sound : Blob}) {
+      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_SOUND, params);
+      loadEvents(context, [event]);
+    },
+
+    async createAudioTimeline(context, audioId : string) {
+      const idAudioTimeline = uuid.v4();
+      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_ADD, {audioId, idAudioTimeline});
+      loadEvents(context, [event]);
+      await store.dispatch('user/updateCurrentSeenProject');
+    },
+
+    async removeAudioTimeline(context, audioId: string) {
+      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_REMOVE, {audioId});
+      loadEvents(context, [event]);
+      await store.dispatch('user/updateCurrentSeenProject');
+    },
+
+    async changeAudioTimecode(context, params : {audioId : string, timeCode : string}) {
+      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_TIMECODE, params);
+      loadEvents(context, [event]);
+    },
   },
   getters: {
     movie: (state): Movie =>
@@ -265,6 +306,11 @@ export const ProjectStore: BakuModule<ProjectState> = {
       }
     },
 
+    getAudioRecord: (state, getters: ProjectGetters): Audio[] | undefined =>
+      getters.movie.audios,
+
+    getAudioTimeline: (state, getters: ProjectGetters): Audio[] | undefined =>
+      getters.movie.audioTimeline,     
   },
   modules: {},
 };
