@@ -133,8 +133,8 @@ export default class RecordPopup extends Vue {
     });
     this.mediaRecorder.addEventListener("stop", () => {
       const audioBlob = new Blob(this.audioChunks);
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
+      //const audioUrl = URL.createObjectURL(audioBlob);
+      //const audio = new Audio(audioUrl);
       this.waveSurfer.loadBlob(audioBlob);
     });
   }
