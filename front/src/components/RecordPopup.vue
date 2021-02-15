@@ -22,8 +22,8 @@
       <div id="waveform"></div>
     </section>
     <footer class="modal-card-foot">
-      <button class="button" type="button" @click="closeMedia();$parent.close()">Annuler</button>
-      <button class="button is-primary" id="RecordAction" style="display:none;" @click="closeMedia();storeSound();$parent.close()">Valider</button>
+      <button class="button" type="button" @click="closeMedia()">Annuler</button>
+      <button class="button is-primary" id="RecordAction" style="display:none;" @click="closeMedia();storeSound()">Valider</button>
     </footer>
   </div>
 </template>
@@ -162,16 +162,17 @@ export default class RecordPopup extends Vue {
     }
   }
 
-  public closeMedia(){
+  public async closeMedia(){
     if(this.isRecording){
-      this.mediaRecorder.stop();
+      await this.mediaRecorder.stop();
       this.stream.getTracks().forEach(function(track: MediaStreamTrack) {
         track.stop();
       });
     }
     if(this.waveSurfer.isPlaying()){
-      this.waveSurfer.stop();
+      await this.waveSurfer.stop();
     }
+    this.$parent.close();
   }
 
   public async storeSound(){
