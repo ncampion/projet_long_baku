@@ -50,6 +50,7 @@ export interface Shot {
 
 export interface Audio {
   readonly id: string;
+  readonly idTimeline?: string;
   readonly title?: string;
   readonly sound?: Blob;
   readonly timeCode?: number;
@@ -288,6 +289,7 @@ export class MovieService {
         case BakuAction.AUDIO_TIMELINE_ADD: {
           audioTimeline.push({
             id: event.value.audioId,
+            idTimeline: event.value.idAudioTimeline,
             timeCode: 0,
           });
           break;

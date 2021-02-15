@@ -195,7 +195,8 @@ export const ProjectStore: BakuModule<ProjectState> = {
     },
 
     async createAudioTimeline(context, audioId : string) {
-      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_ADD, audioId);
+      const idAudioTimeline = uuid.v4();
+      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_ADD, {audioId, idAudioTimeline});
       loadEvents(context, [event]);
       await store.dispatch('user/updateCurrentSeenProject');
     },

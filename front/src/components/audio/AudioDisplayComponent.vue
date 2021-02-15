@@ -21,10 +21,14 @@
     >
 
       <div
-            v-for="titles in soundsBar"
+            v-for="audioTimeline in soundsBar"
+            draggable=true
+            @dragstart="handleDragStart($event,audioTimeline.idAudioTimeline);"
+            @dragover="allowDropTimeline($event);"
+            @drop="handleDropTimeline($event);"
             class="sounds"
       >
-          {{ titles.title }}
+          {{ audioTimeline.title }}
       </div>
     
     </div>
@@ -82,7 +86,11 @@ export default class AudioDisplayComponent extends Vue {
           for (let audioT in audiosTimeline) {
             for (let audioR in audiosRecord) {
               if (audiosTimeline[audioT].id == audiosRecord[audioR].id) {
-                titles.push({title : audiosRecord[audioR].title,});
+                titles.push({
+                  id : audiosTimeline[audioT].id,
+                  idAudioTimeline : audiosTimeline[audioT].idTimeline,
+                  title : audiosRecord[audioR].title,
+                });
               }
             }
           }
@@ -90,6 +98,34 @@ export default class AudioDisplayComponent extends Vue {
         return titles;
     }
 
+
+    // Drag and drop Timeline
+
+    handleDragStart(event: any, id: string) {
+      event.dataTransfer.setData("text", id );
+    }
+
+    allowDropTimeline(event: any) {
+      event.preventDefault();
+    }
+
+    public async handleDropTimeline(event: any) {
+      event.preventDefault();
+      
+      var data = event.dataTransfer.getData("text");
+      
+      await this.$store.dispatch('project/createAudioTimeline', data);
+
+      this.$emit('close');
+      event.dataTransfer.clearData();
+
+    }
+
+
+
+
+
+    // Drop from the Record sounds list
 
     allowDrop(event: any) {
       event.preventDefault();
@@ -99,16 +135,11 @@ export default class AudioDisplayComponent extends Vue {
       event.preventDefault();
       
       var data = event.dataTransfer.getData("text");
-
       
-      await this.$store.dispatch('project/createAudioTimeline', {
-          audioId : data;
-      });
+      await this.$store.dispatch('project/createAudioTimeline', data);
 
       this.$emit('close');
       event.dataTransfer.clearData();
-
-
     }
 
 }

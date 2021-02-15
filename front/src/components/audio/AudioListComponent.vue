@@ -78,7 +78,6 @@ export default class AudioListComponent extends Vue {
 
     handleDragStart(event: any, id: string) {
       event.dataTransfer.setData("text", id );
-
     }
 
     public async openRecordPopup() {
