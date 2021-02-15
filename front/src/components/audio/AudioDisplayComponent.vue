@@ -21,10 +21,10 @@
     >
 
       <div
-            v-for="audio in getAudioTimeline"
+            v-for="titles in soundsBar"
             class="sounds"
       >
-          {{ audio.title }}
+          {{ titles.title }}
       </div>
     
     </div>
@@ -43,8 +43,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { Shot, Movie } from '@/utils/movie.service';
-// import { Spinner } from "@/utils/spinner.class";
-// import { ImageCacheService } from "@/utils/imageCache.service";
 
 const ProjectNS = namespace('project');
 
@@ -69,53 +67,42 @@ export default class AudioDisplayComponent extends Vue {
     @ProjectNS.Getter
     protected getAudioTimeline!: any;
 
-    private index: number;
 
     mounted() {
     }
 
-    /*get soundsBar() {
-        const audios = await this.$store.dispatch('project/getAudioTimeline');
-        console.log("azoileurhioupaerzhfio_uoiaerzhufoui");
-        if ( audios == null) {
-          console.log('vide');
+    get soundsBar() {
+        const audiosTimeline = this.getAudioTimeline;
+        const audiosRecord = this.getAudioRecord;
+        const titles = [];
+
+        if (audiosTimeline == null) {
           return null;
+        } else {
+          for (let audioT in audiosTimeline) {
+            for (let audioR in audiosRecord) {
+              if (audiosTimeline[audioT].id == audiosRecord[audioR].id) {
+                titles.push({title : audiosRecord[audioR].title,});
+              }
+            }
+          }
         }
-        return audios;
+        return titles;
     }
-/*
-    public async createNewAudioTimeline(title: string, sound: Blop) {
-      const shotId = await this.$store.dispatch('project/createAudioTimeline', { title, sound, });
-      //await this.$store.dispatch('project/changeActiveShot', audioId);
-      //this.$emit('close');
-    }
-*/
+
+
     allowDrop(event: any) {
       event.preventDefault();
     }
 
     public async handleDrop(event: any) {
-      console.log('You dropped something!');
       event.preventDefault();
       
       var data = event.dataTransfer.getData("text");
 
-      const title = "son 1";
-      const blob = null;
-
-      this.index=0;
-      for (var audios of this.movie.audios) {
-        if (audios.id == data) {
-          //const aaa = this.movie.getAudio(this.movie,this.index);
-          //title = audios.title;
-          //blob = audios.blob;
-        }
-        this.index=this.index+1;
-      }
       
       await this.$store.dispatch('project/createAudioTimeline', {
-          title,
-          sound : blob,
+          audioId : data;
       });
 
       this.$emit('close');

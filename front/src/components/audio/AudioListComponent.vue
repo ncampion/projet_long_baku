@@ -75,32 +75,8 @@ export default class AudioListComponent extends Vue {
       await this.$store.dispatch('project/createAudio', { title : "son 4", sound, });
     }
 
-    public async createNewAudio(title: string, sound: Blob) {
-      //const shotId = 
-      //await this.$store.dispatch('project/changeActiveShot', audioId);
-      //this.$emit('close');
-    }
-
-    /*get sounds() {
-      type sound = Array<{id: string, title: string, blob: Blob}>;
-      const bloby = new Blob();
-      
-      const mySounds: sound = [
-        {id: "1", title: "son 1", blob: bloby},
-        {id: "2", title: "son 2", blob: bloby},
-        {id: "3", title: "son 3", blob: bloby},
-        {id: "4", title: "son 4", blob: bloby}
-      ];
-
-      /*if (this.$store.audios == null) {  
-        return [null, null, null];
-      }
-      return this.$store.audios;
-      return mySounds;
-    }*/
 
     handleDragStart(event: any, id: string) {
-      console.log('Started dragging');
       event.dataTransfer.setData("text", id );
 
     }
