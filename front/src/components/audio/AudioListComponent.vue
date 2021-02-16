@@ -19,7 +19,7 @@
           </div>
           
           <div class="horizontal-align">
-            <i class="baku-button" @click="openEditSoundPopup">Modifier un son</i>
+            <i class="baku-button" @click="openEditSoundPopup(audio.id)">Modifier un son</i>
           </div>
 
 
@@ -69,7 +69,7 @@ export default class AudioListComponent extends Vue {
 
     public async mounted() {
       //const sound = new Blob();
-      // await this.$store.dispatch('project/createAudio', { title : "son 1", sound, });
+      //await this.$store.dispatch('project/createAudio', { title : "son 1", sound, });
       // await this.$store.dispatch('project/createAudio', { title : "son 2", sound, });
       // await this.$store.dispatch('project/createAudio', { title : "son 3", sound, });
       // await this.$store.dispatch('project/createAudio', { title : "son 4", sound, });
@@ -89,12 +89,15 @@ export default class AudioListComponent extends Vue {
       });
     }
 
-    public async openEditSoundPopup() {
+    public async openEditSoundPopup(id: String) {
       this.$buefy.modal.open({
         parent: this,
         component: EditSoundPopup,
         hasModalCard: true,
         canCancel: ['escape', 'outside'],
+        props: {
+          "id": id
+        }
       });
     }
 }
