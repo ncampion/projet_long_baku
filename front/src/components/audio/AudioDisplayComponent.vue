@@ -1,6 +1,5 @@
 <style lang="scss" scoped>
 @import "@/styles/audioDisplay.scss";
-@import "@/styles/timeline.scss";
 </style>
 
 
@@ -48,6 +47,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { Shot, Movie } from '@/utils/movie.service';
 import TimelinesChart from 'timelines-chart';
+import * as css from "@/styles/timeline.scss";
 
 const ProjectNS = namespace('project');
 
@@ -72,7 +72,7 @@ export default class AudioDisplayComponent extends Vue {
     @ProjectNS.Getter
     protected getAudioTimeline!: any;
 
-    private chart!: any;
+    private chart!: any = TimelinesChart();
 
     private chartData!: any;
     
@@ -80,7 +80,7 @@ export default class AudioDisplayComponent extends Vue {
     mounted() {
       this.chartData = this.genRandomData();
       
-      this.chart = TimelinesChart();
+      //this.chart = TimelinesChart();
       
       this.chart.data(this.chartData)
             .xTickFormat((n: number): number => +n)
