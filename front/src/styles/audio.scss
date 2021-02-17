@@ -4,8 +4,8 @@
     flex: 1;
     justify-content: space-between;
     padding: 0 0 12px 20px;
-    max-height: calc(100% - 145px);
-    min-height: calc(100% - 145px);
+    max-height: calc(100% - 400px);
+    min-height: calc(100% - 400px);
     .preview-container {
         //width: 70%;
         width: 90vh;
@@ -13,11 +13,10 @@
         flex-direction: column;
         margin: 0 10px;
         .preview-content-wrapper {
-            
-            .preview-center-content-wrapper{
-                width:70%;
+            .preview-center-content-wrapper {
+                width: 70%;
                 display: inline-block;
-            //max-height: calc(100% - 90px);
+                //max-height: calc(100% - 90px);
                 .preview-content {
                     width: 100%;
                     padding-bottom: 56.25%;
@@ -45,8 +44,8 @@
                     }
                 }
             }
-            .preview-side-content-wrapper{
-                width:15%;
+            .preview-side-content-wrapper {
+                width: 15%;
                 display: inline-block;
                 .small-preview-content {
                     width: 100%;
@@ -90,7 +89,6 @@
                 }
             }
         }
-        
         .preview-actions {
             display: flex;
             flex-direction: column;
@@ -154,8 +152,6 @@
         color: lightgray !important;
         cursor: not-allowed;
     }
-
-
 }
 
 // Little heights

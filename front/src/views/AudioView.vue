@@ -300,7 +300,6 @@ export default class AudioView extends Vue {
           this.allImages.push({image});
         }
       }
-      console.log(this.allImages);
       
 
     }

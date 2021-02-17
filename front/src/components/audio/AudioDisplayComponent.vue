@@ -1,5 +1,6 @@
 <style lang="scss" scoped>
 @import "@/styles/audioDisplay.scss";
+@import "@/styles/timeline.scss";
 </style>
 
 
@@ -35,7 +36,6 @@
 
     <div ref="movieContainer" class="movie-container">
 
-    <!--TODO -->
     
     </div>
     
@@ -47,6 +47,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { Shot, Movie } from '@/utils/movie.service';
+import TimelinesChart from 'timelines-chart';
 
 const ProjectNS = namespace('project');
 
@@ -71,9 +72,74 @@ export default class AudioDisplayComponent extends Vue {
     @ProjectNS.Getter
     protected getAudioTimeline!: any;
 
+    private chart!: any;
+
+    private chartData!: any;
+    
 
     mounted() {
+      this.chartData = this.genRandomData();
+      
+      this.chart = TimelinesChart();
+      
+      this.chart.data(this.chartData)
+            .xTickFormat((n: number): number => +n)
+            .timeFormat('%Q')
+            .maxHeight(330)
+            .onSegmentClick(this.segmentClick)
+            .maxLineHeight(100)
+            .zQualitative(true);
+
+      this.chart(this.$refs.movieContainer);
     }
+
+
+    segmentClick(segment : any) {
+      console.log(segment);
+      segment.target.__data__.data.val = "Son 1";
+      segment.target.__data__.labelVal = "Son 1";
+      segment.target.__data__.val = "Son 1";
+      this.chart.data(this.chartData);
+      this.chart.refresh();
+      return segment;
+    }
+
+    genRandomData() {
+      const NLINES = 3,
+        MAXSEGMENTS = 4,
+        MIN_X = 0,
+        MAX_X = 100;
+
+      return [{
+        group: '',
+        data: [...Array(NLINES).keys()].map(i => ({
+          label: `line${i+1}`,
+          data: getSegmentsData()
+        }))
+      }];
+
+      //
+
+      function getSegmentsData() {
+        const nSegments = Math.ceil(Math.random()*MAXSEGMENTS),
+          segMaxLength = Math.round((MAX_X-MIN_X)/nSegments);
+        let runLength = MIN_X;
+
+        return [...Array(nSegments).keys()].map(i => {
+          const tDivide = [Math.random(), Math.random()].sort(),
+            start = runLength + tDivide[0]*segMaxLength,
+            end = runLength + tDivide[1]*segMaxLength;
+
+          runLength = runLength + segMaxLength;
+
+          return {
+            timeRange: [start, end],
+            val: Math.random()
+          };
+        });
+      }
+    }
+
 
     get soundsBar() {
         const audiosTimeline = this.getAudioTimeline;
@@ -97,6 +163,7 @@ export default class AudioDisplayComponent extends Vue {
         }
         return titles;
     }
+
 
 
     // Drag and drop Timeline
