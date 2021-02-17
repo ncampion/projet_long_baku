@@ -10,8 +10,8 @@
       <div id="waveform"></div>
     </section>
     <footer class="modal-card-foot">
-      <button class="button" type="button" @click="$parent.close()">Annuler</button>
-      <button class="button is-primary" @click="storeEditedSound();$parent.close()">Valider</button>
+      <button class="button" type="button" @click="closeAction();$parent.close()">Annuler</button>
+      <button class="button is-primary" @click="storeEditedSound();closeAction();$parent.close()">Valider</button>
     </footer>
   </div>
 </template>
@@ -36,7 +36,6 @@ export default class EditSoundPopup extends Vue {
   public nameSound: string = "";
 
   private audioBlob: any;
-  private newAudioBlob: any;
   private waveSurfer: any;
 
   public async mounted(){
@@ -58,10 +57,10 @@ export default class EditSoundPopup extends Vue {
             WSRegions.create({
                 regions: [
                     {
-                        id: 1,
-                        start: 1,
-                        end: 2,
-                        color: 'hsla(400, 100%, 30%, 0.5)'
+                        // id: 1,
+                        // start: 0,
+                        // end: 1,
+                        // color: 'hsla(400, 100%, 30%, 0.5)'
                     },
                 ],
                 // dragSelection: {
@@ -71,11 +70,26 @@ export default class EditSoundPopup extends Vue {
         ]
     });
     this.waveSurfer.loadBlob(this.audioBlob);
+    await this.waveSurfer.on('ready', () => {
+      //console.log(this.waveSurfer.getDuration());
+      this.waveSurfer.addRegion({
+                        id: 1,
+                        start: 0,
+                        end: this.waveSurfer.getDuration(),
+                        color: 'hsla(400, 100%, 30%, 0.5)'
+                    });
+    });
+    
+    
     //this.waveSurfer.enableDragSelection();
   }
 
+
+  public closeAction() {
+    this.waveSurfer.clearRegions();
+  }
   public playAction() {
-    this.waveSurfer.play();
+    this.waveSurfer.regions.list["1"].play();
   }
 
   public async storeEditedSound(){
@@ -87,10 +101,21 @@ export default class EditSoundPopup extends Vue {
     await this.$store.dispatch('project/changeAudioSound', { audioId: this.id, sound: this.audioBlob });
   }
 
-  public cropAndUpdate(){
-    this.newAudioBlob = this.crop(); 
-    console.log(this.newAudioBlob);
-    this.waveSurfer.loadBlob(this.newAudioBlob);
+  public async cropAndUpdate(){
+    this.audioBlob = this.crop();
+    this.waveSurfer.clearRegions(); 
+    //console.log(this.audioBlob);
+    this.waveSurfer.loadBlob(this.audioBlob);
+    await this.waveSurfer.on('ready', () => {
+      //console.log(this.waveSurfer.getDuration());
+      this.waveSurfer.clearRegions();
+      this.waveSurfer.addRegion({
+                        id: 1,
+                        start: 0,
+                        end: this.waveSurfer.getDuration(),
+                        color: 'hsla(400, 100%, 30%, 0.5)'
+                    });
+    });
   }
 
   private crop() {
@@ -99,7 +124,7 @@ export default class EditSoundPopup extends Vue {
 
      var originalAudioBuffer = this.waveSurfer.backend.buffer;
 
-    var lengthInSamples = Math.floor( (end - start) * originalAudioBuffer.sampleRate );
+    var lengthInSamples = Math.floor( (end - start) * originalAudioBuffer.sampleRate )+1;
     if (! window.OfflineAudioContext) {
         if (! window.OfflineAudioContext) {
             // $('#output').append('failed : no audiocontext found, change browser');
@@ -117,7 +142,7 @@ export default class EditSoundPopup extends Vue {
 
     var newAudioBuffer = offlineAudioContext.createBuffer(
         originalAudioBuffer.numberOfChannels,
-        (start === 0 ? (originalAudioBuffer.length - emptySegment.length) :originalAudioBuffer.length),
+        (start === 0 ? (originalAudioBuffer.length - emptySegment.length)+1 :originalAudioBuffer.length),
         originalAudioBuffer.sampleRate);
 
     for (var channel = 0; channel < originalAudioBuffer.numberOfChannels;channel++) {
@@ -129,7 +154,8 @@ export default class EditSoundPopup extends Vue {
         var before_data = original_channel_data.subarray(0, start * originalAudioBuffer.sampleRate);
         var mid_data = original_channel_data.subarray( start * originalAudioBuffer.sampleRate, end * originalAudioBuffer.sampleRate);
         var after_data = original_channel_data.subarray(Math.floor(end * originalAudioBuffer.sampleRate), (originalAudioBuffer.length * originalAudioBuffer.sampleRate));
-
+        // console.log(after_data);
+        // console.log(new_channel_data);
         empty_segment_data.set(mid_data);
         if(start > 0){
             new_channel_data.set(before_data);
@@ -140,7 +166,7 @@ export default class EditSoundPopup extends Vue {
     }
     
     
-    return bufferToWave(emptySegment,0,emptySegment.length)
+    return bufferToWave(emptySegment,0,lengthInSamples)
     
       }
     
@@ -149,7 +175,7 @@ export default class EditSoundPopup extends Vue {
   // Convert a audio-buffer segment to a Blob using WAVE representation
   // The returned Object URL can be set directly as a source for an Auido element.
   // (C) Ken Fyrstenberg / MIT license
-  function bufferToWave(abuffer, offset, len) {
+  function bufferToWave(abuffer: AudioBuffer, offset: number, len: number) {
 
     var numOfChan = abuffer.numberOfChannels,
         length = len * numOfChan * 2 + 44,
@@ -192,12 +218,12 @@ export default class EditSoundPopup extends Vue {
     // create Blob
     return new Blob([buffer], {type: "audio/wav"});
     
-    function setUint16(data) {
+    function setUint16(data:any) {
       view.setUint16(pos, data, true);
       pos += 2;
     }
     
-    function setUint32(data) {
+    function setUint32(data:any) {
       view.setUint32(pos, data, true);
       pos += 4;
     }
