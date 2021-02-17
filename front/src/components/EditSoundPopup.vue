@@ -1,3 +1,7 @@
+<style lang="scss" scoped>
+  @import "@/styles/audioEdit.scss"; 
+</style>
+
 <template>
   <div class="modal-card" style="width: 700px; height: 500px;">
     <header class="modal-card-head">
@@ -7,6 +11,8 @@
       <input type="text" ref="nameSound" :value="nameSound"/>
       <button class="button" id="PlayAction" type="button" @click="playAction()">Play</button>
       <div id="waveform"></div>
+      <input id="volume" type="range" min="0" max="100" step="1" @change="changeVolume()"></input>
+
     </section>
     <footer class="modal-card-foot">
       <button class="button" type="button" @click="$parent.close()">Annuler</button>
@@ -29,18 +35,19 @@ export default class SmartphoneSynchroPopupComponent extends Vue {
   protected getAudioRecord!: any;
 
   @Prop()
-  private id: string;
+  private id: string = "";
 
   public nameSound: string = "";
 
   private audioBlob: any;
   private waveSurfer: any;
 
+  public volume: number = 100;
+
   public async mounted(){
-    const audio = this.getAudioRecord.find(audio => audio.id === this.id);
+    const audio = this.getAudioRecord.find((audio: any) => audio.id === this.id);
     this.nameSound = audio.title;
     this.audioBlob = audio.sound;
-    console.log(this.audioBlob);
     this.waveSurfer = WaveSurfer.create({
         container: document.querySelector('#waveform'),
         waveColor: '#D9DCFF',
@@ -66,6 +73,13 @@ export default class SmartphoneSynchroPopupComponent extends Vue {
     }
     await this.$store.dispatch('project/changeAudioTitle', { audioId: this.id, title });
     await this.$store.dispatch('project/changeAudioSound', { audioId: this.id, sound: this.audioBlob });
+  }
+
+  public changeVolume(){
+    const volume: number = parseInt((<HTMLInputElement>document.getElementById("volume")).value);
+      if(volume >= 0 && volume <= 100){
+        this.waveSurfer.setVolume(volume/100);
+      }
   }
 }
 </script>
