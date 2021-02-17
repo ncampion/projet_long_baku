@@ -154,6 +154,7 @@
       </div>
 
       <AudioDisplayComponent
+        :allShots="this.getAllShots"
       />
 
     </template>

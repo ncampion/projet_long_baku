@@ -33,8 +33,29 @@
     
     </div>
 
-    <div ref="movieContainer" class="movie-container">
+    <div class="horizontal-align">
+      <div class="padding-button">
+        <i class="button is-primary" @click="backward10">Reculer de 10 frames</i>
+      </div>
 
+      <div class="padding-button">
+        <i class="button is-primary" @click="backward1">Reculer de 1 frame</i>
+      </div>
+
+      <div class="padding-button">
+        <i class="button is-primary" @click="forward1">Avancer de 1 frame</i>
+      </div>
+
+      <div class="padding-button">
+        <i class="button is-primary" @click="forward10">Avancer de 10 frames</i>
+      </div>
+
+      <div class="padding-button">
+          Le mode de déplacement actuel est : {{ mode }}
+      </div>
+    </div>
+
+    <div ref="movieContainer" class="movie-container">
     
     </div>
     
@@ -45,20 +66,17 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
-import { Shot, Movie } from '@/utils/movie.service';
+import { Movie } from '@/utils/movie.service';
 import TimelinesChart from 'timelines-chart';
-//import * as css from "@/styles/timeline.scss";
+
 
 const ProjectNS = namespace('project');
 
 @Component
 export default class AudioDisplayComponent extends Vue {
-    
-    @Prop()
-    public activeShot!: Shot;
 
     @Prop()
-    public shots!: Shot[];
+    public allShots: Array<any> = [];
 
     @ProjectNS.State
     public id!: string;
@@ -72,28 +90,107 @@ export default class AudioDisplayComponent extends Vue {
     @ProjectNS.Getter
     protected getAudioTimeline!: any;
 
-    private chart!: any = TimelinesChart();
+    private chart: any = TimelinesChart();
 
     private chartData!: any;
     
 
+    private goForward10 : boolean = true;
+    private goForward1 : boolean = false;
+    private goBackward1 : boolean = false;
+    private goBackward10 : boolean = false;
+    private mode : string = "Avancer de 10 frames";
+
+
+
     mounted() {
-      this.chartData = this.genRandomData();
+      this.chartData =
+      [
+        {
+          group: "SONS",
+          data: [
+            {
+              label: "Piste 1",
+              data: [
+                {
+                  timeRange: [1, 5],
+                  val: "Son 1"
+                },
+                {
+                  timeRange: [10, 15],
+                  val: "Son 2"
+                },
+              ]
+            },
+            {
+              label: "Piste 2",
+              data: [
+                {
+                  timeRange: [2, 8],
+                  val: "Son 3"
+                },
+                {
+                  timeRange: [8, 18],
+                  val: "Son 4"
+                },
+              ],
+            },
+          ],
+        },
+        {
+          group: "PLANS",
+          data: [
+            {
+              label: " ",
+              data: this.getChartFromShots()
+            },
+          ],
+        },
+      ];
+
+      console.log(this.mode);
       
-      //this.chart = TimelinesChart();
       
       this.chart.data(this.chartData)
             .xTickFormat((n: number): number => +n)
             .timeFormat('%Q')
             .maxHeight(330)
             .onSegmentClick(this.segmentClick)
-            .maxLineHeight(100)
+            .maxLineHeight(70)
             .zQualitative(true)
-            .dateMarker(50)
+            .dateMarker(20)
+            .enableAnimations(false)
             .segmentTooltipContent(this.segmentTooltip);
 
       this.chart(this.$refs.movieContainer);
+      console.log("Allshots");
+      console.log(this.allShots);
     }
+
+
+    getChartFromShots(){
+
+      if(this.allShots){
+        const nSegments = this.allShots.length
+        let runLength = 1;
+
+        return [...Array(nSegments).keys()].map(i => {
+          const start = runLength,
+            end = runLength + this.allShots[i].images.length;
+
+          runLength = end;
+
+          return {
+            timeRange: [start, end],
+            val: `Plan ${i+1}`
+          };
+        });
+      } else {
+        return [];
+      }
+
+    }
+
 
     segmentTooltip(d : any) {
       return d.labelVal+'<br>'
@@ -102,11 +199,33 @@ export default class AudioDisplayComponent extends Vue {
     }
 
     segmentClick(segment : any) {
-      console.log(segment);
-      segment.target.__data__.data.val = "Son 1";
-      segment.target.__data__.labelVal = "Son 1";
-      segment.target.__data__.val = "Son 1";
-      this.chart.data(this.chartData);
+      var nbFrames = 0;
+      if (this.goForward1 || this.goForward10) {
+        if (this.goForward1) {
+          nbFrames = 1;
+        } else {
+          nbFrames = 10;
+        }
+        segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] + nbFrames;
+        segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] + nbFrames;
+      } 
+      
+      else {
+        if (this.goBackward1) {
+          nbFrames = 1;
+        } else if (this.goBackward10) {
+          nbFrames = 10;
+        }
+        segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] - nbFrames;
+        segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - nbFrames;
+      }
+
+      //segment.target.__data__.data.val = "Son 1";
+      //segment.target.__data__.labelVal = "Son 2";
+      //segment.target.__data__.val = "Son 2";
+
+      this.chart.data(this.chart.data());
+      this.chartData = this.chart.data();
       this.chart.refresh();
       return segment;
     }
@@ -171,6 +290,39 @@ export default class AudioDisplayComponent extends Vue {
         return titles;
     }
 
+
+
+    backward10() {
+      this.goBackward1 = false;
+      this.goBackward10 = true;
+      this.goForward1 = false;
+      this.goForward10 = false;
+      this.mode = "Reculer de 10 frames";
+    }
+
+    backward1() {
+      this.goBackward1 = true;
+      this.goBackward10 = false;
+      this.goForward1 = false;
+      this.goForward10 = false;
+      this.mode = "Reculer de 1 frame";
+    }
+
+    forward1() {
+      this.goBackward1 = false;
+      this.goBackward10 = false;
+      this.goForward1 = true;
+      this.goForward10 = false;
+      this.mode = "Avancer de 1 frame";
+    }
+
+    forward10() {
+      this.goBackward1 = false;
+      this.goBackward10 = false;
+      this.goForward1 = false;
+      this.goForward10 = true;
+      this.mode = "Avancer de 10 frames";
+    }
 
 
     // Drag and drop Timeline
