@@ -47,7 +47,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { Shot, Movie } from '@/utils/movie.service';
 import TimelinesChart from 'timelines-chart';
-import * as css from "@/styles/timeline.scss";
+//import * as css from "@/styles/timeline.scss";
 
 const ProjectNS = namespace('project');
 
@@ -88,11 +88,18 @@ export default class AudioDisplayComponent extends Vue {
             .maxHeight(330)
             .onSegmentClick(this.segmentClick)
             .maxLineHeight(100)
-            .zQualitative(true);
+            .zQualitative(true)
+            .dateMarker(50)
+            .segmentTooltipContent(this.segmentTooltip);
 
       this.chart(this.$refs.movieContainer);
     }
 
+    segmentTooltip(d : any) {
+      return d.labelVal+'<br>'
+            + "From : " + (Math.round(d.data.timeRange[0])) + '<br>'
+            + "To : "  + (Math.round(d.data.timeRange[1]));
+    }
 
     segmentClick(segment : any) {
       console.log(segment);
