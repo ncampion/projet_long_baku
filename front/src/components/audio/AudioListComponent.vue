@@ -24,7 +24,7 @@
 
 
           <div class="horizontal-align">
-            <i class="baku-button" @click="openEditSoundPopup">Jouer un son</i>
+            <i class="baku-button" @click="playSound(audio.id)">Jouer un son</i>
           </div>
         </div>
         
@@ -47,6 +47,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { Shot } from '@/utils/movie.service';
+import { Howl } from 'howler';
 // import { Spinner } from "@/utils/spinner.class";
 // import { ImageCacheService } from "@/utils/imageCache.service";
 import RecordPopup from '@/components/RecordPopup.vue';
@@ -66,6 +67,10 @@ export default class AudioListComponent extends Vue {
 
     @ProjectNS.Getter
     protected getAudioRecord!: any;
+
+    private sound!: Howl;
+
+    private alreadyPlayedOnce: boolean = false;
 
     public async mounted() {
       //const sound = new Blob();
@@ -99,6 +104,35 @@ export default class AudioListComponent extends Vue {
           "id": id
         }
       });
+    }
+
+    public playSound(audioId : string) {
+      if (this.alreadyPlayedOnce) {
+        if (this.sound.playing) {
+          this.sound.stop();
+          var url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
+          this.sound = new Howl({
+            src: [url],
+            format: ['wav']
+        });
+          this.sound.play();
+        // } else {
+        //   var url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
+        //   this.sound = new Howl({
+        //     src: [url],
+        //     format: ['wav']
+        //   });
+        //   this.sound.play();
+        }
+      } else {
+        var url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
+        this.sound = new Howl({
+            src: [url],
+            format: ['wav']
+        });
+        this.sound.play();
+        this.alreadyPlayedOnce = true;
+      }
     }
 }
 </script>
