@@ -54,6 +54,8 @@ export interface Audio {
   readonly title?: string;
   readonly sound?: Blob;
   readonly timeCode?: number;
+  readonly waveform?: Blob;
+  readonly volume?: number;
 }
 
 
@@ -266,6 +268,7 @@ export class MovieService {
             id: event.value.audioId,
             title: title,
             sound: sound,
+            volume: 100,
           });
           break;
         }
@@ -283,6 +286,18 @@ export class MovieService {
         case BakuAction.AUDIO_UPDATE_TITLE: {
           updateAudio(event.value.audioId, (audio: Audio) =>
             ({...audio, title: event.value.title})
+          )
+          break;
+        }
+        case BakuAction.AUDIO_UPDATE_VOLUME: {
+          updateAudio(event.value.audioId, (audio: Audio) =>
+            ({...audio, volume: event.value.volume})
+          )
+          break;
+        }
+        case BakuAction.AUDIO_UPDATE_WAVEFORM: {
+          updateAudio(event.value.audioId, (audio: Audio) =>
+            ({...audio, waveform: event.value.waveform})
           )
           break;
         }

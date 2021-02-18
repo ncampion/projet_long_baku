@@ -194,6 +194,16 @@ export const ProjectStore: BakuModule<ProjectState> = {
       loadEvents(context, [event]);
     },
 
+    async changeAudioVolume(context, params : {audioId : string, volume : number}) {
+      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_VOLUME, params);
+      loadEvents(context, [event]);
+    },
+
+    async changeAudioWaveform(context, params : {audioId : string, waveform : Blob}) {
+      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_WAVEFORM, params);
+      loadEvents(context, [event]);
+    },
+
     async createAudioTimeline(context, audioId : string) {
       const idAudioTimeline = uuid.v4();
       const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_ADD, {audioId, idAudioTimeline});
@@ -211,6 +221,7 @@ export const ProjectStore: BakuModule<ProjectState> = {
       const event = makeEvent(context, BakuAction.AUDIO_UPDATE_TIMECODE, params);
       loadEvents(context, [event]);
     },
+    
   },
   getters: {
     movie: (state): Movie =>

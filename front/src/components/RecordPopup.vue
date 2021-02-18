@@ -91,9 +91,9 @@ export default class RecordPopup extends Vue {
     this.selectedDeviceId = this.devices[0].id ?? undefined;
     this.waveSurfer = WaveSurfer.create({
         container: document.querySelector('#waveform'),
-        waveColor: '#D9DCFF',
-        progressColor: '#4353FF',
-        cursorColor: '#4353FF',
+        waveColor: '#ffbd72',
+        progressColor: '#fe676f',
+        cursorColor: '#fe676f',
         barWidth: 3,
         barRadius: 3,
         cursorWidth: 1,
@@ -181,7 +181,7 @@ export default class RecordPopup extends Vue {
       if(title == ""){
         title = this.nameSound;
       }
-      await this.$store.dispatch('project/createAudio', { title, sound: this.audioBlob, });
+      await this.$store.dispatch('project/createAudio', { title, sound: this.audioBlob });
     }
   }
 }
