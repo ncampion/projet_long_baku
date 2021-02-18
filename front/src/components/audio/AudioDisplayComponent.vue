@@ -62,7 +62,7 @@ const ProjectNS = namespace('project');
 export default class AudioDisplayComponent extends Vue {
 
     @Prop()
-    public allShots: Array<any> = [];
+    public allShots!: Array<any>;
 
     @ProjectNS.State
     public id!: string;
