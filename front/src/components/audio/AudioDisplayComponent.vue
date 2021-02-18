@@ -16,22 +16,8 @@
     <!--TODO -->
 
     </div>
-    <div 
-        ref="soundContainer" class="sound-container"
-    >
-
-      <div
-            v-for="audioTimeline in soundsBar"
-            draggable=true
-            @dragstart="handleDragStart($event,audioTimeline.idAudioTimeline);"
-            @dragover="allowDropTimeline($event);"
-            @drop="handleDropTimeline($event);"
-            class="sounds"
-      >
-          {{ audioTimeline.title }}
-      </div>
     
-    </div>
+    
 
     <div class="horizontal-align">
       <div class="padding-button">
@@ -51,7 +37,7 @@
       </div>
 
       <div class="padding-button">
-          Le mode de déplacement actuel est : {{ mode }}
+          Mode : {{ mode }}
       </div>
     </div>
 
@@ -100,6 +86,7 @@ export default class AudioDisplayComponent extends Vue {
     private goBackward1 : boolean = false;
     private goBackward10 : boolean = false;
     private mode : string = "Avancer de 10 frames";
+    private nbTotalFrames : number = 0;
 
 
 
@@ -147,7 +134,7 @@ export default class AudioDisplayComponent extends Vue {
           ],
         },
       ];
-
+      console.log(this.chartData);
       console.log(this.mode);
       
       
@@ -158,15 +145,20 @@ export default class AudioDisplayComponent extends Vue {
             .onSegmentClick(this.segmentClick)
             .maxLineHeight(70)
             .zQualitative(true)
-            .dateMarker(20)
+            .dateMarker(5)
             .enableAnimations(false)
             .segmentTooltipContent(this.segmentTooltip);
 
       this.chart(this.$refs.movieContainer);
-      console.log("Allshots");
-      console.log(this.allShots);
+      
+      for (var shot of this.allShots) {
+        this.nbTotalFrames = this.nbTotalFrames + shot.images.length;
+      }
     }
 
+    public actualizeDateMarker(newFrame: number){
+      this.chart.dateMarker(newFrame);
+    }
 
     getChartFromShots(){
 
@@ -206,8 +198,14 @@ export default class AudioDisplayComponent extends Vue {
         } else {
           nbFrames = 10;
         }
-        segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] + nbFrames;
-        segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] + nbFrames;
+
+        if (segment.target.__data__.data.timeRange[1] + nbFrames > this.nbTotalFrames) {
+            segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] + this.nbTotalFrames - segment.target.__data__.data.timeRange[1] + 1;
+            segment.target.__data__.data.timeRange[1] = this.nbTotalFrames + 1;
+        } else {
+            segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] + nbFrames;
+            segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] + nbFrames;
+        }
       } 
       
       else {
@@ -216,8 +214,13 @@ export default class AudioDisplayComponent extends Vue {
         } else if (this.goBackward10) {
           nbFrames = 10;
         }
-        segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] - nbFrames;
-        segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - nbFrames;
+        if (segment.target.__data__.timeRange[0] - nbFrames <= 0) {
+          segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - segment.target.__data__.timeRange[0] + 1;
+          segment.target.__data__.data.timeRange[0] = 1;
+        } else {
+          segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] - nbFrames;
+          segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - nbFrames;
+        }
       }
 
       //segment.target.__data__.data.val = "Son 1";
@@ -267,30 +270,6 @@ export default class AudioDisplayComponent extends Vue {
     }
 
 
-    get soundsBar() {
-        const audiosTimeline = this.getAudioTimeline;
-        const audiosRecord = this.getAudioRecord;
-        const titles = [];
-
-        if (audiosTimeline == null) {
-          return null;
-        } else {
-          for (let audioT in audiosTimeline) {
-            for (let audioR in audiosRecord) {
-              if (audiosTimeline[audioT].id == audiosRecord[audioR].id) {
-                titles.push({
-                  id : audiosTimeline[audioT].id,
-                  idAudioTimeline : audiosTimeline[audioT].idTimeline,
-                  title : audiosRecord[audioR].title,
-                });
-              }
-            }
-          }
-        }
-        return titles;
-    }
-
-
 
     backward10() {
       this.goBackward1 = false;
@@ -325,30 +304,6 @@ export default class AudioDisplayComponent extends Vue {
     }
 
 
-    // Drag and drop Timeline
-
-    handleDragStart(event: any, id: string) {
-      event.dataTransfer.setData("text", id );
-    }
-
-    allowDropTimeline(event: any) {
-      event.preventDefault();
-    }
-
-    public async handleDropTimeline(event: any) {
-      event.preventDefault();
-      
-      var data = event.dataTransfer.getData("text");
-      
-      await this.$store.dispatch('project/createAudioTimeline', data);
-
-      this.$emit('close');
-      event.dataTransfer.clearData();
-
-    }
-
-
-
 
 
     // Drop from the Record sounds list
@@ -360,12 +315,37 @@ export default class AudioDisplayComponent extends Vue {
     public async handleDrop(event: any) {
       event.preventDefault();
       
-      var data = event.dataTransfer.getData("text");
-      
-      await this.$store.dispatch('project/createAudioTimeline', data);
+      var idAndTitle = event.dataTransfer.getData("text").split("@");
+      var id = idAndTitle[0];
+      var title = idAndTitle[1];
 
+
+      this.addAudio(id, title);
+
+      this.chart.data(this.chartData);
+      this.chart.refresh();
+      await this.$store.dispatch('project/createAudioTimeline', this.chartData);
       this.$emit('close');
+
       event.dataTransfer.clearData();
+    }
+
+    addAudio(id : string, title : string) {
+      var numPiste = this.chartData[0].data.length + 1;
+      var start = this.chart.dateMarker();
+      var end = start + 5;
+      var timeRange = [start, end];
+      var data = [
+        {
+          timeRange : timeRange,
+          val : title,
+          id : id,
+        }
+      ];
+      this.chartData[0].data.push({
+        label : "Piste " + numPiste,
+        data : data,
+      });
     }
 
 }

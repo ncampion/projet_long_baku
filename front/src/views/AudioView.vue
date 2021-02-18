@@ -154,6 +154,7 @@
       </div>
 
       <AudioDisplayComponent
+        ref="audioDisplay"
         :allShots="this.getAllShots"
       />
 
@@ -333,9 +334,10 @@ export default class AudioView extends Vue {
 
     private displayFrame(timeCode: number) {
 
+      const audioDisplay = this.$refs.audioDisplay as AudioDisplayComponent;
+      audioDisplay.actualizeDateMarker(timeCode+1);
+
       
-      //const activeShot = this.getActiveShot;
-      //if(activeShot){
       if (this.allImages) {
 
         var image = undefined;
