@@ -134,7 +134,7 @@ export default class AudioDisplayComponent extends Vue {
           ],
         },
       ];
-      console.log(this.chartData);
+      
       console.log(this.mode);
       
       
