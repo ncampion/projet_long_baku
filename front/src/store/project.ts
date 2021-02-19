@@ -34,7 +34,19 @@ const makeEvent = (context: BakuActionContext<ProjectState>, action: BakuAction,
   }
 }
 
+
 function loadEvents(context: BakuActionContext<ProjectState>, events: BakuEvent[]): void {
+  const promise = api.stack(context.state.id, events, context.rootState.socket.socketId);
+
+  events.map(event => {
+    context.commit('addToLocalHistory', event);
+    context.commit('incAction', 1);
+    promise.catch(() => context.commit('removeFromLocalHistory', event))
+      .finally(() => context.commit('incAction', -1));
+  })
+}
+
+function loadEvents2(context: BakuActionContext<ProjectState>, events: BakuEvent[]): void {
   //const promise = api.stack(context.state.id, events, context.rootState.socket.socketId);
 
   events.map(event => {
@@ -174,57 +186,51 @@ export const ProjectStore: BakuModule<ProjectState> = {
     async createAudio(context, params: {title : String, sound : Blob}) {
       const audioId = uuid.v4();
       const event = makeEvent(context, BakuAction.AUDIO_ADD, {audioId, params});
-      loadEvents(context, [event]);
+      loadEvents2(context, [event]);
       await store.dispatch('user/updateCurrentSeenProject');
     },
 
     async removeAudio(context, audioId: string) {
       const event = makeEvent(context, BakuAction.AUDIO_REMOVE, {audioId});
-      loadEvents(context, [event]);
+      loadEvents2(context, [event]);
       await store.dispatch('user/updateCurrentSeenProject');
     },
 
     async changeAudioTitle(context, params : {audioId : string, title : string}) {
       const event = makeEvent(context, BakuAction.AUDIO_UPDATE_TITLE, params);
-      loadEvents(context, [event]);
+      loadEvents2(context, [event]);
     },
 
     async changeAudioSound(context, params : {audioId : string, sound : Blob}) {
       const event = makeEvent(context, BakuAction.AUDIO_UPDATE_SOUND, params);
-      loadEvents(context, [event]);
+      loadEvents2(context, [event]);
     },
 
-<<<<<<< HEAD
     async changeAudioVolume(context, params : {audioId : string, volume : number}) {
       const event = makeEvent(context, BakuAction.AUDIO_UPDATE_VOLUME, params);
-      loadEvents(context, [event]);
+      loadEvents2(context, [event]);
     },
 
     async changeAudioWaveform(context, params : {audioId : string, waveform : Blob}) {
       const event = makeEvent(context, BakuAction.AUDIO_UPDATE_WAVEFORM, params);
-      loadEvents(context, [event]);
+      loadEvents2(context, [event]);
     },
 
-    async createAudioTimeline(context, audioId : string) {
-      const idAudioTimeline = uuid.v4();
-      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_ADD, {audioId, idAudioTimeline});
-=======
     async createAudioTimeline(context, data : any) {
       const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_ADD, {data});
->>>>>>> refs/rewritten/brancheAdriendeManon
-      loadEvents(context, [event]);
+      loadEvents2(context, [event]);
       await store.dispatch('user/updateCurrentSeenProject');
     },
 
     async removeAudioTimeline(context, data : any) {
       const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_REMOVE, {data});
-      loadEvents(context, [event]);
+      loadEvents2(context, [event]);
       await store.dispatch('user/updateCurrentSeenProject');
     },
 
     async updateDataTimeline(context, data : any) {
       const event = makeEvent(context, BakuAction.TIMELINE_UPDATE_DATA, {data});
-      loadEvents(context, [event]);
+      loadEvents2(context, [event]);
     },
     
   },
