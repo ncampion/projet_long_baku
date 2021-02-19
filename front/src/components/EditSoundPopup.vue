@@ -114,8 +114,6 @@ export default class EditSoundPopup extends Vue {
     await this.$store.dispatch('project/changeAudioSound', { audioId: this.id, sound: this.audioBlob });
   }
 
-<<<<<<< HEAD
-=======
   public volumeAction(){
     const volume: number = parseInt((<HTMLInputElement>document.getElementById("volume")).value);
       if(volume >= 0 && volume <= 100){
@@ -124,7 +122,6 @@ export default class EditSoundPopup extends Vue {
       }
   }
 
->>>>>>> 27155ec... volume pesistant + styling
   public async cropAndUpdate(){
     this.audioBlob = this.crop();
     this.waveSurfer.clearRegions(); 

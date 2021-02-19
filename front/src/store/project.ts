@@ -194,6 +194,7 @@ export const ProjectStore: BakuModule<ProjectState> = {
       loadEvents(context, [event]);
     },
 
+<<<<<<< HEAD
     async changeAudioVolume(context, params : {audioId : string, volume : number}) {
       const event = makeEvent(context, BakuAction.AUDIO_UPDATE_VOLUME, params);
       loadEvents(context, [event]);
@@ -207,18 +208,22 @@ export const ProjectStore: BakuModule<ProjectState> = {
     async createAudioTimeline(context, audioId : string) {
       const idAudioTimeline = uuid.v4();
       const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_ADD, {audioId, idAudioTimeline});
+=======
+    async createAudioTimeline(context, data : any) {
+      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_ADD, {data});
+>>>>>>> refs/rewritten/brancheAdriendeManon
       loadEvents(context, [event]);
       await store.dispatch('user/updateCurrentSeenProject');
     },
 
-    async removeAudioTimeline(context, audioId: string) {
-      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_REMOVE, {audioId});
+    async removeAudioTimeline(context, data : any) {
+      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_REMOVE, {data});
       loadEvents(context, [event]);
       await store.dispatch('user/updateCurrentSeenProject');
     },
 
-    async changeAudioTimecode(context, params : {audioId : string, timeCode : string}) {
-      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_TIMECODE, params);
+    async updateDataTimeline(context, data : any) {
+      const event = makeEvent(context, BakuAction.TIMELINE_UPDATE_DATA, {data});
       loadEvents(context, [event]);
     },
     
@@ -331,9 +336,7 @@ export const ProjectStore: BakuModule<ProjectState> = {
 
     getAudioRecord: (state, getters: ProjectGetters): Audio[] | undefined =>
       getters.movie.audios,
-
-    getAudioTimeline: (state, getters: ProjectGetters): Audio[] | undefined =>
-      getters.movie.audioTimeline,     
+   
   },
   modules: {},
 };

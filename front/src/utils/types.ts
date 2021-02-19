@@ -22,7 +22,7 @@ export enum BakuAction {
   AUDIO_UPDATE_WAVEFORM,
   AUDIO_TIMELINE_ADD,
   AUDIO_TIMELINE_REMOVE,
-  AUDIO_UPDATE_TIMECODE,
+  TIMELINE_UPDATE_DATA,
 }
 
 export interface BakuEvent {

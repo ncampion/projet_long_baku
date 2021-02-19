@@ -13,7 +13,7 @@
           <div
             class="horizontal-align"
             draggable="true"
-            @dragstart="handleDragStart($event,audio.id);"
+            @dragstart="handleDragStart($event,audio.id, audio.title);"
           >
               {{ audio.title }}
           </div>
@@ -73,16 +73,16 @@ export default class AudioListComponent extends Vue {
     private alreadyPlayedOnce: boolean = false;
 
     public async mounted() {
-      //const sound = new Blob();
-      //await this.$store.dispatch('project/createAudio', { title : "son 1", sound, });
-      // await this.$store.dispatch('project/createAudio', { title : "son 2", sound, });
-      // await this.$store.dispatch('project/createAudio', { title : "son 3", sound, });
-      // await this.$store.dispatch('project/createAudio', { title : "son 4", sound, });
+      const sound = new Blob();
+      await this.$store.dispatch('project/createAudio', { title : "son 1", sound, });
+      await this.$store.dispatch('project/createAudio', { title : "son 2", sound, });
+      await this.$store.dispatch('project/createAudio', { title : "son 3", sound, });
+      await this.$store.dispatch('project/createAudio', { title : "son 4", sound, });
     }
 
 
-    handleDragStart(event: any, id: string) {
-      event.dataTransfer.setData("text", id );
+    handleDragStart(event: any, id: string, title : string) {
+      event.dataTransfer.setData("text", id + "@" + title );
     }
 
     public async openRecordPopup() {
