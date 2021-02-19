@@ -140,7 +140,6 @@
 
       <AudioDisplayComponent
         ref="audioDisplay"
-        :allShots="this.getAllShots"
       />
 
     </template>
@@ -255,8 +254,12 @@ export default class AudioView extends AbstractProjectView {
 
     public async mounted() {
 
+
       //this.loadProject(this.$route.params.projectId);
       await this.$store.dispatch('project/loadProject', this.$route.params.projectId); 
+
+      const audioDisplay = this.$refs.audioDisplay as AudioDisplayComponent;
+      audioDisplay.setAllShots(this.getAllShots);
 
       this.previewImg = this.$refs.previewImg as HTMLImageElement;
       this.prevPreviewImg = this.$refs.prevPreviewImg as HTMLImageElement;

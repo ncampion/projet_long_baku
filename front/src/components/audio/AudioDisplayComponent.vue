@@ -50,10 +50,11 @@
 
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { Movie } from '@/utils/movie.service';
 import TimelinesChart from 'timelines-chart';
+import { Shot } from '@/utils/movie.service';
 
 
 const ProjectNS = namespace('project');
@@ -61,8 +62,6 @@ const ProjectNS = namespace('project');
 @Component
 export default class AudioDisplayComponent extends Vue {
 
-    @Prop()
-    public allShots!: Array<any>;
 
     @ProjectNS.State
     public id!: string;
@@ -79,7 +78,8 @@ export default class AudioDisplayComponent extends Vue {
     private chart: any = TimelinesChart();
 
     private chartData!: any;
-    
+
+    public allShots: Array<any> = [];
 
     private goForward10 : boolean = true;
     private goForward1 : boolean = false;
@@ -91,50 +91,8 @@ export default class AudioDisplayComponent extends Vue {
 
 
     mounted() {
-      this.chartData =
-      [
-        {
-          group: "SONS",
-          data: [
-            {
-              label: "Piste 1",
-              data: [
-                {
-                  timeRange: [1, 5],
-                  val: "Son 1"
-                },
-                {
-                  timeRange: [10, 15],
-                  val: "Son 2"
-                },
-              ]
-            },
-            {
-              label: "Piste 2",
-              data: [
-                {
-                  timeRange: [2, 8],
-                  val: "Son 3"
-                },
-                {
-                  timeRange: [8, 18],
-                  val: "Son 4"
-                },
-              ],
-            },
-          ],
-        },
-        {
-          group: "PLANS",
-          data: [
-            {
-              label: " ",
-              data: this.getChartFromShots()
-            },
-          ],
-        },
-      ];
-      
+      this.chartData = this.getChart();
+
       console.log(this.mode);
       
       
@@ -145,7 +103,7 @@ export default class AudioDisplayComponent extends Vue {
             .onSegmentClick(this.segmentClick)
             .maxLineHeight(70)
             .zQualitative(true)
-            .dateMarker(5)
+            .dateMarker(1)
             .enableAnimations(false)
             .segmentTooltipContent(this.segmentTooltip);
 
@@ -155,13 +113,65 @@ export default class AudioDisplayComponent extends Vue {
         this.nbTotalFrames = this.nbTotalFrames + shot.images.length;
       }
     }
+    
+    
+    getChart(){
+      return [
+          {
+            group: "SONS",
+            data: [
+              {
+                label: "Piste 1",
+                data: [
+                  {
+                    timeRange: [1, 5],
+                    val: "Son 1"
+                  },
+                  {
+                    timeRange: [10, 15],
+                    val: "Son 2"
+                  },
+                ]
+              },
+              {
+                label: "Piste 2",
+                data: [
+                  {
+                    timeRange: [2, 8],
+                    val: "Son 3"
+                  },
+                  {
+                    timeRange: [8, 18],
+                    val: "Son 4"
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            group: "PLANS",
+            data: [
+              {
+                label: " ",
+                data: this.getChartFromShots()
+              },
+            ],
+          },
+        ];
+    }
 
     public actualizeDateMarker(newFrame: number){
       this.chart.dateMarker(newFrame);
     }
 
-    getChartFromShots(){
+    public setAllShots(shots: Shot[]){
+      this.allShots = shots;
 
+      this.chart.data(this.getChart());
+      console.log(this.chartData);
+    }
+
+    getChartFromShots(){
       if(this.allShots){
         const nSegments = this.allShots.length
         let runLength = 1;
