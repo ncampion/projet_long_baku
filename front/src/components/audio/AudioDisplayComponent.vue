@@ -108,10 +108,6 @@ export default class AudioDisplayComponent extends Vue {
             .segmentTooltipContent(this.segmentTooltip);
 
       this.chart(this.$refs.movieContainer);
-      
-      for (var shot of this.allShots) {
-        this.nbTotalFrames = this.nbTotalFrames + shot.images.length;
-      }
     }
     
     
@@ -166,9 +162,10 @@ export default class AudioDisplayComponent extends Vue {
 
     public setAllShots(shots: Shot[]){
       this.allShots = shots;
-
+      for (var shot of this.allShots) {
+        this.nbTotalFrames = this.nbTotalFrames + shot.images.length;
+      }
       this.chart.data(this.getChart());
-      console.log(this.chartData);
     }
 
     getChartFromShots(){
@@ -209,9 +206,9 @@ export default class AudioDisplayComponent extends Vue {
           nbFrames = 10;
         }
 
-        if (segment.target.__data__.data.timeRange[1] + nbFrames > this.nbTotalFrames) {
-            segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] + this.nbTotalFrames - segment.target.__data__.data.timeRange[1] + 1;
-            segment.target.__data__.data.timeRange[1] = this.nbTotalFrames + 1;
+        if (segment.target.__data__.data.timeRange[0] + nbFrames >= this.nbTotalFrames) {
+            segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - segment.target.__data__.data.timeRange[0] + this.nbTotalFrames + 1;
+            segment.target.__data__.data.timeRange[0] = this.nbTotalFrames + 1;
         } else {
             segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] + nbFrames;
             segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] + nbFrames;
@@ -243,6 +240,7 @@ export default class AudioDisplayComponent extends Vue {
       return segment;
     }
 
+/*
     genRandomData() {
       const NLINES = 3,
         MAXSEGMENTS = 4,
@@ -279,7 +277,7 @@ export default class AudioDisplayComponent extends Vue {
       }
     }
 
-
+*/
 
     backward10() {
       this.goBackward1 = false;

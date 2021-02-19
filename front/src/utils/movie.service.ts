@@ -35,6 +35,7 @@ export interface Movie {
   readonly shots: Shot[];
   readonly audios: Audio[];
   readonly dataTimeline: any;
+  readonly soundsTimeline: SoundTimeline[];
   readonly fps: number;
   readonly locked: boolean;
 }
@@ -54,6 +55,11 @@ export interface Audio {
   readonly sound?: Blob;
 }
 
+export interface SoundTimeline {
+  readonly id: string;
+  readonly audioId: string;
+  readonly start : number;
+}
 
 export interface ReadingSliderBoundaries {
   left: number;
@@ -141,6 +147,7 @@ export class MovieService {
     const shots: Shot[] = [];
     const audios: Audio[] = [];
     let dataTimeline : any = [];
+    const soundsTimeline : SoundTimeline[] = [];
 
     const updateShot = (shotId: string, updateFn: (shot: Shot) => Shot) => {
       const shotIndex = shots.findIndex((p) => p.id === shotId);
@@ -160,6 +167,14 @@ export class MovieService {
       audios.splice(audioIndex, 1, updateFn(audio));
     };
 
+    const updateSoundTimeline = (soundTimelineId: string, updateFn: (soundTimeline: SoundTimeline) => SoundTimeline) => {
+      const soundTimelineIndex = soundsTimeline.findIndex((p) => p.id === soundTimelineId);
+      const soundTimeline = soundsTimeline.find((p) => p.id === soundTimelineId);
+      if (!soundTimeline) {
+        throw new Error(`audio ${soundTimeline} should exist for project ${title}`);
+      }
+      audios.splice(soundTimelineIndex, 1, updateFn(soundTimeline));
+    };
     
     events.forEach((event) => {
       switch (event.action) {
@@ -301,12 +316,32 @@ export class MovieService {
           dataTimeline = event.value.data;
           break;
         }
+        case BakuAction.SOUNDTIMELINE_ADD: {
+          const {audioId, start} = event.value.params as { audioId: string, start: number };
+          soundsTimeline.push({
+            id: event.value.soundTimelideId,
+            audioId: audioId,
+            start : start,
+          });
+          break;
+        }
+        case BakuAction.SOUNDTIMELINE_REMOVE: {
+          const soundTimelineIndex = soundsTimeline.findIndex((soundTimeline) => soundTimeline.id === event.value.soundTimelideId);
+          audios.splice(soundTimelineIndex, 1);
+          break;
+        }
+        case BakuAction.SOUNDTIMELINE_UPDATE_START: {
+          updateSoundTimeline(event.value.soundTimelideId, (soundTimeline: SoundTimeline) =>
+            ({...soundTimeline, start: event.value.start})
+          )
+          break;
+        }
         default:
           break;
       }
     });
     return {
-      title, synopsis, poster, shots, audios, dataTimeline, fps, locked
+      title, synopsis, poster, shots, audios, dataTimeline, soundsTimeline, fps, locked
     };
   }
 

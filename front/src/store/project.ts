@@ -1,7 +1,7 @@
 import store from "@/store";
 import * as api from '@/api';
 import { BakuAction, BakuEvent, Duration } from '@/utils/types';
-import { Movie, MovieService, Shot, Audio } from '@/utils/movie.service';
+import { Movie, MovieService, Shot, Audio, SoundTimeline } from '@/utils/movie.service';
 import { BakuActionContext, BakuModule, ProjectState } from '@/store/store.types';
 import uuid from 'uuid';
 
@@ -232,7 +232,24 @@ export const ProjectStore: BakuModule<ProjectState> = {
       const event = makeEvent(context, BakuAction.TIMELINE_UPDATE_DATA, {data});
       loadEvents2(context, [event]);
     },
+
+    async createSoundTimeline(context, params: {audioId : String, start : number}) {
+      const soundTimelideId = uuid.v4();
+      const event = makeEvent(context, BakuAction.SOUNDTIMELINE_ADD, {soundTimelideId, params});
+      loadEvents2(context, [event]);
+      await store.dispatch('user/updateCurrentSeenProject');
+    },    
     
+    async removeSoundTimeline(context, soundTimelideId: string) {
+      const event = makeEvent(context, BakuAction.SOUNDTIMELINE_REMOVE, {soundTimelideId});
+      loadEvents2(context, [event]);
+      await store.dispatch('user/updateCurrentSeenProject');
+    },
+
+    async updateSoundTimelineStart(context, params : {soundTimelideId : string, start : number}) {
+      const event = makeEvent(context, BakuAction.SOUNDTIMELINE_UPDATE_START, params);
+      loadEvents2(context, [event]);
+    },
   },
   getters: {
     movie: (state): Movie =>
@@ -343,6 +360,8 @@ export const ProjectStore: BakuModule<ProjectState> = {
     getAudioRecord: (state, getters: ProjectGetters): Audio[] | undefined =>
       getters.movie.audios,
    
+    getSoundTimeline: (state, getters: ProjectGetters): SoundTimeline[] | undefined =>
+      getters.movie.soundsTimeline,
   },
   modules: {},
 };
