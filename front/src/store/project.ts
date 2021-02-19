@@ -35,13 +35,13 @@ const makeEvent = (context: BakuActionContext<ProjectState>, action: BakuAction,
 }
 
 function loadEvents(context: BakuActionContext<ProjectState>, events: BakuEvent[]): void {
-  const promise = api.stack(context.state.id, events, context.rootState.socket.socketId);
+  //const promise = api.stack(context.state.id, events, context.rootState.socket.socketId);
 
   events.map(event => {
     context.commit('addToLocalHistory', event);
     context.commit('incAction', 1);
-    promise.catch(() => context.commit('removeFromLocalHistory', event))
-      .finally(() => context.commit('incAction', -1));
+    //promise.catch(() => context.commit('removeFromLocalHistory', event))
+    //  .finally(() => context.commit('incAction', -1));
   })
 }
 
