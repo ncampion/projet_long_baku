@@ -261,8 +261,13 @@ export default class AudioDisplayComponent extends Vue {
     var soundTimelineId = segment.target.__data__.data.soundTimelineId;
     await this.$store.dispatch('project/removeSoundTimeline', soundTimelineId);
     var updatedData = this.chart.data();
-    var pisteNumber = segment.target.__data__.label.splice(" ")[1] - 1;
-    //updatedData[0].data[pisteNumber]
+    var pisteNumber = segment.target.__data__.label.split(" ")[1] - 1;
+    var soundTimelineId = segment.target.__data__.data.soundTimelineId;
+    const index = updatedData[0].data[pisteNumber].data.findIndex((p) => p.soundTimelineId === soundTimelineId);
+
+    updatedData[0].data[pisteNumber].data.splice(index,1);
+    this.chart.data(updatedData);
+    
   }
 
 /*

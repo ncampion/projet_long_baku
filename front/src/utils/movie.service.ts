@@ -174,7 +174,7 @@ export class MovieService {
       if (!soundTimeline) {
         throw new Error(`audio ${soundTimeline} should exist for project ${title}`);
       }
-      audios.splice(soundTimelineIndex, 1, updateFn(soundTimeline));
+      soundsTimeline.splice(soundTimelineIndex, 1, updateFn(soundTimeline));
     };
     
     events.forEach((event) => {
