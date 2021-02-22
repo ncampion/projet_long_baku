@@ -164,7 +164,8 @@ import ImagesSelectorComponent from '@/components/image-selector/ImagesSelectorC
 import CaptureToolboxComponent from '@/components/capture/CaptureToolboxComponent.vue';
 import StoryboardPreviewComponent from '@/components/capture/StoryboardPreviewComponent.vue';
 import { ImageCacheService } from '@/utils/imageCache.service';
-import { Movie, ReadingSliderBoundaries, Shot } from '@/utils/movie.service';
+import { Movie, ReadingSliderBoundaries, Shot, SoundTimeline } from '@/utils/movie.service';
+import { Howl } from 'howler';
 
 const ProjectNS = namespace('project');
 
@@ -225,6 +226,12 @@ export default class AudioView extends AbstractProjectView {
     @ProjectNS.Getter
     public getAllShots!: Shot[];
 
+    @ProjectNS.Getter
+    public getSoundTimeline!: SoundTimeline[];
+
+    @ProjectNS.Getter
+    protected getAudioRecord!: any;
+
     @ProjectNS.Action('loadProject')
     protected loadProject!: (projectId: string) => Promise<void>;
 
@@ -251,6 +258,10 @@ export default class AudioView extends AbstractProjectView {
     private previewImg!: HTMLImageElement;
     private prevPreviewImg!: HTMLImageElement;
     private nextPreviewImg!: HTMLImageElement;
+
+    private soundsArray!: SoundTimeline[];
+
+    private sounds: [Howl,number][] = [];
 
     public async mounted() {
 
@@ -316,9 +327,17 @@ export default class AudioView extends AbstractProjectView {
 
     private displayFrame(timeCode: number) {
 
+      if (this.isPlaying=='animation' && this.sounds.length>0){
+        this.sounds.forEach(sound => {
+        if (sound[1]==this.playingFrame){
+            sound[0].play();
+        }
+        })
+      }
+
       const audioDisplay = this.$refs.audioDisplay as AudioDisplayComponent;
       audioDisplay.actualizeDateMarker(timeCode+1);
-
+      
       if (this.allImages) {
 
         var image = undefined;
@@ -413,6 +432,8 @@ export default class AudioView extends AbstractProjectView {
           left: 0,
           right: this.allImages.length + 1,
         };
+
+        this.initSounds();
         this.animationFrame = requestAnimationFrame(this.animate);
       }
     }
@@ -533,6 +554,18 @@ export default class AudioView extends AbstractProjectView {
       return `${Math.floor((frame + 1) / this.movie.fps) % 60}`.padStart(2, '0');
     }
 
+  private initSounds() {
+    this.sounds=[];
+    this.soundsArray = this.getSoundTimeline;
+    this.soundsArray.forEach(elm => {
+      var url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).sound);
+      var sound : Howl = new Howl({
+          src: [url],
+          format: ['wav']
+        });
+      this.sounds.push([sound,elm.start]);
+    })
+  }
 
 }
 </script>
