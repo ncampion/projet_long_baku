@@ -37,6 +37,10 @@
       </div>
 
       <div class="padding-button">
+        <i class="button is-primary" @click="deleteAudioSegment">Supprimer un son</i>
+      </div>
+
+      <div class="padding-button">
           Mode : {{ mode }}
       </div>
     </div>
@@ -73,7 +77,7 @@ export default class AudioDisplayComponent extends Vue {
     protected getAudioRecord!: any;
 
     @ProjectNS.Getter
-    protected getAudioTimeline!: any;
+    protected getSoundTimeline!: any;
 
     private chart: any = TimelinesChart();
 
@@ -85,6 +89,7 @@ export default class AudioDisplayComponent extends Vue {
     private goForward1 : boolean = false;
     private goBackward1 : boolean = false;
     private goBackward10 : boolean = false;
+    private deleteSound : boolean = false;
     private mode : string = "Avancer de 10 frames";
     private nbTotalFrames : number = 0;
 
@@ -197,37 +202,15 @@ export default class AudioDisplayComponent extends Vue {
             + "To : "  + (Math.round(d.data.timeRange[1]));
     }
 
-    segmentClick(segment : any) {
-      var nbFrames = 0;
-      if (this.goForward1 || this.goForward10) {
-        if (this.goForward1) {
-          nbFrames = 1;
-        } else {
-          nbFrames = 10;
-        }
+    public async segmentClick(segment : any) {
+      if (this.goBackward1 || this.goBackward10 || this.goForward1 || this.goForward10) {
+        var updatedStartEnd = this.moveSound(segment);
+        var soundTimelineId = segment.target.__data__.data.soundTimelineId;
+        await this.$store.dispatch('project/updateSoundTimelineStart', { soundTimelineId, start : updatedStartEnd[0], end : updatedStartEnd[1] });
+      }
 
-        if (segment.target.__data__.data.timeRange[0] + nbFrames >= this.nbTotalFrames) {
-            segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - segment.target.__data__.data.timeRange[0] + this.nbTotalFrames + 1;
-            segment.target.__data__.data.timeRange[0] = this.nbTotalFrames + 1;
-        } else {
-            segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] + nbFrames;
-            segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] + nbFrames;
-        }
-      } 
-      
-      else {
-        if (this.goBackward1) {
-          nbFrames = 1;
-        } else if (this.goBackward10) {
-          nbFrames = 10;
-        }
-        if (segment.target.__data__.timeRange[0] - nbFrames <= 0) {
-          segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - segment.target.__data__.timeRange[0] + 1;
-          segment.target.__data__.data.timeRange[0] = 1;
-        } else {
-          segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] - nbFrames;
-          segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - nbFrames;
-        }
+      if (this.deleteSound) {
+        this.removeSoundTimeline(segment);
       }
 
       //segment.target.__data__.data.val = "Son 1";
@@ -239,6 +222,48 @@ export default class AudioDisplayComponent extends Vue {
       this.chart.refresh();
       return segment;
     }
+
+  moveSound(segment : any) {
+    var nbFrames = 0;
+    if (this.goForward1 || this.goForward10) {
+      if (this.goForward1) {
+        nbFrames = 1;
+      } else {
+        nbFrames = 10;
+      }
+
+      if (segment.target.__data__.data.timeRange[0] + nbFrames >= this.nbTotalFrames) {
+          segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - segment.target.__data__.data.timeRange[0] + this.nbTotalFrames + 1;
+          segment.target.__data__.data.timeRange[0] = this.nbTotalFrames + 1;
+      } else {
+          segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] + nbFrames;
+          segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] + nbFrames;
+      }
+    } else {
+      if (this.goBackward1) {
+        nbFrames = 1;
+      } else if (this.goBackward10) {
+        nbFrames = 10;
+      }
+      if (segment.target.__data__.timeRange[0] - nbFrames <= 0) {
+        segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - segment.target.__data__.timeRange[0] + 1;
+        segment.target.__data__.data.timeRange[0] = 1;
+      } else {
+        segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] - nbFrames;
+        segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - nbFrames;
+      }
+    }
+
+    return [segment.target.__data__.data.timeRange[0], segment.target.__data__.data.timeRange[1]];
+  }
+
+  public async removeSoundTimeline(segment : any) {
+    var soundTimelineId = segment.target.__data__.data.soundTimelineId;
+    await this.$store.dispatch('project/removeSoundTimeline', soundTimelineId);
+    var updatedData = this.chart.data();
+    var pisteNumber = segment.target.__data__.label.splice(" ")[1] - 1;
+    //updatedData[0].data[pisteNumber]
+  }
 
 /*
     genRandomData() {
@@ -280,37 +305,42 @@ export default class AudioDisplayComponent extends Vue {
 */
 
     backward10() {
-      this.goBackward1 = false;
+      this.setFalse();
       this.goBackward10 = true;
-      this.goForward1 = false;
-      this.goForward10 = false;
       this.mode = "Reculer de 10 frames";
     }
 
     backward1() {
+      this.setFalse();
       this.goBackward1 = true;
-      this.goBackward10 = false;
-      this.goForward1 = false;
-      this.goForward10 = false;
       this.mode = "Reculer de 1 frame";
     }
 
     forward1() {
-      this.goBackward1 = false;
-      this.goBackward10 = false;
+      this.setFalse();
       this.goForward1 = true;
-      this.goForward10 = false;
       this.mode = "Avancer de 1 frame";
     }
 
     forward10() {
-      this.goBackward1 = false;
-      this.goBackward10 = false;
-      this.goForward1 = false;
+      this.setFalse();
       this.goForward10 = true;
       this.mode = "Avancer de 10 frames";
     }
 
+    deleteAudioSegment() {
+      this.setFalse();
+      this.deleteSound = true;
+      this.mode = "Supprimer un son";
+    }
+
+    setFalse() {
+      this.goBackward1 = false;
+      this.goBackward10 = false;
+      this.goForward1 = false;
+      this.goForward10 = false;
+      this.deleteSound = false;
+    }
 
 
 
@@ -324,21 +354,22 @@ export default class AudioDisplayComponent extends Vue {
       event.preventDefault();
       
       var idAndTitle = event.dataTransfer.getData("text").split("@");
-      var id = idAndTitle[0];
+      var audioId = idAndTitle[0];
       var title = idAndTitle[1];
+      var start = this.chart.dateMarker();
+      var end = start + 5;
+      const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end});
 
-
-      this.addAudio(id, title);
-
+      this.addAudio(audioId, title, soundTimelineId);
       this.chart.data(this.chartData);
       this.chart.refresh();
       await this.$store.dispatch('project/createAudioTimeline', this.chartData);
       this.$emit('close');
-
+      console.log(this.getSoundTimeline);
       event.dataTransfer.clearData();
     }
 
-    addAudio(id : string, title : string) {
+    addAudio(audioId : string, title : string, soundTimelineId : string) {
       var numPiste = this.chartData[0].data.length + 1;
       var start = this.chart.dateMarker();
       var end = start + 5;
@@ -347,7 +378,8 @@ export default class AudioDisplayComponent extends Vue {
         {
           timeRange : timeRange,
           val : title,
-          id : id,
+          audioId : audioId,
+          soundTimelineId : soundTimelineId,
         }
       ];
       this.chartData[0].data.push({

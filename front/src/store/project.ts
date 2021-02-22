@@ -233,20 +233,21 @@ export const ProjectStore: BakuModule<ProjectState> = {
       loadEvents2(context, [event]);
     },
 
-    async createSoundTimeline(context, params: {audioId : String, start : number}) {
-      const soundTimelideId = uuid.v4();
-      const event = makeEvent(context, BakuAction.SOUNDTIMELINE_ADD, {soundTimelideId, params});
+    async createSoundTimeline(context, params: {audioId : String, start : number, end : number}): Promise<string> {
+      const soundTimelineId = uuid.v4();
+      const event = makeEvent(context, BakuAction.SOUNDTIMELINE_ADD, {soundTimelineId, params});
       loadEvents2(context, [event]);
       await store.dispatch('user/updateCurrentSeenProject');
+      return soundTimelineId;
     },    
     
-    async removeSoundTimeline(context, soundTimelideId: string) {
-      const event = makeEvent(context, BakuAction.SOUNDTIMELINE_REMOVE, {soundTimelideId});
+    async removeSoundTimeline(context, soundTimelineId: string) {
+      const event = makeEvent(context, BakuAction.SOUNDTIMELINE_REMOVE, {soundTimelineId});
       loadEvents2(context, [event]);
       await store.dispatch('user/updateCurrentSeenProject');
     },
 
-    async updateSoundTimelineStart(context, params : {soundTimelideId : string, start : number}) {
+    async updateSoundTimelineStart(context, params : {soundTimelineId : string, start : number, end : number}) {
       const event = makeEvent(context, BakuAction.SOUNDTIMELINE_UPDATE_START, params);
       loadEvents2(context, [event]);
     },

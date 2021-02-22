@@ -59,6 +59,7 @@ export interface SoundTimeline {
   readonly id: string;
   readonly audioId: string;
   readonly start : number;
+  readonly end : number;
 }
 
 export interface ReadingSliderBoundaries {
@@ -317,21 +318,22 @@ export class MovieService {
           break;
         }
         case BakuAction.SOUNDTIMELINE_ADD: {
-          const {audioId, start} = event.value.params as { audioId: string, start: number };
+          const {audioId, start, end} = event.value.params as { audioId: string, start: number, end : number };
           soundsTimeline.push({
-            id: event.value.soundTimelideId,
+            id: event.value.soundTimelineId,
             audioId: audioId,
             start : start,
+            end : end,
           });
           break;
         }
         case BakuAction.SOUNDTIMELINE_REMOVE: {
-          const soundTimelineIndex = soundsTimeline.findIndex((soundTimeline) => soundTimeline.id === event.value.soundTimelideId);
+          const soundTimelineIndex = soundsTimeline.findIndex((soundTimeline) => soundTimeline.id === event.value.soundTimelineId);
           audios.splice(soundTimelineIndex, 1);
           break;
         }
         case BakuAction.SOUNDTIMELINE_UPDATE_START: {
-          updateSoundTimeline(event.value.soundTimelideId, (soundTimeline: SoundTimeline) =>
+          updateSoundTimeline(event.value.soundTimelineId, (soundTimeline: SoundTimeline) =>
             ({...soundTimeline, start: event.value.start})
           )
           break;
