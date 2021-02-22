@@ -21,19 +21,19 @@
 
     <div class="horizontal-align">
       <div class="padding-button">
-        <i class="button is-primary" @click="backward10">Reculer de 10 frames</i>
+        <i class="button is-primary" @click="backward10">Reculer de 10</i>
       </div>
 
       <div class="padding-button">
-        <i class="button is-primary" @click="backward1">Reculer de 1 frame</i>
+        <i class="button is-primary" @click="backward1">Reculer de 1</i>
       </div>
 
       <div class="padding-button">
-        <i class="button is-primary" @click="forward1">Avancer de 1 frame</i>
+        <i class="button is-primary" @click="forward1">Avancer de 1</i>
       </div>
 
       <div class="padding-button">
-        <i class="button is-primary" @click="forward10">Avancer de 10 frames</i>
+        <i class="button is-primary" @click="forward10">Avancer de 10</i>
       </div>
 
       <div class="padding-button">
@@ -42,6 +42,10 @@
 
       <div class="padding-button">
           Mode : {{ mode }}
+      </div>
+
+      <div class="padding-button">
+        <i class="button is-primary" @click="addPiste()">Ajouter une piste</i>
       </div>
     </div>
 
@@ -92,6 +96,8 @@ export default class AudioDisplayComponent extends Vue {
     private deleteSound : boolean = false;
     private mode : string = "Avancer de 10 frames";
     private nbTotalFrames : number = 0;
+    private nbPistes : number = 1;
+    private activePiste : number = 1;
 
 
 
@@ -123,29 +129,7 @@ export default class AudioDisplayComponent extends Vue {
             data: [
               {
                 label: "Piste 1",
-                data: [
-                  {
-                    timeRange: [1, 5],
-                    val: "Son 1"
-                  },
-                  {
-                    timeRange: [10, 15],
-                    val: "Son 2"
-                  },
-                ]
-              },
-              {
-                label: "Piste 2",
-                data: [
-                  {
-                    timeRange: [2, 8],
-                    val: "Son 3"
-                  },
-                  {
-                    timeRange: [8, 18],
-                    val: "Son 4"
-                  },
-                ],
+                data: []
               },
             ],
           },
@@ -153,8 +137,8 @@ export default class AudioDisplayComponent extends Vue {
             group: "PLANS",
             data: [
               {
-                label: " ",
-                data: this.getChartFromShots()
+                label: "",
+                data: this.getChartFromShots(),
               },
             ],
           },
@@ -171,6 +155,7 @@ export default class AudioDisplayComponent extends Vue {
         this.nbTotalFrames = this.nbTotalFrames + shot.images.length;
       }
       this.chart.data(this.getChart());
+      this.chartData = this.getChart();
     }
 
     getChartFromShots(){
@@ -208,9 +193,8 @@ export default class AudioDisplayComponent extends Vue {
         var soundTimelineId = segment.target.__data__.data.soundTimelineId;
         await this.$store.dispatch('project/updateSoundTimelineStart', { soundTimelineId, start : updatedStartEnd[0], end : updatedStartEnd[1] });
       }
-
       if (this.deleteSound) {
-        this.removeSoundTimeline(segment);
+        this.removeSoundTimeline(segment);        
       }
 
       //segment.target.__data__.data.val = "Son 1";
@@ -262,14 +246,30 @@ export default class AudioDisplayComponent extends Vue {
     await this.$store.dispatch('project/removeSoundTimeline', soundTimelineId);
     var updatedData = this.chart.data();
     var pisteNumber = segment.target.__data__.label.split(" ")[1] - 1;
-    var soundTimelineId = segment.target.__data__.data.soundTimelineId;
-    const index = updatedData[0].data[pisteNumber].data.findIndex((p) => p.soundTimelineId === soundTimelineId);
 
-    updatedData[0].data[pisteNumber].data.splice(index,1);
-    this.chart.data(updatedData);
+    if (updatedData[0].data[pisteNumber].data.length == 1 && updatedData[0].data.length > 1) {
+      updatedData[0].data.splice(pisteNumber, 1);
+      updatedData = this.renamePistes(updatedData);
+      this.nbPistes = this.nbPistes - 1;
+      this.activePiste = this.activePiste - 1;
+    } else {
+      var soundTimelineId = segment.target.__data__.data.soundTimelineId;
+      const index = updatedData[0].data[pisteNumber].data.findIndex((p) => p.soundTimelineId === soundTimelineId);
+      updatedData[0].data[pisteNumber].data.splice(index,1);
+    }
     
+    this.chart.data(updatedData)
+              .segmentTooltipContent();
+    await this.$store.dispatch('project/updateDataTimeline', updatedData);
   }
 
+
+  renamePistes(updatedData : any) : any {
+    for (var i = 1; i<=updatedData[0].data.length; i++) {
+      updatedData[0].data[i-1].label = "Piste " + i;
+    }
+    return updatedData;
+  }
 /*
     genRandomData() {
       const NLINES = 3,
@@ -365,32 +365,59 @@ export default class AudioDisplayComponent extends Vue {
       var end = start + 5;
       const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end});
 
-      this.addAudio(audioId, title, soundTimelineId);
-      this.chart.data(this.chartData);
-      this.chart.refresh();
-      await this.$store.dispatch('project/createAudioTimeline', this.chartData);
-      this.$emit('close');
-      console.log(this.getSoundTimeline);
+      
+      this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste);
+      this.updateTimelineLocal();
+
       event.dataTransfer.clearData();
     }
 
-    addAudio(audioId : string, title : string, soundTimelineId : string) {
-      var numPiste = this.chartData[0].data.length + 1;
+    public async updateTimelineLocal() {
+      this.chart.data(this.chartData);
+      this.chart.refresh();
+      await this.$store.dispatch('project/updateDataTimeline', this.chartData);
+      this.$emit('close');
+      event.dataTransfer.clearData();
+    }
+
+
+    addAudioToPiste (audioId : string, title : string, soundTimelineId : string, numPiste : number) {
       var start = this.chart.dateMarker();
       var end = start + 5;
       var timeRange = [start, end];
-      var data = [
-        {
+      var dataSound = {
           timeRange : timeRange,
           val : title,
           audioId : audioId,
           soundTimelineId : soundTimelineId,
-        }
-      ];
-      this.chartData[0].data.push({
+        };
+      this.chartData[0].data[numPiste-1].data.push(dataSound);
+    }
+
+
+    public async addPiste() {
+      var numPiste = this.nbPistes + 1;
+      this.nbPistes = this.nbPistes +1;
+      var pistes = this.chartData[0].data;
+      pistes.push({
         label : "Piste " + numPiste,
-        data : data,
+        data : [],
       });
+      this.chartData[0].data = pistes;
+      this.activePiste = numPiste;
+      this.updateTimelineLocal();
+    }
+
+
+    removePiste(numPiste : number) {
+      if (this.nbPistes > 1) {
+        
+        this.nbPistes = this.nbPistes - 1;
+        // Enlever la piste selectionnée, et renommer toutes les autres en fonction du chiffre choisi
+        // = parcourir toutes les pistes et les renommer une par une pour etre sur
+        
+        // TODO
+      }
     }
 
 }

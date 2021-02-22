@@ -329,7 +329,7 @@ export class MovieService {
         }
         case BakuAction.SOUNDTIMELINE_REMOVE: {
           const soundTimelineIndex = soundsTimeline.findIndex((soundTimeline) => soundTimeline.id === event.value.soundTimelineId);
-          audios.splice(soundTimelineIndex, 1);
+          soundsTimeline.splice(soundTimelineIndex, 1);
           break;
         }
         case BakuAction.SOUNDTIMELINE_UPDATE_START: {
