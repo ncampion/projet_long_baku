@@ -47,6 +47,31 @@
       <div class="padding-button">
         <i class="button is-primary" @click="addPiste()">Ajouter une piste</i>
       </div>
+
+      <b-dropdown
+        class="toolbox-dropdown"
+        append-to-body
+        aria-role="menu"
+      >
+        <a class="navbar-item" slot="trigger" role="button" slot-scope="{ active }" style="display: flex; align-items: center">
+          <span class="item-title">Piste {{activePiste}} </span>
+          <i class="icon-chevron-right" :class="active ? 'menu-down' : 'menu-up'"></i>
+        </a>
+
+
+        <div v-for="index in listPistes">
+
+          <b-dropdown-item class aria-role="listitem">
+            <div class="option-logo" @click="goToPiste(index)">
+              <span>Piste {{index}} </span>
+            </div>
+          </b-dropdown-item>
+
+        </div>
+
+
+      </b-dropdown>
+
     </div>
 
     <div ref="movieContainer" class="movie-container">
@@ -98,6 +123,7 @@ export default class AudioDisplayComponent extends Vue {
     private nbTotalFrames : number = 0;
     private nbPistes : number = 1;
     private activePiste : number = 1;
+    private listPistes : number[] = [1];
 
 
 
@@ -363,13 +389,30 @@ export default class AudioDisplayComponent extends Vue {
       var title = idAndTitle[1];
       var start = this.chart.dateMarker();
       var end = start + 5;
-      const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end});
 
+      var addAllowed = this.checkAddOnSound(start, end);
+
+      if (addAllowed) {
+        const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end});
+        
+        this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste);
+        this.updateTimelineLocal();
+      }
       
-      this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste);
-      this.updateTimelineLocal();
 
       event.dataTransfer.clearData();
+    }
+
+    checkAddOnSound(start : number, end : number) {
+      var dataChart = this.chart.data();
+
+      for (var i = 0; i < dataChart[0].data[this.activePiste-1].data.length; i++) {
+        var sound = dataChart[0].data[this.activePiste-1].data[i];
+        if (!(start >= sound.timeRange[1] || end <= sound.timeRange[0])) {
+          return false;
+        }
+      }
+      return true;
     }
 
     public async updateTimelineLocal() {
@@ -399,6 +442,7 @@ export default class AudioDisplayComponent extends Vue {
       var numPiste = this.nbPistes + 1;
       this.nbPistes = this.nbPistes +1;
       var pistes = this.chartData[0].data;
+      this.listPistes.push(numPiste);
       pistes.push({
         label : "Piste " + numPiste,
         data : [],
@@ -411,7 +455,8 @@ export default class AudioDisplayComponent extends Vue {
 
     removePiste(numPiste : number) {
       if (this.nbPistes > 1) {
-        
+
+        this.listPistes.splice(this.nbPistes , 1);
         this.nbPistes = this.nbPistes - 1;
         // Enlever la piste selectionnée, et renommer toutes les autres en fonction du chiffre choisi
         // = parcourir toutes les pistes et les renommer une par une pour etre sur
@@ -420,5 +465,9 @@ export default class AudioDisplayComponent extends Vue {
       }
     }
 
+    goToPiste(n : number) {
+      this.activePiste = n;
+    }
+    
 }
 </script>
