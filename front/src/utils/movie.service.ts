@@ -53,6 +53,9 @@ export interface Audio {
   readonly id: string;
   readonly title?: string;
   readonly sound?: Blob;
+  readonly waveform?: Blob;
+  readonly volume?: number;
+  readonly duration?: number;
 }
 
 export interface SoundTimeline {
@@ -267,12 +270,13 @@ export class MovieService {
           break;
         }
         case BakuAction.AUDIO_ADD: {
-          const {title, sound} = event.value.params as { title: string, sound: Blob };
+          const {title, sound, duration} = event.value.params as { title: string, sound: Blob, duration : number };
           audios.push({
             id: event.value.audioId,
             title: title,
             sound: sound,
             volume: 100,
+            duration: duration,
           });
           break;
         }
@@ -296,6 +300,12 @@ export class MovieService {
         case BakuAction.AUDIO_UPDATE_VOLUME: {
           updateAudio(event.value.audioId, (audio: Audio) =>
             ({...audio, volume: event.value.volume})
+          )
+          break;
+        }
+        case BakuAction.AUDIO_UPDATE_DURATION: {
+          updateAudio(event.value.audioId, (audio: Audio) =>
+            ({...audio, duration: event.value.duration})
           )
           break;
         }

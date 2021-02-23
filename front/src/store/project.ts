@@ -183,7 +183,7 @@ export const ProjectStore: BakuModule<ProjectState> = {
       context.commit('addToLocalHistory', event);
     },
 
-    async createAudio(context, params: {title : String, sound : Blob}) {
+    async createAudio(context, params: {title : String, sound : Blob, duration : number}) {
       const audioId = uuid.v4();
       const event = makeEvent(context, BakuAction.AUDIO_ADD, {audioId, params});
       loadEvents2(context, [event]);
@@ -208,6 +208,11 @@ export const ProjectStore: BakuModule<ProjectState> = {
 
     async changeAudioVolume(context, params : {audioId : string, volume : number}) {
       const event = makeEvent(context, BakuAction.AUDIO_UPDATE_VOLUME, params);
+      loadEvents2(context, [event]);
+    },
+
+    async changeAudioDuration(context, params : {audioId : string, duration : number}) {
+      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_DURATION, params);
       loadEvents2(context, [event]);
     },
 
