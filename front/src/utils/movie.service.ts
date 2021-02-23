@@ -52,6 +52,9 @@ export interface Audio {
   readonly id: string;
   readonly title?: string;
   readonly sound?: Blob;
+  readonly waveform?: Blob;
+  readonly volume?: number;
+  readonly duration?: number;
 }
 
 
@@ -280,6 +283,12 @@ export class MovieService {
         case BakuAction.AUDIO_UPDATE_VOLUME: {
           updateAudio(event.value.audioId, (audio: Audio) =>
             ({...audio, volume: event.value.volume})
+          )
+          break;
+        }
+        case BakuAction.AUDIO_UPDATE_DURATION: {
+          updateAudio(event.value.audioId, (audio: Audio) =>
+            ({...audio, duration: event.value.duration})
           )
           break;
         }

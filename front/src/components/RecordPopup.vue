@@ -153,10 +153,11 @@ export default class RecordPopup extends Vue {
     this.mediaRecorder.addEventListener("stop", async () => {
       this.audioBlob = new Blob(this.audioChunks);
       this.waveSurfer.loadBlob(this.audioBlob);
-
+      
       this.waveSurfer.on('ready', async (e: any) => {
-        console.log("ready");
         setTimeout(async () => {
+          this.audioDuration = this.waveSurfer.getDuration();
+          console.log(this.audioDuration);
           this.audioImage = await this.waveSurfer.exportImage('image/png', 1);
           let el: HTMLImageElement | null = (<HTMLImageElement>document.getElementById("img"));
           if (el){
@@ -193,7 +194,7 @@ export default class RecordPopup extends Vue {
       if(title == ""){
         title = this.nameSound;
       }
-      await this.$store.dispatch('project/createAudio', { title, sound: this.audioBlob });
+      await this.$store.dispatch('project/createAudio', { title, sound: this.audioBlob, duration: this.audioDuration});
     }
   }
 }
