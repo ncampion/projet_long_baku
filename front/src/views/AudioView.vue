@@ -432,7 +432,7 @@ export default class AudioView extends AbstractProjectView {
           left: 0,
           right: this.allImages.length + 1,
         };
-
+      
         this.initSounds();
         this.animationFrame = requestAnimationFrame(this.animate);
       }
@@ -557,16 +557,27 @@ export default class AudioView extends AbstractProjectView {
   private initSounds() {
     this.sounds=[];
     this.soundsArray = this.getSoundTimeline;
-    this.soundsArray.forEach(elm => {
-      var url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).sound);
-      var sound : Howl = new Howl({
-          src: [url],
-          format: ['wav']
-        });
-      this.sounds.push([sound,elm.start]);
-    })
+    if (this.playingFrame>0){
+      this.soundsArray.forEach(elm => {
+        if (elm.start<this.playingFrame && elm.end>this.playingFrame){
+          //là faut lire qu'une partie du son
+        } else if (elm.start >= this.playingFrame) {
+          //là on charge que les futurs sons (pas ceux déjà passés) mais en entier
+        }
+      })
+    } else {
+      this.soundsArray.forEach(elm => {
+        let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).sound);
+        let volume = this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).volume;
+        let sound : Howl = new Howl({
+            src: [url],
+            format: ['wav'],
+            volume: parseFloat((volume/100).toFixed(2))
+          });
+        this.sounds.push([sound,elm.start]);
+      })
+    }
   }
-
 }
 </script>
 
