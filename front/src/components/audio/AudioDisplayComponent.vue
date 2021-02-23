@@ -88,7 +88,6 @@ import { namespace } from 'vuex-class';
 import { Movie } from '@/utils/movie.service';
 import TimelinesChart from 'timelines-chart';
 import { Shot } from '@/utils/movie.service';
-import { clone } from 'lodash';
 
 
 const ProjectNS = namespace('project');
@@ -283,7 +282,7 @@ export default class AudioDisplayComponent extends Vue {
       this.activePiste = this.activePiste - 1;
     } else {
       let soundTimelineId = segment.target.__data__.data.soundTimelineId;
-      const index = updatedData[0].data[pisteNumber].data.findIndex((p) => p.soundTimelineId === soundTimelineId);
+      const index = updatedData[0].data[pisteNumber].data.findIndex((p:any) => p.soundTimelineId === soundTimelineId);
       updatedData[0].data[pisteNumber].data.splice(index,1);
     }
 
@@ -388,8 +387,8 @@ export default class AudioDisplayComponent extends Vue {
       event.preventDefault();
       let audioId = event.dataTransfer.getData("text");
       let audios = this.getAudioRecord;
-      const audioIndex = audios.findIndex((p) => p.id === audioId);
-      const audio = audios.find((p) => p.id === audioId);
+      //const audioIndex = audios.findIndex((p:any) => p.id === audioId);
+      const audio = audios.find((p:any) => p.id === audioId);
       let title = audio.title;
       let start = this.chart.dateMarker();
       let duration = Math.round(audio.duration*this.getMovieFps);
