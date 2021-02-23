@@ -194,6 +194,7 @@ export default class RecordPopup extends Vue {
       if(title == ""){
         title = this.nameSound;
       }
+      console.log(this.audioDuration);
       await this.$store.dispatch('project/createAudio', { title, sound: this.audioBlob, duration: this.audioDuration});
     }
   }

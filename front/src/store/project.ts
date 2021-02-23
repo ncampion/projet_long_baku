@@ -183,7 +183,7 @@ export const ProjectStore: BakuModule<ProjectState> = {
       context.commit('addToLocalHistory', event);
     },
 
-    async createAudio(context, params: {title : String, sound : Blob}) {
+    async createAudio(context, params: {title : String, sound : Blob, duration : number}) {
       const audioId = uuid.v4();
       const event = makeEvent(context, BakuAction.AUDIO_ADD, {audioId, params});
       loadEvents2(context, [event]);

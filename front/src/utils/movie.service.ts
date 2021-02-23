@@ -270,12 +270,13 @@ export class MovieService {
           break;
         }
         case BakuAction.AUDIO_ADD: {
-          const {title, sound} = event.value.params as { title: string, sound: Blob };
+          const {title, sound, duration} = event.value.params as { title: string, sound: Blob, duration : number };
           audios.push({
             id: event.value.audioId,
             title: title,
             sound: sound,
             volume: 100,
+            duration: duration,
           });
           break;
         }

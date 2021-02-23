@@ -109,6 +109,9 @@ export default class AudioDisplayComponent extends Vue {
     @ProjectNS.Getter
     protected getSoundTimeline!: any;
 
+    @ProjectNS.Getter
+    protected getMovieFps !: any;
+
     private chart: any = TimelinesChart();
 
     private chartData!: any;
@@ -383,19 +386,22 @@ export default class AudioDisplayComponent extends Vue {
 
     public async handleDrop(event: any) {
       event.preventDefault();
-
-      let idAndTitle = event.dataTransfer.getData("text").split("@");
-      let audioId = idAndTitle[0];
-      let title = idAndTitle[1];
+      let audioId = event.dataTransfer.getData("text");
+      let audios = this.getAudioRecord;
+      const audioIndex = audios.findIndex((p) => p.id === audioId);
+      const audio = audios.find((p) => p.id === audioId);
+      let title = audio.title;
       let start = this.chart.dateMarker();
-      let end = start + 5;
-
+      let duration = Math.round(audio.duration*this.getMovieFps);
+      let end = start + duration;
+      console.log(duration);
+      console.log(end);
       let addAllowed = this.checkAddOnSound(start, end);
 
       if (addAllowed) {
         const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end});
 
-        this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste);
+        this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste, start, end);
         this.updateTimelineLocal();
       }
 
@@ -420,13 +426,10 @@ export default class AudioDisplayComponent extends Vue {
       this.chart.refresh();
       await this.$store.dispatch('project/updateDataTimeline', this.chartData);
       this.$emit('close');
-      event.dataTransfer.clearData();
     }
 
 
-    addAudioToPiste (audioId : string, title : string, soundTimelineId : string, numPiste : number) {
-      let start = this.chart.dateMarker();
-      let end = start + 5;
+    addAudioToPiste (audioId : string, title : string, soundTimelineId : string, numPiste : number, start : number, end : number) {
       let timeRange = [start, end];
       let dataSound = {
           timeRange : timeRange,

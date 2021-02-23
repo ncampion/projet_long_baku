@@ -13,7 +13,7 @@
           <div
             class="horizontal-align"
             draggable="true"
-            @dragstart="handleDragStart($event,audio.id, audio.title);"
+            @dragstart="handleDragStart($event,audio.id);"
           >
               {{ audio.title }}
           </div>
@@ -81,8 +81,8 @@ export default class AudioListComponent extends Vue {
     }
 
 
-    handleDragStart(event: any, id: string, title : string) {
-      event.dataTransfer.setData("text", id + "@" + title );
+    handleDragStart(event: any, id: string) {
+      event.dataTransfer.setData("text", id);
     }
 
     public async openRecordPopup() {
