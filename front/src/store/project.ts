@@ -211,6 +211,11 @@ export const ProjectStore: BakuModule<ProjectState> = {
       loadEvents2(context, [event]);
     },
 
+    async changeAudioDuration(context, params : {audioId : string, duration : number}) {
+      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_DURATION, params);
+      loadEvents2(context, [event]);
+    },
+
     async changeAudioWaveform(context, params : {audioId : string, waveform : Blob}) {
       const event = makeEvent(context, BakuAction.AUDIO_UPDATE_WAVEFORM, params);
       loadEvents2(context, [event]);

@@ -30,9 +30,7 @@
 
 
 <script lang="ts">
-import {
-  Component, Vue,
-} from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import WaveSurfer from "wavesurfer.js";
 
@@ -74,6 +72,8 @@ export default class RecordPopup extends Vue {
   private waveSurfer: any;
 
   private audioBlob: any;
+  private audioImage: any;
+  private audioDuration: any;
 
   public async mounted() {
     this.numberOfSounds = this.getAudioRecord.length + 1;
@@ -121,7 +121,7 @@ export default class RecordPopup extends Vue {
 
     this.stream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: this.selectedDeviceId}});
     this.mediaRecorder = new MediaRecorder(this.stream);
-    this.mediaRecorder.start(); // pass optionnal timeslice in ms as parameter
+    this.mediaRecorder.start(1); // pass optionnal timeslice in ms as parameter
     this.mediaRecorder.addEventListener("dataavailable", (event: any) => {
     this.audioChunks.push(event.data);
     });
@@ -150,16 +150,29 @@ export default class RecordPopup extends Vue {
     this.stream.getTracks().forEach(function(track: MediaStreamTrack) {
       track.stop();
     });
-    this.mediaRecorder.addEventListener("stop", () => {
+    this.mediaRecorder.addEventListener("stop", async () => {
       this.audioBlob = new Blob(this.audioChunks);
       this.waveSurfer.loadBlob(this.audioBlob);
+      
+      this.waveSurfer.on('ready', async (e: any) => {
+        setTimeout(async () => {
+          this.audioDuration = this.waveSurfer.getDuration();
+          console.log(this.audioDuration);
+          this.audioImage = await this.waveSurfer.exportImage('image/png', 1);
+          let el: HTMLImageElement | null = (<HTMLImageElement>document.getElementById("img"));
+          if (el){
+            el.src = this.audioImage;
+            //console.log(this.audioImage);
+          }
+        }, 300);
+      });
     });
   }
   
-  public playAction() {
-    if(!this.isRecording){
+  public async playAction() {
+    await this.waveSurfer.on('ready', () => {
       this.waveSurfer.play();
-    }
+    });
   }
 
   public async closeMedia(){
@@ -181,7 +194,7 @@ export default class RecordPopup extends Vue {
       if(title == ""){
         title = this.nameSound;
       }
-      await this.$store.dispatch('project/createAudio', { title, sound: this.audioBlob });
+      await this.$store.dispatch('project/createAudio', { title, sound: this.audioBlob, duration: this.audioDuration});
     }
   }
 }
