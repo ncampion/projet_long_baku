@@ -45,7 +45,7 @@ export default class EditSoundPopup extends Vue {
 >>>>>>> 27155ec... volume pesistant + styling
   public nameSound: string = "";
   public audioVolume: number = 100;
-  private audioDuration: number;
+  private audioDuration: number = 0;
   private audioBlob: any;
   
   private waveSurfer: any;
