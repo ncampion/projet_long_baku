@@ -140,6 +140,7 @@
 
       <AudioDisplayComponent
         ref="audioDisplay"
+        :isPlaying="isPlaying"
       />
 
     </template>
