@@ -83,7 +83,7 @@
 
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { Movie } from '@/utils/movie.service';
 import TimelinesChart from 'timelines-chart';
@@ -96,6 +96,8 @@ const ProjectNS = namespace('project');
 @Component
 export default class AudioDisplayComponent extends Vue {
 
+    @Prop()
+    public isPlaying!: 'animation' | 'selection' | null = null;
 
     @ProjectNS.State
     public id!: string;
@@ -252,7 +254,8 @@ export default class AudioDisplayComponent extends Vue {
 
       let moveAllowed = this.checkSound(start + nbFrames, end + nbFrames, piste, [start, end]);
 
-      if (moveAllowed) {
+      console.log(this.isPlaying);
+      if (moveAllowed && !this.isPlaying) {
         if (start + nbFrames >= this.nbTotalFrames) {
             segment.target.__data__.data.timeRange[1] = end - start + this.nbTotalFrames + 1;
             segment.target.__data__.data.timeRange[0] = this.nbTotalFrames + 1;
@@ -269,8 +272,9 @@ export default class AudioDisplayComponent extends Vue {
       }
 
       let moveAllowed = this.checkSound(start - nbFrames, end - nbFrames, piste, [start, end]);
-
-      if (moveAllowed) {
+      
+      console.log(this.isPlaying);
+      if (moveAllowed && !this.isPlaying) {
         if (start - nbFrames <= 0) {
           segment.target.__data__.data.timeRange[1] = end - start + 1;
           segment.target.__data__.data.timeRange[0] = 1;
@@ -290,15 +294,18 @@ export default class AudioDisplayComponent extends Vue {
     let updatedData = this.chart.data();
     let pisteNumber = segment.target.__data__.label.split(" ")[1] - 1;
 
-    if (updatedData[0].data[pisteNumber].data.length == 1 && updatedData[0].data.length > 1) {
-      updatedData[0].data.splice(pisteNumber, 1);
-      updatedData = this.renamePistes(updatedData);
-      this.nbPistes = this.nbPistes - 1;
-      this.activePiste = this.activePiste - 1;
-    } else {
-      let soundTimelineId = segment.target.__data__.data.soundTimelineId;
-      const index = updatedData[0].data[pisteNumber].data.findIndex((p : any) => p.soundTimelineId === soundTimelineId);
-      updatedData[0].data[pisteNumber].data.splice(index,1);
+    console.log(this.isPlaying);
+    if(!this.isPlaying) {
+      if (updatedData[0].data[pisteNumber].data.length == 1 && updatedData[0].data.length > 1) {
+        updatedData[0].data.splice(pisteNumber, 1);
+        updatedData = this.renamePistes(updatedData);
+        this.nbPistes = this.nbPistes - 1;
+        this.activePiste = this.activePiste - 1;
+      } else {
+        let soundTimelineId = segment.target.__data__.data.soundTimelineId;
+        const index = updatedData[0].data[pisteNumber].data.findIndex((p : any) => p.soundTimelineId === soundTimelineId);
+        updatedData[0].data[pisteNumber].data.splice(index,1);
+      }
     }
 
     this.chart.data(updatedData)
@@ -372,8 +379,8 @@ export default class AudioDisplayComponent extends Vue {
       let end = start + duration;
 
       let addAllowed = this.checkSound(start, end, this.activePiste-1, [null, null]);
-
-      if (addAllowed) {
+      console.log(this.isPlaying);
+      if (addAllowed && !this.isPlaying) {
         const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end});
 
         this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste, start, end);
