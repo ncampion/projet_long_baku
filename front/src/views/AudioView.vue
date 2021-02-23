@@ -232,6 +232,9 @@ export default class AudioView extends AbstractProjectView {
     @ProjectNS.Getter
     protected getAudioRecord!: any;
 
+    @ProjectNS.Getter
+    public getMovieFps!: number | undefined;
+
     @ProjectNS.Action('loadProject')
     protected loadProject!: (projectId: string) => Promise<void>;
 
@@ -461,6 +464,9 @@ export default class AudioView extends AbstractProjectView {
 
     public pauseAnimation() {
       if (this.isPlaying) {
+        this.sounds.forEach(elm => {
+          elm[0].pause();
+        });
         this.isPlaying = null;
         delete this.animationStart;
         delete this.animationStartFrame;
@@ -561,8 +567,29 @@ export default class AudioView extends AbstractProjectView {
       this.soundsArray.forEach(elm => {
         if (elm.start<this.playingFrame && elm.end>this.playingFrame){
           //là faut lire qu'une partie du son
+          let nbFrameTot = elm.end - elm.start;
+          let nbFrameElapsed = this.playingFrame - elm.start;
+          let ratio = nbFrameElapsed/nbFrameTot;
+          let timeToSeek = ratio * this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).duration;
+          let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).sound);
+          let volume = this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).volume;
+          let sound : Howl = new Howl({
+              src: [url],
+              format: ['wav'],
+              volume: parseFloat((volume/100).toFixed(2))
+          });
+          sound.seek(timeToSeek);
+          this.sounds.push([sound,this.playingFrame]);
         } else if (elm.start >= this.playingFrame) {
           //là on charge que les futurs sons (pas ceux déjà passés) mais en entier
+          let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).sound);
+          let volume = this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).volume;
+          let sound : Howl = new Howl({
+              src: [url],
+              format: ['wav'],
+              volume: parseFloat((volume/100).toFixed(2))
+          });
+          this.sounds.push([sound,elm.start]);
         }
       })
     } else {
