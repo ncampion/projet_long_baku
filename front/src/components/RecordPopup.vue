@@ -20,8 +20,6 @@
       <button class="button" id="StopRecordAction" style="display:none;" type="button" @click="stopRecordAction()">Stop</button>
       <br><button class="button" id="PlayAction" style="display:none;" type="button" @click="playAction()">Play</button>
       <div id="waveform"></div>
-
-      <img alt="" id="img">
     </section>
     <footer class="modal-card-foot">
       <button class="button" type="button" @click="closeMedia()">Annuler</button>
@@ -32,9 +30,7 @@
 
 
 <script lang="ts">
-import {
-  Component, Vue,
-} from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import WaveSurfer from "wavesurfer.js";
 
@@ -77,6 +73,7 @@ export default class RecordPopup extends Vue {
 
   private audioBlob: any;
   private audioImage: any;
+  private audioDuration: any;
 
   public async mounted() {
     this.numberOfSounds = this.getAudioRecord.length + 1;
@@ -157,29 +154,17 @@ export default class RecordPopup extends Vue {
       this.audioBlob = new Blob(this.audioChunks);
       this.waveSurfer.loadBlob(this.audioBlob);
 
-      this.waveSurfer.on('ready', async (e: any) => { 
-        console.log("ready"); 
+      this.waveSurfer.on('ready', async (e: any) => {
+        console.log("ready");
         setTimeout(async () => {
           this.audioImage = await this.waveSurfer.exportImage('image/png', 1);
           let el: HTMLImageElement | null = (<HTMLImageElement>document.getElementById("img"));
           if (el){
             el.src = this.audioImage;
-            console.log(this.audioImage);
+            //console.log(this.audioImage);
           }
         }, 300);
       });
-
-
-      // await this.waveSurfer.on('ready', () => {
-      //   var blob = this.waveSurfer.exportImage('image/png', 1);
-      //   //const blobUrl = URL.createObjectURL(blob);
-      //   let el: HTMLImageElement | null = (<HTMLImageElement>document.getElementById("img"));
-      //   if (el){
-      //     el.src = blob;
-      //   }
-      //   console.log("2");
-      //   console.log(blob);
-      // });
     });
   }
   
