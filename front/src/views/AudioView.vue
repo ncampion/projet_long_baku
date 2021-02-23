@@ -167,7 +167,6 @@ import StoryboardPreviewComponent from '@/components/capture/StoryboardPreviewCo
 import { ImageCacheService } from '@/utils/imageCache.service';
 import { Movie, ReadingSliderBoundaries, Shot, SoundTimeline } from '@/utils/movie.service';
 import { Howl } from 'howler';
-import { time } from 'vue-analytics';
 
 const ProjectNS = namespace('project');
 
