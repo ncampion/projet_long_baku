@@ -166,6 +166,7 @@ import StoryboardPreviewComponent from '@/components/capture/StoryboardPreviewCo
 import { ImageCacheService } from '@/utils/imageCache.service';
 import { Movie, ReadingSliderBoundaries, Shot, SoundTimeline } from '@/utils/movie.service';
 import { Howl } from 'howler';
+import { time } from 'vue-analytics';
 
 const ProjectNS = namespace('project');
 
@@ -334,6 +335,7 @@ export default class AudioView extends AbstractProjectView {
         this.sounds.forEach(sound => {
         if (sound[1]==this.playingFrame){
             sound[0].play();
+            console.log("wesh");
         }
         })
       }
@@ -563,12 +565,12 @@ export default class AudioView extends AbstractProjectView {
   private initSounds() {
     this.sounds=[];
     this.soundsArray = this.getSoundTimeline;
-    if (this.playingFrame>0){
+    if (this.playingFrame>0 && this.playingFrame+1<this.allImages.length){
       this.soundsArray.forEach(elm => {
-        if (elm.start<this.playingFrame && elm.end>this.playingFrame){
+        if (elm.start<this.playingFrame+1 && elm.end>this.playingFrame+1){
           //là faut lire qu'une partie du son
           let nbFrameTot = elm.end - elm.start;
-          let nbFrameElapsed = this.playingFrame - elm.start;
+          let nbFrameElapsed = (this.playingFrame+1) - elm.start;
           let ratio = nbFrameElapsed/nbFrameTot;
           let timeToSeek = ratio * this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).duration;
           let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).sound);
@@ -579,8 +581,12 @@ export default class AudioView extends AbstractProjectView {
               volume: parseFloat((volume/100).toFixed(2))
           });
           sound.seek(timeToSeek);
-          this.sounds.push([sound,this.playingFrame]);
-        } else if (elm.start >= this.playingFrame) {
+          console.log(nbFrameTot);
+          console.log(nbFrameElapsed);
+          console.log(ratio);
+          console.log(timeToSeek);
+          this.sounds.push([sound,this.playingFrame+1]);
+        } else if (elm.start >= this.playingFrame+1) {
           //là on charge que les futurs sons (pas ceux déjà passés) mais en entier
           let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).sound);
           let volume = this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).volume;

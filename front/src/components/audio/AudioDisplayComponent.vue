@@ -88,6 +88,7 @@ import { namespace } from 'vuex-class';
 import { Movie } from '@/utils/movie.service';
 import TimelinesChart from 'timelines-chart';
 import { Shot } from '@/utils/movie.service';
+//import { clone } from 'lodash';
 
 
 const ProjectNS = namespace('project');
@@ -237,6 +238,11 @@ export default class AudioDisplayComponent extends Vue {
 
   moveSound(segment : any) {
     let nbFrames = 0;
+
+    let piste = segment.target.__data__.label.split(" ")[1] - 1;
+    let start = segment.target.__data__.data.timeRange[0];
+    let end = segment.target.__data__.data.timeRange[1];
+
     if (this.goForward1 || this.goForward10) {
       if (this.goForward1) {
         nbFrames = 1;
@@ -244,12 +250,16 @@ export default class AudioDisplayComponent extends Vue {
         nbFrames = 10;
       }
 
-      if (segment.target.__data__.data.timeRange[0] + nbFrames >= this.nbTotalFrames) {
-          segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - segment.target.__data__.data.timeRange[0] + this.nbTotalFrames + 1;
-          segment.target.__data__.data.timeRange[0] = this.nbTotalFrames + 1;
-      } else {
-          segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] + nbFrames;
-          segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] + nbFrames;
+      let moveAllowed = this.checkSound(start + nbFrames, end + nbFrames, piste, [start, end]);
+
+      if (moveAllowed) {
+        if (start + nbFrames >= this.nbTotalFrames) {
+            segment.target.__data__.data.timeRange[1] = end - start + this.nbTotalFrames + 1;
+            segment.target.__data__.data.timeRange[0] = this.nbTotalFrames + 1;
+        } else {
+            segment.target.__data__.data.timeRange[0] = start + nbFrames;
+            segment.target.__data__.data.timeRange[1] = end + nbFrames;
+        }
       }
     } else {
       if (this.goBackward1) {
@@ -257,12 +267,17 @@ export default class AudioDisplayComponent extends Vue {
       } else if (this.goBackward10) {
         nbFrames = 10;
       }
-      if (segment.target.__data__.timeRange[0] - nbFrames <= 0) {
-        segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - segment.target.__data__.timeRange[0] + 1;
-        segment.target.__data__.data.timeRange[0] = 1;
-      } else {
-        segment.target.__data__.data.timeRange[0] = segment.target.__data__.data.timeRange[0] - nbFrames;
-        segment.target.__data__.data.timeRange[1] = segment.target.__data__.data.timeRange[1] - nbFrames;
+
+      let moveAllowed = this.checkSound(start - nbFrames, end - nbFrames, piste, [start, end]);
+
+      if (moveAllowed) {
+        if (start - nbFrames <= 0) {
+          segment.target.__data__.data.timeRange[1] = end - start + 1;
+          segment.target.__data__.data.timeRange[0] = 1;
+        } else {
+          segment.target.__data__.data.timeRange[0] = start - nbFrames;
+          segment.target.__data__.data.timeRange[1] = end - nbFrames;
+        }
       }
     }
 
@@ -282,7 +297,7 @@ export default class AudioDisplayComponent extends Vue {
       this.activePiste = this.activePiste - 1;
     } else {
       let soundTimelineId = segment.target.__data__.data.soundTimelineId;
-      const index = updatedData[0].data[pisteNumber].data.findIndex((p:any) => p.soundTimelineId === soundTimelineId);
+      const index = updatedData[0].data[pisteNumber].data.findIndex((p : any) => p.soundTimelineId === soundTimelineId);
       updatedData[0].data[pisteNumber].data.splice(index,1);
     }
 
@@ -298,44 +313,7 @@ export default class AudioDisplayComponent extends Vue {
     }
     return updatedData;
   }
-/*
-    genRandomData() {
-      const NLINES = 3,
-        MAXSEGMENTS = 4,
-        MIN_X = 0,
-        MAX_X = 100;
 
-      return [{
-        group: '',
-        data: [...Array(NLINES).keys()].map(i => ({
-          label: `line${i+1}`,
-          data: getSegmentsData()
-        }))
-      }];
-
-      //
-
-      function getSegmentsData() {
-        const nSegments = Math.ceil(Math.random()*MAXSEGMENTS),
-          segMaxLength = Math.round((MAX_X-MIN_X)/nSegments);
-        let runLength = MIN_X;
-
-        return [...Array(nSegments).keys()].map(i => {
-          const tDivide = [Math.random(), Math.random()].sort(),
-            start = runLength + tDivide[0]*segMaxLength,
-            end = runLength + tDivide[1]*segMaxLength;
-
-          runLength = runLength + segMaxLength;
-
-          return {
-            timeRange: [start, end],
-            val: Math.random()
-          };
-        });
-      }
-    }
-
-*/
 
     backward10() {
       this.setFalse();
@@ -387,15 +365,13 @@ export default class AudioDisplayComponent extends Vue {
       event.preventDefault();
       let audioId = event.dataTransfer.getData("text");
       let audios = this.getAudioRecord;
-      //const audioIndex = audios.findIndex((p:any) => p.id === audioId);
-      const audio = audios.find((p:any) => p.id === audioId);
+      const audio = audios.find((p : any) => p.id === audioId);
       let title = audio.title;
       let start = this.chart.dateMarker();
       let duration = Math.round(audio.duration*this.getMovieFps);
       let end = start + duration;
-      console.log(duration);
-      console.log(end);
-      let addAllowed = this.checkAddOnSound(start, end);
+
+      let addAllowed = this.checkSound(start, end, this.activePiste-1, [null, null]);
 
       if (addAllowed) {
         const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end});
@@ -408,14 +384,18 @@ export default class AudioDisplayComponent extends Vue {
       event.dataTransfer.clearData();
     }
 
-    checkAddOnSound(start : number, end : number) {
+    checkSound(start : number, end : number, piste : number, timeRange: number[]) {
       let dataChart = this.chart.data();
 
-      for (let i = 0; i < dataChart[0].data[this.activePiste-1].data.length; i++) {
-        let sound = dataChart[0].data[this.activePiste-1].data[i];
-        if (!(start >= sound.timeRange[1] || end <= sound.timeRange[0])) {
-          return false;
+      for (let i = 0; i < dataChart[0].data[piste].data.length; i++) {
+        let sound = dataChart[0].data[piste].data[i];
+
+        if (sound.timeRange[0] != timeRange[0] || sound.timeRange[1] != timeRange[1]) {
+          if (!(start >= sound.timeRange[1] || end <= sound.timeRange[0])) {
+            return false;
+          }
         }
+        
       }
       return true;
     }
@@ -430,13 +410,18 @@ export default class AudioDisplayComponent extends Vue {
 
     addAudioToPiste (audioId : string, title : string, soundTimelineId : string, numPiste : number, start : number, end : number) {
       let timeRange = [start, end];
+      let dataActivePiste = [... this.chartData[0].data[this.activePiste-1].data];
       let dataSound = {
           timeRange : timeRange,
           val : title,
           audioId : audioId,
           soundTimelineId : soundTimelineId,
-        };
-      this.chartData[0].data[numPiste-1].data.push(dataSound);
+      };
+      dataActivePiste.push(dataSound);
+      let newChartData =  JSON.parse(JSON.stringify(this.chartData));
+      newChartData[0].data[this.activePiste-1].data = dataActivePiste;
+      this.chart.data(newChartData);
+      this.chartData = newChartData;
     }
 
 

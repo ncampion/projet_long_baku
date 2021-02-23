@@ -346,6 +346,9 @@ export class MovieService {
           updateSoundTimeline(event.value.soundTimelineId, (soundTimeline: SoundTimeline) =>
             ({...soundTimeline, start: event.value.start})
           )
+          updateSoundTimeline(event.value.soundTimelineId, (soundTimeline: SoundTimeline) =>
+            ({...soundTimeline, end: event.value.end})
+          )
           break;
         }
         default:
