@@ -110,14 +110,14 @@ export default class AudioListComponent extends Vue {
       if (this.alreadyPlayedOnce) {
         if (this.sound.playing()) {
           this.sound.stop();
-          var url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
+          let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
           this.sound = new Howl({
             src: [url],
             format: ['wav']
         });
           this.sound.play();
         } else {
-          var url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
+          let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
           this.sound = new Howl({
             src: [url],
             format: ['wav']
@@ -125,7 +125,7 @@ export default class AudioListComponent extends Vue {
           this.sound.play();
         }
       } else {
-        var url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
+        let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
         this.sound = new Howl({
             src: [url],
             format: ['wav']

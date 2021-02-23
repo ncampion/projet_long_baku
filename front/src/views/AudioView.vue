@@ -267,12 +267,12 @@ export default class AudioView extends AbstractProjectView {
 
       this.allImages = [];
 
-      var allImagesLocal : any[] = [];
+      let allImagesLocal : any[] = [];
 
       //stockage de toutes les images dans allImages et allImagesLocal
-      for(var shot of this.getAllShots){
+      for(let shot of this.getAllShots){
         allImagesLocal = allImagesLocal.concat(shot.images);
-        for(var image of shot.images){
+        for(let image of shot.images){
           this.allImages.push({image});
         }
       }
@@ -321,17 +321,17 @@ export default class AudioView extends AbstractProjectView {
 
       if (this.allImages) {
 
-        var image = undefined;
+        let image = undefined;
         if(this.allImages[timeCode]){
           image = this.allImages[timeCode].image;
         }
 
-        var prevImage = undefined;
+        let prevImage = undefined;
         if(this.allImages[timeCode-1.0]){
           prevImage = this.allImages[timeCode-1.0].image;
         }
 
-        var nextImage = undefined;
+        let nextImage = undefined;
         if(this.allImages[timeCode+1.0]){
           nextImage = this.allImages[timeCode+1.0].image;
         }
@@ -373,17 +373,17 @@ export default class AudioView extends AbstractProjectView {
 
     private getCurrentShot(timestamp: number) {
       const totalImageNumber = this.allImages.length;
-      var imageNumberCalculation = totalImageNumber;
+      let imageNumberCalculation = totalImageNumber;
       
       const allShots = this.getAllShots;
 
-      var shotLengths = Array();
+      let shotLengths = Array();
 
-      for(var shot of allShots){
+      for(let shot of allShots){
         shotLengths.push(shot.images.length);
       }
 
-      for(var i=0; i< shotLengths.length; i++){
+      for(let i=0; i< shotLengths.length; i++){
         imageNumberCalculation = imageNumberCalculation - shotLengths[i];
         if (imageNumberCalculation<=0){
           if(allShots){
