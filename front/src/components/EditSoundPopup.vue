@@ -84,7 +84,6 @@ export default class EditSoundPopup extends Vue {
     });
     this.waveSurfer.loadBlob(this.audioBlob);
     await this.waveSurfer.on('ready', () => {
-      //console.log();
       this.waveSurfer.addRegion({
                         id: 1,
                         start: 0,

@@ -151,28 +151,25 @@ export default class RecordPopup extends Vue {
       track.stop();
     });
     this.mediaRecorder.addEventListener("stop", async () => {
-      this.audioBlob = new Blob(this.audioChunks);
-      this.waveSurfer.loadBlob(this.audioBlob);
-      
-      this.waveSurfer.on('ready', async (e: any) => {
-        setTimeout(async () => {
-          this.audioDuration = this.waveSurfer.getDuration();
-          console.log(this.audioDuration);
-          this.audioImage = await this.waveSurfer.exportImage('image/png', 1);
-          let el: HTMLImageElement | null = (<HTMLImageElement>document.getElementById("img"));
-          if (el){
-            el.src = this.audioImage;
-            //console.log(this.audioImage);
-          }
-        }, 300);
-      });
+    this.audioBlob = new Blob(this.audioChunks);
+    this.waveSurfer.loadBlob(this.audioBlob);
+    this.waveSurfer.on('ready', async (e: any) => {
+      setTimeout(async () => {
+        this.audioDuration = this.waveSurfer.getDuration();
+        this.audioImage = await this.waveSurfer.exportImage('image/png', 1);
+        let el: HTMLImageElement | null = (<HTMLImageElement>document.getElementById("img"));
+        if (el){
+          el.src = this.audioImage;
+        }
+      }, 300);
+    });
     });
   }
   
-  public async playAction() {
-    await this.waveSurfer.on('ready', () => {
+  public playAction(){
+    if(!this.isRecording){
       this.waveSurfer.play();
-    });
+    };
   }
 
   public async closeMedia(){
