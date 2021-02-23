@@ -97,7 +97,7 @@ const ProjectNS = namespace('project');
 export default class AudioDisplayComponent extends Vue {
 
     @Prop()
-    public isPlaying!: 'animation' | 'selection' | null = null;
+    public isPlaying: 'animation' | 'selection' | null = null;
 
     @ProjectNS.State
     public id!: string;
@@ -298,9 +298,12 @@ export default class AudioDisplayComponent extends Vue {
 
         updatedData = JSON.parse(JSON.stringify(updatedData));
         updatedData[0].data.splice(pisteNumber, 1);
+        this.listPistes.splice(pisteNumber , 1);
         updatedData = this.renamePistes(updatedData);
         this.nbPistes = this.nbPistes - 1;
         this.activePiste = this.activePiste - 1;
+
+
 
 
       } else {
@@ -320,6 +323,7 @@ export default class AudioDisplayComponent extends Vue {
   renamePistes(updatedData : any) : any {
     for (let i = 1; i<=updatedData[0].data.length; i++) {
       updatedData[0].data[i-1].label = "Piste " + i;
+      this.listPistes[i-1] = i;
     }
     return updatedData;
   }
@@ -381,7 +385,7 @@ export default class AudioDisplayComponent extends Vue {
       let duration = Math.round(audio.duration*this.getMovieFps);
       let end = start + duration;
 
-      let addAllowed = this.checkSound(start, end, this.activePiste-1, [null, null]);
+      let addAllowed = this.checkSound(start, end, this.activePiste-1, [-1, -1]);
 
       if (addAllowed && !this.isPlaying) {
         const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end});
@@ -459,6 +463,8 @@ export default class AudioDisplayComponent extends Vue {
 
         this.listPistes.splice(this.nbPistes , 1);
         this.nbPistes = this.nbPistes - 1;
+
+
         // Enlever la piste selectionnée, et renommer toutes les autres en fonction du chiffre choisi
         // = parcourir toutes les pistes et les renommer une par une pour etre sur
 
