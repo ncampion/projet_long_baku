@@ -178,10 +178,12 @@
 </template>
 
 <script lang="ts">
+
 import { Component, Vue, Watch, } from 'vue-property-decorator';
 import ProjectSettingsPopup from '@/components/ProjectSettingsPopup.vue';
 import { namespace } from 'vuex-class';
-
+import RecordPopup from '@/components/RecordPopup.vue';
+import EditSoundPopup from '@/components/EditSoundPopup.vue';
 
 import HistoryComponent from '@/components/capture/HistoryComponent.vue';
 import AudioDisplayComponent from '@/components/audio/AudioDisplayComponent.vue';
