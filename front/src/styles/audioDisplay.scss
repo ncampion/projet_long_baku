@@ -1,6 +1,6 @@
 .audioDisplay-root-div {
     z-index: 2;
-    height: 145px;
+    height: 400px;
 }
 
 .toolbar {
@@ -37,4 +37,11 @@
 .sounds {
     display: inline-block;
     padding: 10px 10px
+}
+
+.horizontal-align {
+    .padding-button {
+        display: inline-block;
+        padding: 10px 20px
+    }
 }

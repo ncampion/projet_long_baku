@@ -34,7 +34,7 @@ export interface Movie {
   readonly poster?: ImageRef;
   readonly shots: Shot[];
   readonly audios: Audio[];
-  readonly audioTimeline: Audio[];
+  readonly dataTimeline: any;
   readonly fps: number;
   readonly locked: boolean;
 }
@@ -50,12 +50,11 @@ export interface Shot {
 
 export interface Audio {
   readonly id: string;
-  readonly idTimeline?: string;
   readonly title?: string;
   readonly sound?: Blob;
-  readonly timeCode?: number;
   readonly waveform?: Blob;
   readonly volume?: number;
+  readonly duration?: number;
 }
 
 
@@ -144,7 +143,7 @@ export class MovieService {
     let locked = false;
     const shots: Shot[] = [];
     const audios: Audio[] = [];
-    const audioTimeline : Audio[] = [];
+    let dataTimeline : any = [];
 
     const updateShot = (shotId: string, updateFn: (shot: Shot) => Shot) => {
       const shotIndex = shots.findIndex((p) => p.id === shotId);
@@ -164,14 +163,6 @@ export class MovieService {
       audios.splice(audioIndex, 1, updateFn(audio));
     };
 
-    const updateAudioTimeline = (audioId: string, updateFn: (audio: Audio) => Audio) => {
-      const audioIndex = audios.findIndex((p) => p.id === audioId);
-      const audio = audios.find((p) => p.id === audioId);
-      if (!audio) {
-        throw new Error(`audio ${audioId} should exist for project ${title}`);
-      }
-      audioTimeline.splice(audioIndex, 1, updateFn(audio));
-    };
     
     events.forEach((event) => {
       switch (event.action) {
@@ -295,6 +286,12 @@ export class MovieService {
           )
           break;
         }
+        case BakuAction.AUDIO_UPDATE_DURATION: {
+          updateAudio(event.value.audioId, (audio: Audio) =>
+            ({...audio, duration: event.value.duration})
+          )
+          break;
+        }
         case BakuAction.AUDIO_UPDATE_WAVEFORM: {
           updateAudio(event.value.audioId, (audio: Audio) =>
             ({...audio, waveform: event.value.waveform})
@@ -302,22 +299,15 @@ export class MovieService {
           break;
         }
         case BakuAction.AUDIO_TIMELINE_ADD: {
-          audioTimeline.push({
-            id: event.value.audioId,
-            idTimeline: event.value.idAudioTimeline,
-            timeCode: 0,
-          });
+          dataTimeline = event.value.data;
           break;
         }
         case BakuAction.AUDIO_TIMELINE_REMOVE: {
-          const audioIndex = audioTimeline.findIndex((audio) => audio.id === event.value.audioId);
-          audioTimeline.splice(audioIndex, 1);
+          dataTimeline = event.value.data;
           break;
         }
-        case BakuAction.AUDIO_UPDATE_TIMECODE: {
-          updateAudioTimeline(event.value.audioId, (audio: Audio) =>
-            ({...audio, timeCode: event.value.timeCode})
-          )
+        case BakuAction.TIMELINE_UPDATE_DATA: {
+          dataTimeline = event.value.data;
           break;
         }
         default:
@@ -325,7 +315,7 @@ export class MovieService {
       }
     });
     return {
-      title, synopsis, poster, shots, audios, audioTimeline, fps, locked
+      title, synopsis, poster, shots, audios, dataTimeline, fps, locked
     };
   }
 

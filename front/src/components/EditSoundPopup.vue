@@ -12,7 +12,7 @@
       <button class="button" id="PlayAction" type="button" @click="playAction()">Play</button>
       <button class="button" id="CropAction" type="button" @click="cropAndUpdate()">Crop</button>
       <div id="waveform"></div>
-      <input id="volume" type="range" min="0" max="100" step="1" :value="volume" @change="volumeAction()" ></input>
+      <input id="volume" type="range" min="0" max="100" step="1" :value="audioVolume" @change="volumeAction()" ></input>
 
     </section>
     <footer class="modal-card-foot">
@@ -44,7 +44,8 @@ export default class EditSoundPopup extends Vue {
   private id!: string;
 >>>>>>> 27155ec... volume pesistant + styling
   public nameSound: string = "";
-  public volume: number = 100;
+  public audioVolume: number = 100;
+  private audioDuration: number = 0;
   private audioBlob: any;
   
   private waveSurfer: any;
@@ -52,8 +53,9 @@ export default class EditSoundPopup extends Vue {
   public async mounted(){
     const audio = this.getAudioRecord.find((audio: any) => audio.id === this.id);
     this.nameSound = audio.title;
-    this.volume = audio.volume;
+    this.audioVolume = audio.volume;
     this.audioBlob = audio.sound;
+    this.audioDuration = audio.duration;
     this.waveSurfer = WaveSurfer.create({
         container: document.querySelector('#waveform'),
         waveColor: '#ffbd72',
@@ -82,7 +84,6 @@ export default class EditSoundPopup extends Vue {
     });
     this.waveSurfer.loadBlob(this.audioBlob);
     await this.waveSurfer.on('ready', () => {
-      //console.log(this.waveSurfer.getDuration());
       this.waveSurfer.addRegion({
                         id: 1,
                         start: 0,
@@ -108,23 +109,22 @@ export default class EditSoundPopup extends Vue {
     if(title == ""){
       title = this.nameSound;
     }
-
+    this.audioDuration = this.waveSurfer.getDuration();
+    console.log(this.audioDuration);
     await this.$store.dispatch('project/changeAudioTitle', { audioId: this.id, title });
-    await this.$store.dispatch('project/changeAudioVolume', { audioId: this.id, volume: this.volume });
+    await this.$store.dispatch('project/changeAudioVolume', { audioId: this.id, volume: this.audioVolume });
     await this.$store.dispatch('project/changeAudioSound', { audioId: this.id, sound: this.audioBlob });
+    await this.$store.dispatch('project/changeAudioDuration', { audioId: this.id, duration: this.audioDuration });
   }
 
-<<<<<<< HEAD
-=======
   public volumeAction(){
     const volume: number = parseInt((<HTMLInputElement>document.getElementById("volume")).value);
       if(volume >= 0 && volume <= 100){
         this.waveSurfer.setVolume(volume/100);
-        this.volume = volume;
+        this.audioVolume = volume;
       }
   }
 
->>>>>>> 27155ec... volume pesistant + styling
   public async cropAndUpdate(){
     this.audioBlob = this.crop();
     this.waveSurfer.clearRegions(); 

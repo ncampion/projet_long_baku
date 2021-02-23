@@ -352,11 +352,11 @@ export default class App extends Vue {
     public async goToAudio() {
       if (this.$route.name === 'captureShot' || 'movie') {
         await this.$router.push({
-          name: 'audio',/*
+          name: 'audio',
           params: {
             projectId: this.id,
-            shotId,
-          },*/
+            //shotId: this.activeShotId,
+          },
         });
       }
     }
