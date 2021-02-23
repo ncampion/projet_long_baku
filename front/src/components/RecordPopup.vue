@@ -20,6 +20,8 @@
       <button class="button" id="StopRecordAction" style="display:none;" type="button" @click="stopRecordAction()">Stop</button>
       <br><button class="button" id="PlayAction" style="display:none;" type="button" @click="playAction()">Play</button>
       <div id="waveform"></div>
+
+      <img alt="" id="img">
     </section>
     <footer class="modal-card-foot">
       <button class="button" type="button" @click="closeMedia()">Annuler</button>
@@ -74,6 +76,7 @@ export default class RecordPopup extends Vue {
   private waveSurfer: any;
 
   private audioBlob: any;
+  private audioImage: any;
 
   public async mounted() {
     this.numberOfSounds = this.getAudioRecord.length + 1;
@@ -121,7 +124,7 @@ export default class RecordPopup extends Vue {
 
     this.stream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: this.selectedDeviceId}});
     this.mediaRecorder = new MediaRecorder(this.stream);
-    this.mediaRecorder.start(); // pass optionnal timeslice in ms as parameter
+    this.mediaRecorder.start(1); // pass optionnal timeslice in ms as parameter
     this.mediaRecorder.addEventListener("dataavailable", (event: any) => {
     this.audioChunks.push(event.data);
     });
@@ -150,16 +153,40 @@ export default class RecordPopup extends Vue {
     this.stream.getTracks().forEach(function(track: MediaStreamTrack) {
       track.stop();
     });
-    this.mediaRecorder.addEventListener("stop", () => {
+    this.mediaRecorder.addEventListener("stop", async () => {
       this.audioBlob = new Blob(this.audioChunks);
       this.waveSurfer.loadBlob(this.audioBlob);
+
+      this.waveSurfer.on('ready', async (e: any) => { 
+        console.log("ready"); 
+        setTimeout(async () => {
+          this.audioImage = await this.waveSurfer.exportImage('image/png', 1);
+          let el: HTMLImageElement | null = (<HTMLImageElement>document.getElementById("img"));
+          if (el){
+            el.src = this.audioImage;
+            console.log(this.audioImage);
+          }
+        }, 300);
+      });
+
+
+      // await this.waveSurfer.on('ready', () => {
+      //   var blob = this.waveSurfer.exportImage('image/png', 1);
+      //   //const blobUrl = URL.createObjectURL(blob);
+      //   let el: HTMLImageElement | null = (<HTMLImageElement>document.getElementById("img"));
+      //   if (el){
+      //     el.src = blob;
+      //   }
+      //   console.log("2");
+      //   console.log(blob);
+      // });
     });
   }
   
-  public playAction() {
-    if(!this.isRecording){
+  public async playAction() {
+    await this.waveSurfer.on('ready', () => {
       this.waveSurfer.play();
-    }
+    });
   }
 
   public async closeMedia(){
