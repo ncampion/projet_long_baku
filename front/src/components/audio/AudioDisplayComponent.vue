@@ -11,14 +11,6 @@
     @drop="handleDrop($event);"
   >
 
-    <div class="toolbar">
-
-    <!--TODO -->
-
-    </div>
-
-
-
     <div class="horizontal-align">
       <div class="padding-button">
         <i class="button is-primary" @click="backward10">Reculer de 10</i>
@@ -71,6 +63,10 @@
 
 
       </b-dropdown>
+
+      <div class="padding-button">
+        <i class="button is-primary" @click="removePiste(activePiste)">Supprimer la piste</i>
+      </div>
 
     </div>
 
@@ -295,28 +291,21 @@ export default class AudioDisplayComponent extends Vue {
     if(!this.isPlaying) {
       if (updatedData[0].data[pisteNumber].data.length == 1 && updatedData[0].data.length > 1) {
 
-
-        updatedData = JSON.parse(JSON.stringify(updatedData));
-        updatedData[0].data.splice(pisteNumber, 1);
-        this.listPistes.splice(pisteNumber , 1);
-        updatedData = this.renamePistes(updatedData);
-        this.nbPistes = this.nbPistes - 1;
-        this.activePiste = this.activePiste - 1;
-
-
-
+        this.removePiste(pisteNumber+1);
 
       } else {
+
         let soundTimelineId = segment.target.__data__.data.soundTimelineId;
         const index = updatedData[0].data[pisteNumber].data.findIndex((p : any) => p.soundTimelineId === soundTimelineId);
         updatedData = JSON.parse(JSON.stringify(updatedData));
         updatedData[0].data[pisteNumber].data.splice(index,1);
+
+        this.chart.data(updatedData);
+        this.chartData = updatedData;
+        this.updateTimelineLocal();
+        
       }
     }
-
-    this.chart.data(updatedData)
-              .segmentTooltipContent();
-    await this.$store.dispatch('project/updateDataTimeline', updatedData);
   }
 
 
@@ -418,7 +407,7 @@ export default class AudioDisplayComponent extends Vue {
       this.chart.data(this.chartData);
       this.chart.refresh();
       await this.$store.dispatch('project/updateDataTimeline', this.chartData);
-      this.$emit('close');
+      //this.$emit('close');
     }
 
 
@@ -436,6 +425,7 @@ export default class AudioDisplayComponent extends Vue {
       newChartData[0].data[this.activePiste-1].data = dataActivePiste;
       this.chart.data(newChartData);
       this.chartData = newChartData;
+      this.updateTimelineLocal();
     }
 
 
@@ -458,17 +448,26 @@ export default class AudioDisplayComponent extends Vue {
     }
 
 
-    removePiste(numPiste : number) {
-      if (this.nbPistes > 1) {
+    public async removePiste(pisteNumber : number) {
 
-        this.listPistes.splice(this.nbPistes , 1);
+      let newDataUpdate = [... this.chart.data()];
+      newDataUpdate = JSON.parse(JSON.stringify(newDataUpdate));
+
+      if (newDataUpdate[0].data.length > 1) {
+
+        newDataUpdate[0].data.splice(pisteNumber-1, 1);
+        this.listPistes.splice(pisteNumber-1 , 1);
+
+        newDataUpdate = this.renamePistes(newDataUpdate);
         this.nbPistes = this.nbPistes - 1;
 
-
-        // Enlever la piste selectionnée, et renommer toutes les autres en fonction du chiffre choisi
-        // = parcourir toutes les pistes et les renommer une par une pour etre sur
-
-        // TODO
+        if (pisteNumber>= this.activePiste && pisteNumber!=1) {
+          this.activePiste = this.activePiste - 1;
+        }
+      
+        this.chart.data(newDataUpdate);
+        this.chartData = newDataUpdate;
+        this.updateTimelineLocal();
       }
     }
 
