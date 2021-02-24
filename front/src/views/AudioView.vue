@@ -571,10 +571,9 @@ export default class AudioView extends AbstractProjectView {
   private initSounds() {
     //this.sounds=[];
     this.soundsTimeline = this.getSoundTimeline;
-    this.soundsPlayers= new Array(this.soundsTimeline.length);
+    this.soundsPlayers= new Array(this.allImages.length);
     if (this.playingFrame>0 && this.playingFrame+1<this.allImages.length){
-      this.soundsTimeline
-.forEach(elm => {
+      this.soundsTimeline.forEach(elm => {
         if (elm.start<this.playingFrame+1 && elm.end>this.playingFrame+1){
           //là faut lire qu'une partie du son
           let nbFrameTot = elm.end - elm.start;
