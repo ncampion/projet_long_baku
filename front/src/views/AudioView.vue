@@ -333,8 +333,7 @@ export default class AudioView extends AbstractProjectView {
 
     private displayFrame(timeCode: number) {
 
-      if (this.isPlaying=='animation' && this.soundsTimeline
-.length>0){
+      if (this.isPlaying=='animation' && this.soundsTimeline.length>0){
         if (this.soundsPlayers[this.playingFrame] != undefined){
             this.soundsPlayers[this.playingFrame].forEach(sound => {
               sound.play();
@@ -429,6 +428,7 @@ export default class AudioView extends AbstractProjectView {
     }
 
     public async playAnimation() {
+      console.log("play appuyé");
       if (!this.isPlaying && this.allImages.length > 0) {
         if (this.activeFrame === this.allImages.length) {
           this.moveFrame(0);
@@ -439,8 +439,7 @@ export default class AudioView extends AbstractProjectView {
           left: 0,
           right: this.allImages.length + 1,
         };
-      
-        this.initSounds();
+        await Promise.all(this.initSounds());
         this.animationFrame = requestAnimationFrame(this.animate);
       }
     }
@@ -570,10 +569,11 @@ export default class AudioView extends AbstractProjectView {
 
   private initSounds() {
     //this.sounds=[];
+    let promiseArray : Promise<void>[] = [];
     this.soundsTimeline = this.getSoundTimeline;
     this.soundsPlayers= new Array(this.allImages.length);
     if (this.playingFrame>0 && this.playingFrame+1<this.allImages.length){
-      this.soundsTimeline.forEach(elm => {
+      this.soundsTimeline.forEach(async elm => {
         if (elm.start<this.playingFrame+1 && elm.end>this.playingFrame+1){
           //là faut lire qu'une partie du son
           let nbFrameTot = elm.end - elm.start;
@@ -592,6 +592,7 @@ export default class AudioView extends AbstractProjectView {
           if (this.soundsPlayers[this.playingFrame+1] == undefined) {
             this.soundsPlayers[this.playingFrame+1] = [];
           }
+          promiseArray.push(isLoaded(sound));
           this.soundsPlayers[this.playingFrame+1].push(sound);
         } else if (elm.start >= this.playingFrame+1) {
           //là on charge que les futurs sons (pas ceux déjà passés) mais en entier
@@ -605,12 +606,12 @@ export default class AudioView extends AbstractProjectView {
           if (this.soundsPlayers[elm.start] == undefined) {
             this.soundsPlayers[elm.start] = [];
           }
+          promiseArray.push(isLoaded(sound));
           this.soundsPlayers[elm.start].push(sound);
         }
       })
     } else {
-      this.soundsTimeline
-.forEach(elm => {
+      this.soundsTimeline.forEach(async elm => {
         let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).sound);
         let volume = this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).volume;
         let sound : Howl = new Howl({
@@ -621,10 +622,20 @@ export default class AudioView extends AbstractProjectView {
         if (this.soundsPlayers[elm.start] == undefined) {
           this.soundsPlayers[elm.start] = [];
         }
+        promiseArray.push(isLoaded(sound));
         this.soundsPlayers[elm.start].push(sound);
       })
     }
+    return promiseArray;
   }
+}
+
+function isLoaded(sound: Howl) {
+  return new Promise<void>((resolve,reject) => {
+    sound.once('load', () => {
+      resolve();
+    })
+  })
 }
 </script>
 
