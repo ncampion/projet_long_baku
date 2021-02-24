@@ -263,9 +263,11 @@ export default class AudioView extends AbstractProjectView {
     private prevPreviewImg!: HTMLImageElement;
     private nextPreviewImg!: HTMLImageElement;
 
-    private soundsArray!: SoundTimeline[];
+    private soundsTimeline!: SoundTimeline[];
 
-    private sounds: [Howl,number][] = [];
+    //private sounds: [Howl,number][] = [];
+
+    private soundsPlayers: Howl[][] = [];
 
     public async mounted() {
 
@@ -331,13 +333,13 @@ export default class AudioView extends AbstractProjectView {
 
     private displayFrame(timeCode: number) {
 
-      if (this.isPlaying=='animation' && this.sounds.length>0){
-        this.sounds.forEach(sound => {
-        if (sound[1]==this.playingFrame){
-            sound[0].play();
-            console.log("wesh");
+      if (this.isPlaying=='animation' && this.soundsTimeline
+.length>0){
+        if (this.soundsPlayers[this.playingFrame] != undefined){
+            this.soundsPlayers[this.playingFrame].forEach(sound => {
+              sound.play();
+            })
         }
-        })
       }
 
       const audioDisplay = this.$refs.audioDisplay as AudioDisplayComponent;
@@ -466,8 +468,12 @@ export default class AudioView extends AbstractProjectView {
 
     public pauseAnimation() {
       if (this.isPlaying) {
-        this.sounds.forEach(elm => {
-          elm[0].pause();
+        this.soundsPlayers.forEach(tab => {
+          if (tab != undefined){
+            tab.forEach(sound => {
+              sound.pause();
+            })
+          }
         });
         this.isPlaying = null;
         delete this.animationStart;
@@ -563,10 +569,12 @@ export default class AudioView extends AbstractProjectView {
     }
 
   private initSounds() {
-    this.sounds=[];
-    this.soundsArray = this.getSoundTimeline;
+    //this.sounds=[];
+    this.soundsTimeline = this.getSoundTimeline;
+    this.soundsPlayers= new Array(this.soundsTimeline.length);
     if (this.playingFrame>0 && this.playingFrame+1<this.allImages.length){
-      this.soundsArray.forEach(elm => {
+      this.soundsTimeline
+.forEach(elm => {
         if (elm.start<this.playingFrame+1 && elm.end>this.playingFrame+1){
           //là faut lire qu'une partie du son
           let nbFrameTot = elm.end - elm.start;
@@ -581,11 +589,11 @@ export default class AudioView extends AbstractProjectView {
               volume: parseFloat((volume/100).toFixed(2))
           });
           sound.seek(timeToSeek);
-          console.log(nbFrameTot);
-          console.log(nbFrameElapsed);
-          console.log(ratio);
-          console.log(timeToSeek);
-          this.sounds.push([sound,this.playingFrame+1]);
+          //this.sounds.push([sound,this.playingFrame+1]);
+          if (this.soundsPlayers[this.playingFrame+1] == undefined) {
+            this.soundsPlayers[this.playingFrame+1] = [];
+          }
+          this.soundsPlayers[this.playingFrame+1].push(sound);
         } else if (elm.start >= this.playingFrame+1) {
           //là on charge que les futurs sons (pas ceux déjà passés) mais en entier
           let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).sound);
@@ -595,11 +603,15 @@ export default class AudioView extends AbstractProjectView {
               format: ['wav'],
               volume: parseFloat((volume/100).toFixed(2))
           });
-          this.sounds.push([sound,elm.start]);
+          if (this.soundsPlayers[elm.start] == undefined) {
+            this.soundsPlayers[elm.start] = [];
+          }
+          this.soundsPlayers[elm.start].push(sound);
         }
       })
     } else {
-      this.soundsArray.forEach(elm => {
+      this.soundsTimeline
+.forEach(elm => {
         let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).sound);
         let volume = this.getAudioRecord.find((audio: any) => audio.id === elm.audioId).volume;
         let sound : Howl = new Howl({
@@ -607,7 +619,10 @@ export default class AudioView extends AbstractProjectView {
             format: ['wav'],
             volume: parseFloat((volume/100).toFixed(2))
           });
-        this.sounds.push([sound,elm.start]);
+        if (this.soundsPlayers[elm.start] == undefined) {
+          this.soundsPlayers[elm.start] = [];
+        }
+        this.soundsPlayers[elm.start].push(sound);
       })
     }
   }
