@@ -394,6 +394,12 @@ export default class AudioDisplayComponent extends Vue {
   }
 
 
+  @Watch('getAudioRecord')
+  public onSoundChange() {
+    
+  }
+
+
 
 
 
