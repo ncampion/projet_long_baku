@@ -441,11 +441,8 @@ export default class AudioView extends AbstractProjectView {
           right: this.allImages.length + 1,
         };
         this.allLoaded=false;
-        let before = Date.now();
         await Promise.all(this.initSounds());
-        let after = Date.now();
         this.allLoaded=true;
-        console.log((after-before)/1000);
         this.animationFrame = requestAnimationFrame(this.animate);
       }
     }
