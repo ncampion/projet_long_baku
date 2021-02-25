@@ -302,8 +302,7 @@ export default class AudioView extends AbstractProjectView {
         this.onImagePreloaded,
       );
 
-      // pour que le build marche 
-      const currentShot = this.getCurrentShot(0);
+      //const currentShot = this.getCurrentShot(0);
       //console.log(currentShot);
     }
 
@@ -398,28 +397,28 @@ export default class AudioView extends AbstractProjectView {
       );
     }
 
-    private getCurrentShot(timestamp: number) {
-      const totalImageNumber = this.allImages.length;
-      let imageNumberCalculation = totalImageNumber;
+    // private getCurrentShot(timestamp: number) {
+    //   const totalImageNumber = this.allImages.length;
+    //   let imageNumberCalculation = totalImageNumber;
       
-      const allShots = this.getAllShots;
+    //   const allShots = this.getAllShots;
 
-      let shotLengths = Array();
+    //   let shotLengths = Array();
 
-      for(let shot of allShots){
-        shotLengths.push(shot.images.length);
-      }
+    //   for(let shot of allShots){
+    //     shotLengths.push(shot.images.length);
+    //   }
 
-      for(let i=0; i< shotLengths.length; i++){
-        imageNumberCalculation = imageNumberCalculation - shotLengths[i];
-        if (imageNumberCalculation<=0){
-          if(allShots){
-            return allShots[i];
-          }
-        }
-      }
-      return undefined;
-    }
+    //   for(let i=0; i< shotLengths.length; i++){
+    //     imageNumberCalculation = imageNumberCalculation - shotLengths[i];
+    //     if (imageNumberCalculation<=0){
+    //       if(allShots){
+    //         return allShots[i];
+    //       }
+    //     }
+    //   }
+    //   return undefined;
+    // }
 
     public togglePlay() {
       if (this.isPlaying && this.allLoaded) {
