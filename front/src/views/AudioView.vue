@@ -304,7 +304,7 @@ export default class AudioView extends AbstractProjectView {
 
       // pour que le build marche 
       const currentShot = this.getCurrentShot(0);
-      console.log(currentShot);
+      //console.log(currentShot);
     }
 
     public animate(timestamp: number) {
