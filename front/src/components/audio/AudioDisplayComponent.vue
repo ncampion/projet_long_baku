@@ -83,7 +83,7 @@
 
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { Movie } from '@/utils/movie.service';
 import TimelinesChart from 'timelines-chart';
@@ -120,6 +120,8 @@ export default class AudioDisplayComponent extends Vue {
 
     public allShots: Array<any> = [];
 
+    private audioRecord: Array<any> = [];
+
     private goForward10 : boolean = true;
     private goForward1 : boolean = false;
     private goBackward1 : boolean = false;
@@ -150,6 +152,7 @@ export default class AudioDisplayComponent extends Vue {
             .enableAnimations(false)
             .segmentTooltipContent(this.segmentTooltip);
       this.chart(this.$refs.movieContainer);
+      this.audioRecord = this.getAudioRecord;
     }
 
 
@@ -227,10 +230,6 @@ export default class AudioDisplayComponent extends Vue {
       if (this.deleteSound) {
         this.removeSoundTimeline(segment);
       }
-
-      //segment.target.__data__.data.val = "Son 1";
-      //segment.target.__data__.labelVal = "Son 2";
-      //segment.target.__data__.val = "Son 2";
 
       this.chart.data(this.chart.data());
       this.chartData = this.chart.data();
@@ -369,18 +368,16 @@ export default class AudioDisplayComponent extends Vue {
   }
 
   public async whenCrop(audioId : string, duration : number) {
-    console.log("je suis passé ici");
-    let nbFrames = Math.round(audio.duration*this.getMovieFps);
+    let nbFrames = Math.round(duration*this.getMovieFps);
 
     let pistes = [... this.chartData[0].data];
 
     for (let i = 0; i < pistes.length; i++) {
-      for (let j = 0; j < pistes.data[i].data.length; j++) {
-        let sound = piste.data[i].data[j];
+      for (let j = 0; j < pistes[i].data.length; j++) {
+        let sound = pistes[i].data[j];
         if (sound.audioId == audioId) {
-          console.log("là aussi");
           let end = sound.timeRange[0] + nbFrames;
-          piste.data[i].data[j].timeRange[1] = end;
+          pistes[i].data[j].timeRange[1] = end;
           await this.$store.dispatch('project/updateSoundTimelineStart', {soundTimelineId : sound.soundTimelineId , start : sound.timeRange[0], end}); 
         }
       }
@@ -395,8 +392,15 @@ export default class AudioDisplayComponent extends Vue {
 
 
   @Watch('getAudioRecord')
-  public onSoundChange() {
-    
+  public onSoundChange(newAudioRecord : Array<any>) {
+    if (this.audioRecord.length == newAudioRecord.length) {
+      for (let i = 0; i < newAudioRecord.length; i++) {
+        if (this.audioRecord[i].duration != newAudioRecord[i].duration) {
+          this.whenCrop(newAudioRecord[i].id, newAudioRecord[i].duration);
+        }
+      }
+    }
+    this.audioRecord = newAudioRecord;
   }
 
 
