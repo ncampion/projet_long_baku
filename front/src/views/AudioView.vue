@@ -269,6 +269,8 @@ export default class AudioView extends AbstractProjectView {
 
     private soundsPlayers: Howl[][] = [];
 
+    private allLoaded : boolean = false;
+
     public async mounted() {
 
 
@@ -420,7 +422,7 @@ export default class AudioView extends AbstractProjectView {
     }
 
     public togglePlay() {
-      if (this.isPlaying) {
+      if (this.isPlaying && this.allLoaded) {
         this.pauseAnimation();
       } else {
         this.playAnimation();
@@ -428,7 +430,6 @@ export default class AudioView extends AbstractProjectView {
     }
 
     public async playAnimation() {
-      console.log("play appuyé");
       if (!this.isPlaying && this.allImages.length > 0) {
         if (this.activeFrame === this.allImages.length) {
           this.moveFrame(0);
@@ -439,7 +440,12 @@ export default class AudioView extends AbstractProjectView {
           left: 0,
           right: this.allImages.length + 1,
         };
+        this.allLoaded=false;
+        let before = Date.now();
         await Promise.all(this.initSounds());
+        let after = Date.now();
+        this.allLoaded=true;
+        console.log((after-before)/1000);
         this.animationFrame = requestAnimationFrame(this.animate);
       }
     }
@@ -585,6 +591,7 @@ export default class AudioView extends AbstractProjectView {
           let sound : Howl = new Howl({
               src: [url],
               format: ['wav'],
+              html5: true,
               volume: parseFloat((volume/100).toFixed(2))
           });
           sound.seek(timeToSeek);
@@ -601,6 +608,7 @@ export default class AudioView extends AbstractProjectView {
           let sound : Howl = new Howl({
               src: [url],
               format: ['wav'],
+              html5: true,
               volume: parseFloat((volume/100).toFixed(2))
           });
           if (this.soundsPlayers[elm.start] == undefined) {
@@ -617,6 +625,7 @@ export default class AudioView extends AbstractProjectView {
         let sound : Howl = new Howl({
             src: [url],
             format: ['wav'],
+            html5: true,
             volume: parseFloat((volume/100).toFixed(2))
           });
         if (this.soundsPlayers[elm.start] == undefined) {
