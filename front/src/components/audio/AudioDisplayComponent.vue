@@ -11,14 +11,6 @@
     @drop="handleDrop($event);"
   >
 
-    <div class="toolbar">
-
-    <!--TODO -->
-
-    </div>
-
-
-
     <div class="horizontal-align">
       <div class="padding-button">
         <i class="button is-primary" @click="backward10">Reculer de 10</i>
@@ -72,6 +64,10 @@
 
       </b-dropdown>
 
+      <div class="padding-button">
+        <i class="button is-primary" @click="removePiste(activePiste)">Supprimer la piste</i>
+      </div>
+
     </div>
 
     <div ref="movieContainer" class="movie-container">
@@ -83,7 +79,7 @@
 
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { Movie } from '@/utils/movie.service';
 import TimelinesChart from 'timelines-chart';
@@ -120,6 +116,8 @@ export default class AudioDisplayComponent extends Vue {
 
     public allShots: Array<any> = [];
 
+    private audioRecord: Array<any> = [];
+
     private goForward10 : boolean = true;
     private goForward1 : boolean = false;
     private goBackward1 : boolean = false;
@@ -150,6 +148,7 @@ export default class AudioDisplayComponent extends Vue {
             .enableAnimations(false)
             .segmentTooltipContent(this.segmentTooltip);
       this.chart(this.$refs.movieContainer);
+      this.audioRecord = this.getAudioRecord;
     }
 
 
@@ -228,10 +227,6 @@ export default class AudioDisplayComponent extends Vue {
         this.removeSoundTimeline(segment);
       }
 
-      //segment.target.__data__.data.val = "Son 1";
-      //segment.target.__data__.labelVal = "Son 2";
-      //segment.target.__data__.val = "Son 2";
-
       this.chart.data(this.chart.data());
       this.chartData = this.chart.data();
       this.chart.refresh();
@@ -295,28 +290,21 @@ export default class AudioDisplayComponent extends Vue {
     if(!this.isPlaying) {
       if (updatedData[0].data[pisteNumber].data.length == 1 && updatedData[0].data.length > 1) {
 
-
-        updatedData = JSON.parse(JSON.stringify(updatedData));
-        updatedData[0].data.splice(pisteNumber, 1);
-        this.listPistes.splice(pisteNumber , 1);
-        updatedData = this.renamePistes(updatedData);
-        this.nbPistes = this.nbPistes - 1;
-        this.activePiste = this.activePiste - 1;
-
-
-
+        this.removePiste(pisteNumber+1);
 
       } else {
+
         let soundTimelineId = segment.target.__data__.data.soundTimelineId;
         const index = updatedData[0].data[pisteNumber].data.findIndex((p : any) => p.soundTimelineId === soundTimelineId);
         updatedData = JSON.parse(JSON.stringify(updatedData));
         updatedData[0].data[pisteNumber].data.splice(index,1);
+
+        this.chart.data(updatedData);
+        this.chartData = updatedData;
+        this.updateTimelineLocal();
+        
       }
     }
-
-    this.chart.data(updatedData)
-              .segmentTooltipContent();
-    await this.$store.dispatch('project/updateDataTimeline', updatedData);
   }
 
 
@@ -328,97 +316,136 @@ export default class AudioDisplayComponent extends Vue {
     return updatedData;
   }
 
+  
 
-    backward10() {
-      this.setFalse();
-      this.goBackward10 = true;
-      this.mode = "Reculer de 10 frames";
-    }
+  backward10() {
+    this.setFalse();
+    this.goBackward10 = true;
+    this.mode = "Reculer de 10 frames";
+  }
 
-    backward1() {
-      this.setFalse();
-      this.goBackward1 = true;
-      this.mode = "Reculer de 1 frame";
-    }
+  backward1() {
+    this.setFalse();
+    this.goBackward1 = true;
+    this.mode = "Reculer de 1 frame";
+  }
 
-    forward1() {
-      this.setFalse();
-      this.goForward1 = true;
-      this.mode = "Avancer de 1 frame";
-    }
+  forward1() {
+    this.setFalse();
+    this.goForward1 = true;
+    this.mode = "Avancer de 1 frame";
+  }
 
-    forward10() {
-      this.setFalse();
-      this.goForward10 = true;
-      this.mode = "Avancer de 10 frames";
-    }
+  forward10() {
+    this.setFalse();
+    this.goForward10 = true;
+    this.mode = "Avancer de 10 frames";
+  }
 
-    deleteAudioSegment() {
-      this.setFalse();
-      this.deleteSound = true;
-      this.mode = "Supprimer un son";
-    }
+  deleteAudioSegment() {
+    this.setFalse();
+    this.deleteSound = true;
+    this.mode = "Supprimer un son";
+  }
 
-    setFalse() {
-      this.goBackward1 = false;
-      this.goBackward10 = false;
-      this.goForward1 = false;
-      this.goForward10 = false;
-      this.deleteSound = false;
-    }
+  setFalse() {
+    this.goBackward1 = false;
+    this.goBackward10 = false;
+    this.goForward1 = false;
+    this.goForward10 = false;
+    this.deleteSound = false;
+  }
 
+  public async whenCrop(audioId : string, duration : number) {
+    let nbFrames = Math.round(duration*this.getMovieFps);
 
+    let pistes = [... this.chartData[0].data];
 
-    // Drop from the Record sounds list
-
-    allowDrop(event: any) {
-      event.preventDefault();
-    }
-
-    public async handleDrop(event: any) {
-      event.preventDefault();
-      let audioId = event.dataTransfer.getData("text");
-      let audios = this.getAudioRecord;
-      const audio = audios.find((p : any) => p.id === audioId);
-      let title = audio.title;
-      let start = this.chart.dateMarker();
-      let duration = Math.round(audio.duration*this.getMovieFps);
-      let end = start + duration;
-
-      let addAllowed = this.checkSound(start, end, this.activePiste-1, [-1, -1]);
-
-      if (addAllowed && !this.isPlaying) {
-        const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end});
-
-        this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste, start, end);
-        this.updateTimelineLocal();
-      }
-
-
-      event.dataTransfer.clearData();
-    }
-
-    checkSound(start : number, end : number, piste : number, timeRange: number[]) {
-      let dataChart = this.chart.data();
-
-      for (let i = 0; i < dataChart[0].data[piste].data.length; i++) {
-        let sound = dataChart[0].data[piste].data[i];
-
-        if (sound.timeRange[0] != timeRange[0] || sound.timeRange[1] != timeRange[1]) {
-          if (!(start >= sound.timeRange[1] || end <= sound.timeRange[0])) {
-            return false;
-          }
+    for (let i = 0; i < pistes.length; i++) {
+      for (let j = 0; j < pistes[i].data.length; j++) {
+        let sound = pistes[i].data[j];
+        if (sound.audioId == audioId) {
+          let end = sound.timeRange[0] + nbFrames;
+          pistes[i].data[j].timeRange[1] = end;
+          await this.$store.dispatch('project/updateSoundTimelineStart', {soundTimelineId : sound.soundTimelineId , start : sound.timeRange[0], end}); 
         }
-        
       }
-      return true;
     }
+
+    let newChartData =  JSON.parse(JSON.stringify(this.chartData));
+    newChartData[0].data = pistes;
+    this.chart.data(newChartData);
+    this.chartData = newChartData;
+    this.updateTimelineLocal();
+  }
+
+
+  @Watch('getAudioRecord')
+  public onSoundChange(newAudioRecord : Array<any>) {
+    if (this.audioRecord.length == newAudioRecord.length) {
+      for (let i = 0; i < newAudioRecord.length; i++) {
+        if (this.audioRecord[i].duration != newAudioRecord[i].duration) {
+          this.whenCrop(newAudioRecord[i].id, newAudioRecord[i].duration);
+        }
+      }
+    }
+    this.audioRecord = newAudioRecord;
+  }
+
+
+
+
+
+  // Drop from the Record sounds list
+
+  allowDrop(event: any) {
+    event.preventDefault();
+  }
+
+  public async handleDrop(event: any) {
+    event.preventDefault();
+    let audioId = event.dataTransfer.getData("text");
+    let audios = this.getAudioRecord;
+    const audio = audios.find((p : any) => p.id === audioId);
+    let title = audio.title;
+    let start = this.chart.dateMarker();
+    let duration = Math.round(audio.duration*this.getMovieFps);
+    let end = start + duration;
+
+    let addAllowed = this.checkSound(start, end, this.activePiste-1, [-1, -1]);
+
+    if (addAllowed && !this.isPlaying) {
+      const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end});
+
+      this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste, start, end);
+      this.updateTimelineLocal();
+    }
+
+
+    event.dataTransfer.clearData();
+  }
+
+  checkSound(start : number, end : number, piste : number, timeRange: number[]) {
+    let dataChart = this.chart.data();
+
+    for (let i = 0; i < dataChart[0].data[piste].data.length; i++) {
+      let sound = dataChart[0].data[piste].data[i];
+
+      if (sound.timeRange[0] != timeRange[0] || sound.timeRange[1] != timeRange[1]) {
+        if (!(start >= sound.timeRange[1] || end <= sound.timeRange[0])) {
+          return false;
+        }
+      }
+      
+    }
+    return true;
+  }
 
     public async updateTimelineLocal() {
       this.chart.data(this.chartData);
       this.chart.refresh();
       await this.$store.dispatch('project/updateDataTimeline', this.chartData);
-      this.$emit('close');
+      //this.$emit('close');
     }
 
 
@@ -436,45 +463,56 @@ export default class AudioDisplayComponent extends Vue {
       newChartData[0].data[this.activePiste-1].data = dataActivePiste;
       this.chart.data(newChartData);
       this.chartData = newChartData;
-    }
-
-
-    public async addPiste() {
-      let numPiste = this.nbPistes + 1;
-      this.nbPistes = this.nbPistes +1;
-
-      let pistes = [... this.chartData[0].data];
-      this.listPistes.push(numPiste);
-      pistes.push({
-        label : "Piste " + numPiste,
-        data : [],
-      });
-      let newChartData =  JSON.parse(JSON.stringify(this.chartData));
-      newChartData[0].data = pistes;
-      this.chart.data(newChartData);
-      this.chartData = newChartData;
-      this.activePiste = numPiste;
       this.updateTimelineLocal();
     }
 
 
-    removePiste(numPiste : number) {
-      if (this.nbPistes > 1) {
+  public async addPiste() {
+    let numPiste = this.nbPistes + 1;
+    this.nbPistes = this.nbPistes +1;
 
-        this.listPistes.splice(this.nbPistes , 1);
-        this.nbPistes = this.nbPistes - 1;
+    let pistes = [... this.chartData[0].data];
+    this.listPistes.push(numPiste);
+    pistes.push({
+      label : "Piste " + numPiste,
+      data : [],
+    });
+    let newChartData =  JSON.parse(JSON.stringify(this.chartData));
+    newChartData[0].data = pistes;
+    this.chart.data(newChartData);
+    this.chartData = newChartData;
+    this.activePiste = numPiste;
+    this.updateTimelineLocal();
+  }
 
 
-        // Enlever la piste selectionnée, et renommer toutes les autres en fonction du chiffre choisi
-        // = parcourir toutes les pistes et les renommer une par une pour etre sur
+  public async removePiste(pisteNumber : number) {
 
-        // TODO
+    let newDataUpdate = [... this.chart.data()];
+    newDataUpdate = JSON.parse(JSON.stringify(newDataUpdate));
+
+    if (newDataUpdate[0].data.length > 1) {
+
+      newDataUpdate[0].data.splice(pisteNumber-1, 1);
+      this.listPistes.splice(pisteNumber-1 , 1);
+
+      newDataUpdate = this.renamePistes(newDataUpdate);
+      this.nbPistes = this.nbPistes - 1;
+
+      if (pisteNumber>= this.activePiste && pisteNumber!=1 && this.activePiste!=1) {
+        this.activePiste = this.activePiste - 1;
       }
+    
+      this.chart.data(newDataUpdate);
+      this.chartData = newDataUpdate;
+      this.updateTimelineLocal();
     }
+    
+  }
 
-    goToPiste(n : number) {
-      this.activePiste = n;
-    }
+  goToPiste(n : number) {
+    this.activePiste = n;
+  }
 
 }
 </script>
