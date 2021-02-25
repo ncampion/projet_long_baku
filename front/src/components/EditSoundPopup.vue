@@ -144,26 +144,26 @@ export default class EditSoundPopup extends Vue {
         originalAudioBuffer.numberOfChannels,
         lengthInSamples,
         originalAudioBuffer.sampleRate );
-    var newAudioBuffer = offlineAudioContext.createBuffer(
-        originalAudioBuffer.numberOfChannels,
-        (start === 0 ? (originalAudioBuffer.length - emptySegment.length)+1 :originalAudioBuffer.length),
-        originalAudioBuffer.sampleRate);
+    // var newAudioBuffer = offlineAudioContext.createBuffer(
+    //     originalAudioBuffer.numberOfChannels,
+    //     (start === 0 ? (originalAudioBuffer.length - emptySegment.length)+1 :originalAudioBuffer.length),
+    //     originalAudioBuffer.sampleRate);
     for (var channel = 0; channel < originalAudioBuffer.numberOfChannels;channel++) {
-        var new_channel_data = newAudioBuffer.getChannelData(channel);
+        // var new_channel_data = newAudioBuffer.getChannelData(channel);
         var empty_segment_data = emptySegment.getChannelData(channel);
         var original_channel_data = originalAudioBuffer.getChannelData(channel);
-        var before_data = original_channel_data.subarray(0, start * originalAudioBuffer.sampleRate);
+        // var before_data = original_channel_data.subarray(0, start * originalAudioBuffer.sampleRate);
         var mid_data = original_channel_data.subarray( start * originalAudioBuffer.sampleRate, end * originalAudioBuffer.sampleRate);
-        var after_data = original_channel_data.subarray(Math.floor(end * originalAudioBuffer.sampleRate), (originalAudioBuffer.length * originalAudioBuffer.sampleRate));
+        // var after_data = original_channel_data.subarray(Math.floor(end * originalAudioBuffer.sampleRate), (originalAudioBuffer.length * originalAudioBuffer.sampleRate));
         // console.log(after_data);
         // console.log(new_channel_data);
         empty_segment_data.set(mid_data);
-        if(start > 0){
-            new_channel_data.set(before_data);
-            new_channel_data.set(after_data,(start * newAudioBuffer.sampleRate));
-        } else {
-            new_channel_data.set(after_data);
-        }
+        // if(start > 0){
+        //     new_channel_data.set(before_data);
+        //     new_channel_data.set(after_data,(start * newAudioBuffer.sampleRate));
+        // } else {
+        //     new_channel_data.set(after_data);
+        // }
     }
     return bufferToWave(emptySegment,0,lengthInSamples)
   }
