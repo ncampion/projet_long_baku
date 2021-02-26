@@ -18,9 +18,13 @@ public final class Movie {
     private final ImmutableSet<String> lockedShots;
     private final ImmutableList<String> shots;
     private final ImmutableListMultimap<String, Path> images;
+    private final ImmutableList<String> audios;
+    private final ImmutableList<String> soundsTimeline;
+    private final ImmutableList<Object> dataTimeline;
 
     public Movie(String projectId, String name, String synopsis, int fps, boolean locked,
-                 Set<String> lockedShots, List<String> shots, ListMultimap<String, Path> images) {
+                 Set<String> lockedShots, List<String> shots, ListMultimap<String, Path> images,
+                 List<String> audios, List<String> soundsTimeline, List<Object> dataTimeline) {
         this.locked = locked;
         this.lockedShots = ImmutableSet.copyOf(lockedShots);
         this.shots = ImmutableList.copyOf(shots);
@@ -29,6 +33,9 @@ public final class Movie {
         this.name = name;
         this.synopsis = synopsis;
         this.fps = fps == 0 ? 12 : fps;
+        this.audios = ImmutableList.copyOf(audios);
+        this.soundsTimeline = ImmutableList.copyOf(soundsTimeline);
+        this.dataTimeline = ImmutableList.copyOf(dataTimeline);
     }
 
     public String getProjectId() {
@@ -61,5 +68,17 @@ public final class Movie {
 
     public ImmutableListMultimap<String, Path> getImages() {
         return images;
+    }
+
+    public ImmutableList<String> getAudios() {
+        return audios;
+    }
+
+    public ImmutableList<String> getSoundsTimeline() {
+        return soundsTimeline;
+    }
+
+    public ImmutableList<Object> getDataTimeline() {
+        return dataTimeline;
     }
 }

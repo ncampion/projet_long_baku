@@ -221,18 +221,6 @@ export const ProjectStore: BakuModule<ProjectState> = {
       loadEvents2(context, [event]);
     },
 
-    async createAudioTimeline(context, data : any) {
-      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_ADD, {data});
-      loadEvents2(context, [event]);
-      await store.dispatch('user/updateCurrentSeenProject');
-    },
-
-    async removeAudioTimeline(context, data : any) {
-      const event = makeEvent(context, BakuAction.AUDIO_TIMELINE_REMOVE, {data});
-      loadEvents2(context, [event]);
-      await store.dispatch('user/updateCurrentSeenProject');
-    },
-
     async updateDataTimeline(context, data : any) {
       const event = makeEvent(context, BakuAction.TIMELINE_UPDATE_DATA, {data});
       loadEvents2(context, [event]);

@@ -315,14 +315,6 @@ export class MovieService {
           )
           break;
         }
-        case BakuAction.AUDIO_TIMELINE_ADD: {
-          dataTimeline = event.value.data;
-          break;
-        }
-        case BakuAction.AUDIO_TIMELINE_REMOVE: {
-          dataTimeline = event.value.data;
-          break;
-        }
         case BakuAction.TIMELINE_UPDATE_DATA: {
           dataTimeline = event.value.data;
           break;

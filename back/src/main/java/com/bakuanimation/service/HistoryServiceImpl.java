@@ -219,6 +219,43 @@ public class HistoryServiceImpl implements HistoryService {
                             .subList(leftIdx, rightIdx + 1));
                     break;
                 }
+                case AUDIO_ADD: {
+                    String audioId = element.getValue().get("audioId").asText();
+                    audios.add(audioId);
+                    break;
+                }
+                case AUDIO_REMOVE: {
+                    String audioId = element.getValue().get("audioId").asText();
+                    audios.remove(audioId);
+                    break;
+                }
+                case AUDIO_UPDATE_TITLE: {
+                    break;                    
+                }
+                case AUDIO_UPDATE_SOUND: {
+                    break;                    
+                }
+                case AUDIO_UPDATE_VOLUME: {
+                    break;                    
+                }
+                case AUDIO_UPDATE_DURATION: {
+                    break;                    
+                }
+                case AUDIO_UPDATE_WAVEFORM: {
+                    break;                    
+                }
+                case TIMELINE_UPDATE_DATA: {
+                    break;                    
+                }
+                case SOUNDTIMELINE_ADD: {
+                    break;                    
+                }
+                case SOUNDTIMELINE_REMOVE: {
+                    break;                    
+                }
+                case SOUNDTIMELINE_UPDATE_START: {
+                    break;                    
+                }
                 default: {
                     // Ignored
                     break;
