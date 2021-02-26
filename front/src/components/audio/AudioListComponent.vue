@@ -43,6 +43,7 @@
 
     <div class="record-Button">
       <button class="button is-primary" @click="openRecordPopup">Enregistrer un son</button>
+      <button class="button is-primary" @click="stopPlayer()">Stopper la lecture des sons</button>
     </div>
   </div>
 </template>
@@ -118,24 +119,30 @@ export default class AudioListComponent extends Vue {
         if (this.sound.playing()) {
           this.sound.stop();
           let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
+          let volume = this.getAudioRecord.find((audio: any) => audio.id === audioId).volume;
           this.sound = new Howl({
             src: [url],
-            format: ['wav']
+            format: ['wav'],
+            volume: parseFloat((volume/100).toFixed(2))
         });
           this.sound.play();
         } else {
           let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
+          let volume = this.getAudioRecord.find((audio: any) => audio.id === audioId).volume;
           this.sound = new Howl({
             src: [url],
-            format: ['wav']
+            format: ['wav'],
+            volume: parseFloat((volume/100).toFixed(2))
           });
           this.sound.play();
         }
       } else {
         let url = (window.URL || window.webkitURL ).createObjectURL(this.getAudioRecord.find((audio: any) => audio.id === audioId).sound);
+        let volume = this.getAudioRecord.find((audio: any) => audio.id === audioId).volume;
         this.sound = new Howl({
             src: [url],
-            format: ['wav']
+            format: ['wav'],
+            volume: parseFloat((volume/100).toFixed(2))
         });
         this.sound.play();
         this.alreadyPlayedOnce = true;
@@ -146,6 +153,12 @@ export default class AudioListComponent extends Vue {
       if (!this.isPlaying) {
         await this.$store.dispatch('project/removeAudio', audioId);
       }   
+    }
+
+    public stopPlayer() {
+      if (this.alreadyPlayedOnce) {
+        this.sound.stop();
+      }
     }
 }
 </script>
