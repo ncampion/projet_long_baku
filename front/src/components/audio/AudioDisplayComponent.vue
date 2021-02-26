@@ -393,7 +393,7 @@ export default class AudioDisplayComponent extends Vue {
                       return !newAudioRecord.includes(v);
                   })[0];
       let soundTimeline = this.getSoundTimeline;
-      soundTimeline.forEach(elt => {
+      soundTimeline.forEach((elt:any) => {
         if (elt.audioId == audio.id) {
           this.removeSoundTimeline(elt.id, elt.pisteNumber-1);
         }
