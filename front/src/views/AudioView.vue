@@ -8,6 +8,7 @@
       <div class="preview-bloc">
 
         <AudioListComponent
+          :isPlaying="isPlaying"
         />
         
         <div class="preview-container">

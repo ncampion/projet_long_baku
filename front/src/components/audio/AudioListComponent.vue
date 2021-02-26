@@ -19,12 +19,16 @@
           </div>
           
           <div class="horizontal-align">
-            <i class="baku-button" @click="openEditSoundPopup(audio.id)">Modifier un son</i>
+            <i class="baku-button" @click="openEditSoundPopup(audio.id)">Modifier le son</i>
           </div>
 
 
           <div class="horizontal-align">
-            <i class="baku-button" @click="playSound(audio.id)">Jouer un son</i>
+            <i class="baku-button" @click="playSound(audio.id)">Jouer le son</i>
+          </div>
+
+          <div class="horizontal-align">
+            <i class="baku-button" @click="deleteSound(audio.id)">Supprimer le son</i>
           </div>
         </div>
         
@@ -61,6 +65,9 @@ export default class AudioListComponent extends Vue {
 
     @Prop()
     public shots!: Shot[];
+
+    @Prop()
+    public isPlaying: 'animation' | 'selection' | null = null;
 
     @ProjectNS.State
     public id!: string;
@@ -133,6 +140,12 @@ export default class AudioListComponent extends Vue {
         this.sound.play();
         this.alreadyPlayedOnce = true;
       }
+    }
+
+    public async deleteSound(audioId: string) {   
+      if (!this.isPlaying) {
+        await this.$store.dispatch('project/removeAudio', audioId);
+      }   
     }
 }
 </script>

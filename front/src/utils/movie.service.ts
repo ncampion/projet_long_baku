@@ -61,6 +61,7 @@ export interface Audio {
 export interface SoundTimeline {
   readonly id: string;
   readonly audioId: string;
+  readonly pisteNumber : number;
   readonly start : number;
   readonly end : number;
 }
@@ -328,12 +329,13 @@ export class MovieService {
           break;
         }
         case BakuAction.SOUNDTIMELINE_ADD: {
-          const {audioId, start, end} = event.value.params as { audioId: string, start: number, end : number };
+          const {audioId, start, end, pisteNumber} = event.value.params as { audioId: string, start: number, end : number; pisteNumber : number };
           soundsTimeline.push({
             id: event.value.soundTimelineId,
             audioId: audioId,
             start : start,
             end : end,
+            pisteNumber : pisteNumber,
           });
           break;
         }

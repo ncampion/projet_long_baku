@@ -218,19 +218,22 @@ export default class AudioDisplayComponent extends Vue {
     }
 
     public async segmentClick(segment : any) {
-      if (this.goBackward1 || this.goBackward10 || this.goForward1 || this.goForward10) {
-        let updatedStartEnd = this.moveSound(segment);
-        let soundTimelineId = segment.target.__data__.data.soundTimelineId;
-        await this.$store.dispatch('project/updateSoundTimelineStart', { soundTimelineId, start : updatedStartEnd[0], end : updatedStartEnd[1] });
-      }
-      if (this.deleteSound) {
-        this.removeSoundTimeline(segment);
-      }
+      if (!this.isPlaying) {
+        if (this.goBackward1 || this.goBackward10 || this.goForward1 || this.goForward10) {
+          let updatedStartEnd = this.moveSound(segment);
+          let soundTimelineId = segment.target.__data__.data.soundTimelineId;
+          await this.$store.dispatch('project/updateSoundTimelineStart', { soundTimelineId, start : updatedStartEnd[0], end : updatedStartEnd[1] });
+        }
+        if (this.deleteSound) {
+          let soundTimelineId = segment.target.__data__.data.soundTimelineId;
+          let pisteNumber = segment.target.__data__.label.split(" ")[1] - 1;
+          this.removeSoundTimeline(soundTimelineId, pisteNumber);
+        }
 
-      this.chart.data(this.chart.data());
-      this.chartData = this.chart.data();
-      this.chart.refresh();
-      return segment;
+        this.chart.data(this.chart.data());
+        this.chartData = this.chart.data();
+        this.chart.refresh();
+      }
     }
 
   moveSound(segment : any) {
@@ -281,11 +284,9 @@ export default class AudioDisplayComponent extends Vue {
     return [segment.target.__data__.data.timeRange[0], segment.target.__data__.data.timeRange[1]];
   }
 
-  public async removeSoundTimeline(segment : any) {
-    let soundTimelineId = segment.target.__data__.data.soundTimelineId;
+  public async removeSoundTimeline(soundTimelineId : string, pisteNumber : number) {
     await this.$store.dispatch('project/removeSoundTimeline', soundTimelineId);
     let updatedData = [... this.chart.data()]; //this.chart.data();
-    let pisteNumber = segment.target.__data__.label.split(" ")[1] - 1;
 
     if(!this.isPlaying) {
       if (updatedData[0].data[pisteNumber].data.length == 1 && updatedData[0].data.length > 1) {
@@ -294,7 +295,6 @@ export default class AudioDisplayComponent extends Vue {
 
       } else {
 
-        let soundTimelineId = segment.target.__data__.data.soundTimelineId;
         const index = updatedData[0].data[pisteNumber].data.findIndex((p : any) => p.soundTimelineId === soundTimelineId);
         updatedData = JSON.parse(JSON.stringify(updatedData));
         updatedData[0].data[pisteNumber].data.splice(index,1);
@@ -381,13 +381,23 @@ export default class AudioDisplayComponent extends Vue {
 
 
   @Watch('getAudioRecord')
-  public onSoundChange(newAudioRecord : Array<any>) {
+  public async onSoundChange(newAudioRecord : Array<any>) {
     if (this.audioRecord.length == newAudioRecord.length) {
       for (let i = 0; i < newAudioRecord.length; i++) {
         if (this.audioRecord[i].duration != newAudioRecord[i].duration) {
           this.whenCrop(newAudioRecord[i].id, newAudioRecord[i].duration);
         }
       }
+    } else if (this.audioRecord.length == (newAudioRecord.length+1) ) {
+      let audio = this.audioRecord.filter((v) => {
+                      return !newAudioRecord.includes(v);
+                  })[0];
+      let soundTimeline = this.getSoundTimeline;
+      soundTimeline.forEach(elt => {
+        if (elt.audioId == audio.id) {
+          this.removeSoundTimeline(elt.id, elt.pisteNumber-1);
+        }
+      })
     }
     this.audioRecord = newAudioRecord;
   }
@@ -415,7 +425,7 @@ export default class AudioDisplayComponent extends Vue {
     let addAllowed = this.checkSound(start, end, this.activePiste-1, [-1, -1]);
 
     if (addAllowed && !this.isPlaying) {
-      const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end});
+      const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end, pisteNumber : this.activePiste});
 
       this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste, start, end);
       this.updateTimelineLocal();
