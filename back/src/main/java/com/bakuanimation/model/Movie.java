@@ -18,8 +18,8 @@ public final class Movie {
     private final ImmutableSet<String> lockedShots;
     private final ImmutableList<String> shots;
     private final ImmutableListMultimap<String, Path> images;
-    private final ImmutableList<String> audios;
-    private final ImmutableList<String> soundsTimeline;
+    private final ImmutableList<Audio> audios;
+    private final ImmutableList<SoundTimeLine> soundsTimeline;
     private final ImmutableList<Object> dataTimeline;
 
     public Movie(String projectId, String name, String synopsis, int fps, boolean locked,
