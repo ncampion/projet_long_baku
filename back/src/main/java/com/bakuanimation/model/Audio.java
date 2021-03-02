@@ -1,14 +1,16 @@
 package com.bakuanimation.model;
 
+import java.io.*;
+
 public final class Audio {
     private final String id;
-    private final String title;
-    private final Blob sound;
-    private final Blob waveform;
-    private final float volume;
-    private final float duration;
+    private String title;
+    private InputStream sound;
+    private InputStream waveform;
+    private double volume;
+    private double duration;
 
-    public Audio(String id, String title, Blob sound, Blob waveform, float volume, float duration) {
+    public Audio(String id, String title, InputStream sound, InputStream waveform, double volume, double duration) {
         this.id = id;
         this.title = title;
         this.sound = sound;
@@ -25,19 +27,39 @@ public final class Audio {
         return title;
     }
 
-    public Blob getSound() {
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public InputStream getSound() {
         return sound;
     }
 
-    public Blob getWaveform() {
+    public void setSound(InputStream sound) {
+        this.sound = sound;
+    }
+
+    public InputStream getWaveform() {
         return waveform;
     }
 
-    public float getVolume() {
+    public void setWaveform(InputStream waveform) {
+        this.waveform = waveform;
+    }
+
+    public double getVolume() {
         return volume;
     }
 
-    public float getDuration() {
+    public void setVolume(double volume) {
+        this.volume = volume;
+    }
+
+    public double getDuration() {
         return duration;
+    }
+
+    public void setDuration(double duration) {
+        this.duration = duration;
     }
 }

@@ -473,7 +473,6 @@ export default class AudioDisplayComponent extends Vue {
       newChartData[0].data[this.activePiste-1].data = dataActivePiste;
       this.chart.data(newChartData);
       this.chartData = newChartData;
-      this.updateTimelineLocal();
     }
 
 

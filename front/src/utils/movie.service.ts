@@ -176,7 +176,7 @@ export class MovieService {
       const soundTimelineIndex = soundsTimeline.findIndex((p) => p.id === soundTimelineId);
       const soundTimeline = soundsTimeline.find((p) => p.id === soundTimelineId);
       if (!soundTimeline) {
-        throw new Error(`audio ${soundTimeline} should exist for project ${title}`);
+        throw new Error(`soundTimeline ${soundTimeline} should exist for project ${title}`);
       }
       soundsTimeline.splice(soundTimelineIndex, 1, updateFn(soundTimeline));
     };

@@ -1,38 +1,50 @@
 package com.bakuanimation.model;
 
-public final class Audio {
+public final class SoundTimeLine {
 
-    private final String id;
+    private final String soundTimelineId;
     private final String audioId;
-    private final float pisteNumber;
-    private final float start;
-    private final float end;
+    private double pisteNumber;
+    private double start;
+    private double end;
 
-    public Audio(String id, String audioId, float pisteNumber, float start, float end) {
-        this.id = id;
+    public SoundTimeLine(String soundTimelineId, String audioId, double pisteNumber, double start, double end) {
+        this.soundTimelineId = soundTimelineId;
         this.audioId = audioId;
         this.pisteNumber = pisteNumber;
         this.start = start;
         this.end = end;
     }
 
-    public String getId() {
-        return id;
+    public String getSoundTimelineId() {
+        return soundTimelineId;
     }
 
     public String getAudioId() {
         return audioId;
     }
 
-    public float getPisteNumber() {
+    public double getPisteNumber() {
         return pisteNumber;
     }
 
-    public float getStart() {
+    public void setPisteNumber(double pisteNumber) {
+        this.pisteNumber = pisteNumber;
+    }
+
+    public double getStart() {
         return start;
     }
 
-    public float getEnd() {
+    public void setStart(double start) {
+        this.start = start;
+    }
+
+    public double getEnd() {
         return end;
+    }
+
+    public void setEnd(double end) {
+        this.end = end;
     }
 }
