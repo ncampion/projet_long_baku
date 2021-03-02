@@ -131,15 +131,13 @@ export default class AudioDisplayComponent extends Vue {
 
 
 
-    async mounted() {
+    mounted() {
       //pour le build
       console.log(this.mode);
 
-      //this.loadProject(this.$route.params.projectId);
-      await this.$store.dispatch('project/loadProject', this.$route.params.projectId); 
+      this.chartData = this.getChart();
 
-
-      this.chart.data( this.getChart())
+      this.chart.data(this.chartData)
             .xTickFormat((n: number): number => +n)
             .timeFormat('%Q')
             .maxHeight(330)
@@ -152,7 +150,6 @@ export default class AudioDisplayComponent extends Vue {
       this.chart(this.$refs.movieContainer);
       this.audioRecord = this.getAudioRecord;
 
-      this.chartData = this.initializeChart();
     }
 
 
@@ -181,41 +178,23 @@ export default class AudioDisplayComponent extends Vue {
 
     public initializeChart(){
       let localChart = this.getChart();
-      //let soundTimeline = this.getSoundTimeline;
-
-      console.log("soundTimeline");
-      console.log(this.getSoundTimeline);
-      console.log("localChart");
-      console.log(localChart);
 
       for (let sound of this.getSoundTimeline) {
-        /*
-        audioId: "8e3da37d-3d84-4ec0-9da5-6cd0f35537b0"
-        end: 9
-        id: "3084ac11-1725-4568-aac7-ea3eda75fc4d"
-        pisteNumber: 1
-        start: 1
-        */
-
         if(!localChart[0].data[sound.pisteNumber-1]) {
+
           // ajouter un nombre de pistes suffisant
           for(let i = 1; i<=(sound.pisteNumber-localChart[0].data.length); i++){
             let numPiste = localChart[0].data.length + i;
             this.nbPistes = this.nbPistes +1;
 
             let pistes = [... localChart[0].data];
-            //this.listPistes.push(numPiste);
+            this.listPistes.push(numPiste);
 
             pistes.push({
               label : "Piste " + numPiste,
               data : [],
             });
-            //let newChartData =  JSON.parse(JSON.stringify(this.chartData));
             localChart[0].data = pistes;
-            //this.chart.data(newChartData);
-            //this.chartData = newChartData;
-            //this.activePiste = numPiste;
-            //this.updateTimelineLocal();
           }
         }
 
@@ -228,10 +207,7 @@ export default class AudioDisplayComponent extends Vue {
             soundTimelineId : sound.id,
         };
         dataActivePiste.push(dataSound);
-        //let newChartData =  JSON.parse(JSON.stringify(this.localChart));
         localChart[0].data[sound.pisteNumber-1].data = dataActivePiste;
-        //this.chart.data(newChartData);
-        //this.chartData = newChartData;
 
       }
       return localChart;
@@ -246,8 +222,8 @@ export default class AudioDisplayComponent extends Vue {
       for (let shot of this.allShots) {
         this.nbTotalFrames = this.nbTotalFrames + shot.images.length;
       }
-      this.chart.data(this.getChart());
-      this.chartData = this.getChart();
+      this.chartData = this.initializeChart();
+      this.chart.data(this.chartData);
     }
 
     getChartFromShots(){
@@ -269,7 +245,6 @@ export default class AudioDisplayComponent extends Vue {
       } else {
         return [];
       }
-
     }
 
 
