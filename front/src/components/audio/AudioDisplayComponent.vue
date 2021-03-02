@@ -202,7 +202,7 @@ export default class AudioDisplayComponent extends Vue {
         let dataActivePiste = [... localChart[0].data[sound.pisteNumber-1].data];
         let dataSound = {
             timeRange : timeRange,
-            val : "coucou",
+            val : sound.title,
             audioId : sound.audioId,
             soundTimelineId : sound.id,
         };
@@ -323,7 +323,7 @@ export default class AudioDisplayComponent extends Vue {
 
   public async removeSoundTimeline(soundTimelineId : string, pisteNumber : number) {
     await this.$store.dispatch('project/removeSoundTimeline', soundTimelineId);
-    let updatedData = [... this.chart.data()]; //this.chart.data();
+    let updatedData = [... this.chart.data()];
 
     if(!this.isPlaying) {
       if (updatedData[0].data[pisteNumber].data.length == 1 && updatedData[0].data.length > 1) {
@@ -462,7 +462,7 @@ export default class AudioDisplayComponent extends Vue {
     let addAllowed = this.checkSound(start, end, this.activePiste-1, [-1, -1]);
 
     if (addAllowed && !this.isPlaying) {
-      const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end, pisteNumber : this.activePiste});
+      const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end, pisteNumber : this.activePiste, title});
 
       this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste, start, end);
       this.updateTimelineLocal();
@@ -491,8 +491,6 @@ export default class AudioDisplayComponent extends Vue {
   public async updateTimelineLocal() {
     this.chart.data(this.chartData);
     this.chart.refresh();
-    //await this.$store.dispatch('project/updateDataTimeline', this.chartData);
-    //this.$emit('close');
   }
 
 

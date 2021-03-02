@@ -64,6 +64,7 @@ export interface SoundTimeline {
   readonly pisteNumber : number;
   readonly start : number;
   readonly end : number;
+  readonly title : String;
 }
 
 export interface ReadingSliderBoundaries {
@@ -317,13 +318,14 @@ export class MovieService {
           break;
         }
         case BakuAction.SOUNDTIMELINE_ADD: {
-          const {audioId, start, end, pisteNumber} = event.value.params as { audioId: string, start: number, end : number; pisteNumber : number };
+          const {audioId, start, end, pisteNumber, title} = event.value.params as { audioId: string, start: number, end : number; pisteNumber : number, title : String };
           soundsTimeline.push({
             id: event.value.soundTimelineId,
             audioId: audioId,
             start : start,
             end : end,
             pisteNumber : pisteNumber,
+            title : title,
           });
           break;
         }
