@@ -221,11 +221,6 @@ export const ProjectStore: BakuModule<ProjectState> = {
       loadEvents(context, [event]);
     },
 
-    async updateDataTimeline(context, data : any) {
-      const event = makeEvent(context, BakuAction.TIMELINE_UPDATE_DATA, {data});
-      loadEvents(context, [event]);
-    },
-
     async createSoundTimeline(context, params: {audioId : String, start : number, end : number, pisteNumber : number}): Promise<string> {
       const soundTimelineId = uuid.v4();
       const event = makeEvent(context, BakuAction.SOUNDTIMELINE_ADD, {soundTimelineId, params});

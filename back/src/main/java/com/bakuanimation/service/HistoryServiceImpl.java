@@ -142,7 +142,6 @@ public class HistoryServiceImpl implements HistoryService {
         Set<String> lockedShots = new HashSet<>();
         List<Audio> audios = new ArrayList<>();
         List<SoundTimeLine> soundsTimeline = new ArrayList<>();
-        ArrayList<Object> dataTimeline = new ArrayList<>();
         for (BakuEvent element : history) {
             switch (BakuAction.action(element.getAction())) {
                 case MOVIE_UPDATE_TITLE:
@@ -299,11 +298,6 @@ public class HistoryServiceImpl implements HistoryService {
                     }
                     break;                    
                 }
-                case TIMELINE_UPDATE_DATA: {
-                    System.out.println(element.getValue().get("data"));
-                    //dataTimeline = element.getValue().get("data");
-                    break;                    
-                }
                 case SOUNDTIMELINE_ADD: {
                     String soundTimelineId = element.getValue().get("soundTimelineId").asText();
                     String audioId = element.getValue().get("params").get("audioId").asText();
@@ -360,6 +354,6 @@ public class HistoryServiceImpl implements HistoryService {
             }
             imagesBuilder.putAll(shotId, imagesEntry.getValue());
         }
-        return new Movie(projectId, name, synopsis, fps, movieLocked, lockedShots, shots, imagesBuilder.build(), audios, soundsTimeline, dataTimeline);
+        return new Movie(projectId, name, synopsis, fps, movieLocked, lockedShots, shots, imagesBuilder.build(), audios, soundsTimeline);
     }
 }

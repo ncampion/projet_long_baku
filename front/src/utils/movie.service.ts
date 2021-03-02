@@ -316,10 +316,6 @@ export class MovieService {
           )
           break;
         }
-        case BakuAction.TIMELINE_UPDATE_DATA: {
-          dataTimeline = event.value.data;
-          break;
-        }
         case BakuAction.SOUNDTIMELINE_ADD: {
           const {audioId, start, end, pisteNumber} = event.value.params as { audioId: string, start: number, end : number; pisteNumber : number };
           soundsTimeline.push({

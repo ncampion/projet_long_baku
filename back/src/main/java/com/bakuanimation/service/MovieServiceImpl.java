@@ -95,7 +95,7 @@ public final class MovieServiceImpl implements MovieService {
                         return Single.error(new IllegalArgumentException("Shot " + shotId + " not found"));
                     }
                     Movie movie = new Movie(wholeMovie.getProjectId(), wholeMovie.getName(), wholeMovie.getSynopsis(), wholeMovie.getFps(), wholeMovie.isLocked(),
-                            wholeMovie.getLockedShots(), List.of(shotId), wholeMovie.getImages(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+                            wholeMovie.getLockedShots(), List.of(shotId), wholeMovie.getImages(), new ArrayList<>(), new ArrayList<>());
                     Path moviePath = pathService.getMovieFile(projectId, String.valueOf(shotIdx));
                     Path movieTempPath = pathService.getMovieTempFile(projectId, String.valueOf(shotIdx));
                     Instant lastModifiedStackFile = Files.getLastModifiedTime(pathService.getStackFile(projectId)).toInstant();
