@@ -183,8 +183,9 @@ export default class AudioDisplayComponent extends Vue {
         if(!localChart[0].data[sound.pisteNumber-1]) {
 
           // ajouter un nombre de pistes suffisant
-          for(let i = 1; i<=(sound.pisteNumber-localChart[0].data.length); i++){
-            let numPiste = localChart[0].data.length + i;
+          let pisteLength = localChart[0].data.length;
+          for(let i = 1; i<=(sound.pisteNumber-pisteLength); i++){
+            let numPiste = localChart[0].data.length + 1;
             this.nbPistes = this.nbPistes +1;
 
             let pistes = [... localChart[0].data];
@@ -440,9 +441,6 @@ export default class AudioDisplayComponent extends Vue {
   }
 
 
-
-
-
   // Drop from the Record sounds list
 
   allowDrop(event: any) {
@@ -557,6 +555,5 @@ export default class AudioDisplayComponent extends Vue {
   goToPiste(n : number) {
     this.activePiste = n;
   }
-
 }
 </script>

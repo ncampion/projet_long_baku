@@ -319,12 +319,10 @@ public class HistoryServiceImpl implements HistoryService {
                 }
                 case SOUNDTIMELINE_UPDATE_START: {
                     String soundTimelineId = element.getValue().get("soundTimelineId").asText();
-                    double pisteNumber = element.getValue().get("pisteNumber").asDouble();
                     double start = element.getValue().get("start").asDouble();
                     double end = element.getValue().get("end").asDouble();
                     for (SoundTimeLine soundTimeline : soundsTimeline) {
                         if (soundTimeline.getSoundTimelineId() == soundTimelineId) {
-                            soundTimeline.setPisteNumber(pisteNumber);
                             soundTimeline.setStart(start);
                             soundTimeline.setEnd(end);
                             break;
