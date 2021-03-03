@@ -96,7 +96,7 @@ export default class AudioListComponent extends Vue {
       event.dataTransfer.setData("text", id);
     }
 
-    public async openRecordPopup(projectId) {
+    public async openRecordPopup(projectId:string) {
       this.$buefy.modal.open({
         parent: this,
         component: RecordPopup,
