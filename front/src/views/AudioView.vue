@@ -9,6 +9,7 @@
 
         <AudioListComponent
           :isPlaying="isPlaying"
+          :projectId="id"
         />
         
         <div class="preview-container">

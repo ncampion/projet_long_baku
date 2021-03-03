@@ -42,7 +42,7 @@
     
 
     <div class="record-Button">
-      <button class="button is-primary" @click="openRecordPopup">Enregistrer un son</button>
+      <button class="button is-primary" @click="openRecordPopup(projectId)">Enregistrer un son</button>
       <button class="button is-primary" @click="stopPlayer()">Stopper la lecture des sons</button>
     </div>
   </div>
@@ -70,6 +70,9 @@ export default class AudioListComponent extends Vue {
     @Prop()
     public isPlaying: 'animation' | 'selection' | null = null;
 
+    @Prop()
+    public projectId!: String;
+
     @ProjectNS.State
     public id!: string;
 
@@ -93,12 +96,15 @@ export default class AudioListComponent extends Vue {
       event.dataTransfer.setData("text", id);
     }
 
-    public async openRecordPopup() {
+    public async openRecordPopup(projectId) {
       this.$buefy.modal.open({
         parent: this,
         component: RecordPopup,
         hasModalCard: true,
         canCancel: ['escape', 'outside'],
+        props: {
+          "projectId": projectId
+        }
       });
     }
 

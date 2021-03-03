@@ -30,10 +30,10 @@
 
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component,Prop,Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import WaveSurfer from "wavesurfer.js";
-
+import { uploadSound } from '@/api';
 
 export class AudioDevice{
   public id: string;
@@ -52,6 +52,9 @@ export default class RecordPopup extends Vue {
 
   @ProjectNS.Getter
   protected getAudioRecord!: any;
+
+  @Prop()
+  public projectId! : string;
 
   private numberOfSounds: number = 0;
   public nameSound: string = "";
@@ -192,6 +195,7 @@ export default class RecordPopup extends Vue {
         title = this.nameSound;
       }
       await this.$store.dispatch('project/createAudio', { title, sound: this.audioBlob, duration: this.audioDuration});
+      await uploadSound(this.projectId, this.audioBlob, title);
     }
   }
 }
