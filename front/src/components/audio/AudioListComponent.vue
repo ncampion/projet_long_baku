@@ -19,18 +19,17 @@
                 {{ audio.title }}
             </div>
             
-            <div class="horizontal-align">
-              <i class="create-button-modify" @click="openEditSoundPopup(audio.id)"></i>
-            </div>
+            <span class="tools">
+              <div class="tool create-button-modify" @click="openEditSoundPopup(audio.id)">
+              </div>
 
 
-            <div class="horizontal-align">
-              <i class="create-button-play" @click="playSound(audio.id)"></i>
-            </div>
+              <div class="tool create-button-play" @click="playSound(audio.id)">
+              </div>
 
-            <div class="horizontal-align">
-              <i class="create-button-delete" @click="deleteSound(audio.id)"></i>
-            </div>
+              <div class="tool create-button-delete" @click="deleteSound(audio.id)">
+              </div>
+            </span>
           </div>
         </div>
         

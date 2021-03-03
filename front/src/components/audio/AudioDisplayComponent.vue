@@ -134,7 +134,6 @@ export default class AudioDisplayComponent extends Vue {
     mounted() {
       //pour le build
       console.log(this.mode);
-      window.innerwidth
       this.chartData = this.getChart();
       window.addEventListener('resize', this.reportWindowSize);
       this.chart.data(this.chartData)
