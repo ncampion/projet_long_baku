@@ -19,7 +19,7 @@
           </div>
           
           <div class="horizontal-align">
-            <i class="baku-button" @click="openEditSoundPopup(audio.id)">Modifier le son</i>
+            <i class="baku-button" @click="openEditSoundPopup(audio.id,projectId)">Modifier le son</i>
           </div>
 
 
@@ -108,14 +108,15 @@ export default class AudioListComponent extends Vue {
       });
     }
 
-    public async openEditSoundPopup(id: String) {
+    public async openEditSoundPopup(id: String, projectId: string) {
       this.$buefy.modal.open({
         parent: this,
         component: EditSoundPopup,
         hasModalCard: true,
         canCancel: ['escape', 'outside'],
         props: {
-          "id": id
+          "id": id,
+          "projectId": projectId
         }
       });
     }

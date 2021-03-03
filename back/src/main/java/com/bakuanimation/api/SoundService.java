@@ -11,4 +11,6 @@ import java.io.OutputStream;
 
 public interface SoundService {
     public void save(String projectId, InputStream inputStream, String filename);
+
+    public void delete(String projectId, String filename);
 }
