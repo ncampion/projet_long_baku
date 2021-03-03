@@ -8,27 +8,29 @@
         <div
           v-for="audio in getAudioRecord"
           class="sounds"
+          draggable="true"
+          @dragstart="handleDragStart($event,audio.id);"
         >
+          <div class="border">
           
-          <div
-            class="horizontal-align"
-            draggable="true"
-            @dragstart="handleDragStart($event,audio.id);"
-          >
-              {{ audio.title }}
-          </div>
-          
-          <div class="horizontal-align">
-            <i class="baku-button" @click="openEditSoundPopup(audio.id)">Modifier le son</i>
-          </div>
+            <div
+              class="horizontal-align"
+            >
+                {{ audio.title }}
+            </div>
+            
+            <div class="horizontal-align">
+              <i class="create-button-modify" @click="openEditSoundPopup(audio.id)"></i>
+            </div>
 
 
-          <div class="horizontal-align">
-            <i class="baku-button" @click="playSound(audio.id)">Jouer le son</i>
-          </div>
+            <div class="horizontal-align">
+              <i class="create-button-play" @click="playSound(audio.id)"></i>
+            </div>
 
-          <div class="horizontal-align">
-            <i class="baku-button" @click="deleteSound(audio.id)">Supprimer le son</i>
+            <div class="horizontal-align">
+              <i class="create-button-delete" @click="deleteSound(audio.id)"></i>
+            </div>
           </div>
         </div>
         

@@ -1,11 +1,55 @@
 .audio-list {
     width: 200px;
     padding: 10px 0;
+    height: 75%;
 }
 
 .audio-list-container {
     width: 200px;
-    height: 400px;
+    max-height: 100%;
+    flex-direction: column;
+    overflow: auto;
+    background-color: aqua;
+    display: flex;
+}
+
+.create-button-modify {
+    background-image: url("../../assets/modify_sound.png");
+    background-size: contain;
+    background-position: top;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    //top: -2.2rem;
+    //right: -3.6rem;
+    //z-index: -1;
+}
+
+.create-button-play {
+    background-image: url("../../assets/play_sound.png");
+    background-size: contain;
+    background-position: top;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    //top: -2.2rem;
+    //right: -3.6rem;
+    //z-index: -1;
+}
+
+.create-button-delete {
+    background-image: url("../../assets/delete_sound.png");
+    background-size: contain;
+    background-position: top;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    //top: -2.2rem;
+    //right: -3.6rem;
+    //z-index: -1;
 }
 
 .record-Button {
@@ -15,8 +59,14 @@
 
 .horizontal-align {
     display: inline-block;
+    padding: 0px 20px;
 }
 
 .sounds {
-    padding: 10px 0;
+    padding: 5px 0;
+    .border {
+        border-style: solid;
+        border-color: #e66359;
+        padding: 5px 0;
+    }
 }
