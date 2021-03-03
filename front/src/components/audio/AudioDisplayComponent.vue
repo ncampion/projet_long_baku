@@ -132,12 +132,12 @@ export default class AudioDisplayComponent extends Vue {
 
 
     mounted() {
-      this.chartData = this.getChart();
-
+      //pour le build
       console.log(this.mode);
 
+      this.chartData = this.getChart();
 
-      this.chart.data( this.getChart())
+      this.chart.data(this.chartData)
             .xTickFormat((n: number): number => +n)
             .timeFormat('%Q')
             .maxHeight(330)
@@ -149,6 +149,7 @@ export default class AudioDisplayComponent extends Vue {
             .segmentTooltipContent(this.segmentTooltip);
       this.chart(this.$refs.movieContainer);
       this.audioRecord = this.getAudioRecord;
+
     }
 
 
@@ -175,6 +176,44 @@ export default class AudioDisplayComponent extends Vue {
         ];
     }
 
+    public initializeChart(){
+      let localChart = this.getChart();
+
+      for (let sound of this.getSoundTimeline) {
+        if(!localChart[0].data[sound.pisteNumber-1]) {
+
+          // ajouter un nombre de pistes suffisant
+          let pisteLength = localChart[0].data.length;
+          for(let i = 1; i<=(sound.pisteNumber-pisteLength); i++){
+            let numPiste = localChart[0].data.length + 1;
+            this.nbPistes = this.nbPistes +1;
+
+            let pistes = [... localChart[0].data];
+            this.listPistes.push(numPiste);
+
+            pistes.push({
+              label : "Piste " + numPiste,
+              data : [],
+            });
+            localChart[0].data = pistes;
+          }
+        }
+
+        let timeRange = [sound.start, sound.end];
+        let dataActivePiste = [... localChart[0].data[sound.pisteNumber-1].data];
+        let dataSound = {
+            timeRange : timeRange,
+            val : sound.title,
+            audioId : sound.audioId,
+            soundTimelineId : sound.id,
+        };
+        dataActivePiste.push(dataSound);
+        localChart[0].data[sound.pisteNumber-1].data = dataActivePiste;
+
+      }
+      return localChart;
+    }
+
     public actualizeDateMarker(newFrame: number){
       this.chart.dateMarker(newFrame);
     }
@@ -184,8 +223,8 @@ export default class AudioDisplayComponent extends Vue {
       for (let shot of this.allShots) {
         this.nbTotalFrames = this.nbTotalFrames + shot.images.length;
       }
-      this.chart.data(this.getChart());
-      this.chartData = this.getChart();
+      this.chartData = this.initializeChart();
+      this.chart.data(this.chartData);
     }
 
     getChartFromShots(){
@@ -207,7 +246,6 @@ export default class AudioDisplayComponent extends Vue {
       } else {
         return [];
       }
-
     }
 
 
@@ -228,6 +266,9 @@ export default class AudioDisplayComponent extends Vue {
           let soundTimelineId = segment.target.__data__.data.soundTimelineId;
           let pisteNumber = segment.target.__data__.label.split(" ")[1] - 1;
           this.removeSoundTimeline(soundTimelineId, pisteNumber);
+          if (this.chartData[0].data[pisteNumber].data.length == 0 && this.chartData[0].data.length > 1) {
+            this.removePiste(pisteNumber+1);
+          }
         }
 
         this.chart.data(this.chart.data());
@@ -285,28 +326,17 @@ export default class AudioDisplayComponent extends Vue {
   }
 
   public async removeSoundTimeline(soundTimelineId : string, pisteNumber : number) {
-    await this.$store.dispatch('project/removeSoundTimeline', soundTimelineId);
-    let updatedData = [... this.chart.data()]; //this.chart.data();
-
     if(!this.isPlaying) {
-      if (updatedData[0].data[pisteNumber].data.length == 1 && updatedData[0].data.length > 1) {
+      await this.$store.dispatch('project/removeSoundTimeline', soundTimelineId);
+      let updatedData = [... this.chart.data()];
+      const index = updatedData[0].data[pisteNumber].data.findIndex((p : any) => p.soundTimelineId === soundTimelineId);
+      updatedData = JSON.parse(JSON.stringify(updatedData));
+      updatedData[0].data[pisteNumber].data.splice(index,1);
 
-        this.removePiste(pisteNumber+1);
-
-      } else {
-
-        const index = updatedData[0].data[pisteNumber].data.findIndex((p : any) => p.soundTimelineId === soundTimelineId);
-        updatedData = JSON.parse(JSON.stringify(updatedData));
-        updatedData[0].data[pisteNumber].data.splice(index,1);
-
-        this.chart.data(updatedData);
-        this.chartData = updatedData;
-        this.updateTimelineLocal();
-        
-      }
+      this.chart.data(updatedData);
+      this.chartData = updatedData;
     }
   }
-
 
   renamePistes(updatedData : any) : any {
     for (let i = 1; i<=updatedData[0].data.length; i++) {
@@ -315,8 +345,6 @@ export default class AudioDisplayComponent extends Vue {
     }
     return updatedData;
   }
-
-  
 
   backward10() {
     this.setFalse();
@@ -376,7 +404,6 @@ export default class AudioDisplayComponent extends Vue {
     newChartData[0].data = pistes;
     this.chart.data(newChartData);
     this.chartData = newChartData;
-    this.updateTimelineLocal();
   }
 
 
@@ -397,13 +424,19 @@ export default class AudioDisplayComponent extends Vue {
         if (elt.audioId == audio.id) {
           this.removeSoundTimeline(elt.id, elt.pisteNumber-1);
         }
-      })
+      });
+      let updatedData = [... this.chart.data()];
+      for (let i = updatedData[0].data.length; i>0; i--) {
+        if (updatedData[0].data[i-1].data.length == 0 && updatedData[0].data.length > 1) {
+          this.removePiste(i);
+        }
+      }
+      updatedData = JSON.parse(JSON.stringify(updatedData));
+      this.chart.data(updatedData);
+      this.chartData = updatedData;
     }
     this.audioRecord = newAudioRecord;
   }
-
-
-
 
 
   // Drop from the Record sounds list
@@ -425,10 +458,9 @@ export default class AudioDisplayComponent extends Vue {
     let addAllowed = this.checkSound(start, end, this.activePiste-1, [-1, -1]);
 
     if (addAllowed && !this.isPlaying) {
-      const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end, pisteNumber : this.activePiste});
+      const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end, pisteNumber : this.activePiste, title});
 
       this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste, start, end);
-      this.updateTimelineLocal();
     }
 
 
@@ -451,30 +483,21 @@ export default class AudioDisplayComponent extends Vue {
     return true;
   }
 
-    public async updateTimelineLocal() {
-      this.chart.data(this.chartData);
-      this.chart.refresh();
-      await this.$store.dispatch('project/updateDataTimeline', this.chartData);
-      //this.$emit('close');
-    }
-
-
-    addAudioToPiste (audioId : string, title : string, soundTimelineId : string, numPiste : number, start : number, end : number) {
-      let timeRange = [start, end];
-      let dataActivePiste = [... this.chartData[0].data[this.activePiste-1].data];
-      let dataSound = {
-          timeRange : timeRange,
-          val : title,
-          audioId : audioId,
-          soundTimelineId : soundTimelineId,
-      };
-      dataActivePiste.push(dataSound);
-      let newChartData =  JSON.parse(JSON.stringify(this.chartData));
-      newChartData[0].data[this.activePiste-1].data = dataActivePiste;
-      this.chart.data(newChartData);
-      this.chartData = newChartData;
-      this.updateTimelineLocal();
-    }
+  addAudioToPiste (audioId : string, title : string, soundTimelineId : string, numPiste : number, start : number, end : number) {
+    let timeRange = [start, end];
+    let dataActivePiste = [... this.chartData[0].data[this.activePiste-1].data];
+    let dataSound = {
+        timeRange : timeRange,
+        val : title,
+        audioId : audioId,
+        soundTimelineId : soundTimelineId,
+    };
+    dataActivePiste.push(dataSound);
+    let newChartData =  JSON.parse(JSON.stringify(this.chartData));
+    newChartData[0].data[this.activePiste-1].data = dataActivePiste;
+    this.chart.data(newChartData);
+    this.chartData = newChartData;
+  }
 
 
   public async addPiste() {
@@ -492,7 +515,6 @@ export default class AudioDisplayComponent extends Vue {
     this.chart.data(newChartData);
     this.chartData = newChartData;
     this.activePiste = numPiste;
-    this.updateTimelineLocal();
   }
 
 
@@ -515,7 +537,6 @@ export default class AudioDisplayComponent extends Vue {
     
       this.chart.data(newDataUpdate);
       this.chartData = newDataUpdate;
-      this.updateTimelineLocal();
     }
     
   }
@@ -523,6 +544,5 @@ export default class AudioDisplayComponent extends Vue {
   goToPiste(n : number) {
     this.activePiste = n;
   }
-
 }
 </script>

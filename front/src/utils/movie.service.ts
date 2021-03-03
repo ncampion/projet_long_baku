@@ -64,6 +64,7 @@ export interface SoundTimeline {
   readonly pisteNumber : number;
   readonly start : number;
   readonly end : number;
+  readonly title : String;
 }
 
 export interface ReadingSliderBoundaries {
@@ -176,7 +177,7 @@ export class MovieService {
       const soundTimelineIndex = soundsTimeline.findIndex((p) => p.id === soundTimelineId);
       const soundTimeline = soundsTimeline.find((p) => p.id === soundTimelineId);
       if (!soundTimeline) {
-        throw new Error(`audio ${soundTimeline} should exist for project ${title}`);
+        throw new Error(`soundTimeline ${soundTimeline} should exist for project ${title}`);
       }
       soundsTimeline.splice(soundTimelineIndex, 1, updateFn(soundTimeline));
     };
@@ -316,26 +317,15 @@ export class MovieService {
           )
           break;
         }
-        case BakuAction.AUDIO_TIMELINE_ADD: {
-          dataTimeline = event.value.data;
-          break;
-        }
-        case BakuAction.AUDIO_TIMELINE_REMOVE: {
-          dataTimeline = event.value.data;
-          break;
-        }
-        case BakuAction.TIMELINE_UPDATE_DATA: {
-          dataTimeline = event.value.data;
-          break;
-        }
         case BakuAction.SOUNDTIMELINE_ADD: {
-          const {audioId, start, end, pisteNumber} = event.value.params as { audioId: string, start: number, end : number; pisteNumber : number };
+          const {audioId, start, end, pisteNumber, title} = event.value.params as { audioId: string, start: number, end : number; pisteNumber : number, title : String };
           soundsTimeline.push({
             id: event.value.soundTimelineId,
             audioId: audioId,
             start : start,
             end : end,
             pisteNumber : pisteNumber,
+            title : title,
           });
           break;
         }

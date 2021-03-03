@@ -95,6 +95,26 @@ export default class HistoryComponent extends Vue {
           return 'déplace un plan';
         case BakuAction.CHANGE_FPS:
           return `change les fps du film ${event.value}`;
+        case BakuAction.AUDIO_ADD:
+          return 'enregistre un son';
+        case BakuAction.AUDIO_REMOVE:
+          return 'supprime un son';
+        case BakuAction.AUDIO_UPDATE_TITLE:
+          return 'change le titre d\'un son';
+        case BakuAction.AUDIO_UPDATE_SOUND:
+          return 'modifie un son';
+        case BakuAction.AUDIO_UPDATE_VOLUME:
+          return 'change le volume d\'un son';
+        case BakuAction.AUDIO_UPDATE_DURATION:
+          return 'change la durée d\'un son';
+        case BakuAction.AUDIO_UPDATE_WAVEFORM:
+          return 'change la waveform d\'un son';
+        case BakuAction.SOUNDTIMELINE_ADD:
+          return 'ajoute un son sur le film';
+        case BakuAction.SOUNDTIMELINE_REMOVE:
+          return 'retire un son du film';
+        case BakuAction.SOUNDTIMELINE_UPDATE_START:
+          return 'deplace un son';
         default:
           return '';
       }
