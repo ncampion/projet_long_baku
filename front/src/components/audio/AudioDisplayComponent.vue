@@ -266,6 +266,9 @@ export default class AudioDisplayComponent extends Vue {
           let soundTimelineId = segment.target.__data__.data.soundTimelineId;
           let pisteNumber = segment.target.__data__.label.split(" ")[1] - 1;
           this.removeSoundTimeline(soundTimelineId, pisteNumber);
+          if (this.chartData[0].data[pisteNumber].data.length == 0 && this.chartData[0].data.length > 1) {
+            this.removePiste(pisteNumber+1);
+          }
         }
 
         this.chart.data(this.chart.data());
@@ -323,28 +326,17 @@ export default class AudioDisplayComponent extends Vue {
   }
 
   public async removeSoundTimeline(soundTimelineId : string, pisteNumber : number) {
-    await this.$store.dispatch('project/removeSoundTimeline', soundTimelineId);
-    let updatedData = [... this.chart.data()];
-
     if(!this.isPlaying) {
-      if (updatedData[0].data[pisteNumber].data.length == 1 && updatedData[0].data.length > 1) {
+      await this.$store.dispatch('project/removeSoundTimeline', soundTimelineId);
+      let updatedData = [... this.chart.data()];
+      const index = updatedData[0].data[pisteNumber].data.findIndex((p : any) => p.soundTimelineId === soundTimelineId);
+      updatedData = JSON.parse(JSON.stringify(updatedData));
+      updatedData[0].data[pisteNumber].data.splice(index,1);
 
-        this.removePiste(pisteNumber+1);
-
-      } else {
-
-        const index = updatedData[0].data[pisteNumber].data.findIndex((p : any) => p.soundTimelineId === soundTimelineId);
-        updatedData = JSON.parse(JSON.stringify(updatedData));
-        updatedData[0].data[pisteNumber].data.splice(index,1);
-
-        this.chart.data(updatedData);
-        this.chartData = updatedData;
-        this.updateTimelineLocal();
-        
-      }
+      this.chart.data(updatedData);
+      this.chartData = updatedData;
     }
   }
-
 
   renamePistes(updatedData : any) : any {
     for (let i = 1; i<=updatedData[0].data.length; i++) {
@@ -353,8 +345,6 @@ export default class AudioDisplayComponent extends Vue {
     }
     return updatedData;
   }
-
-  
 
   backward10() {
     this.setFalse();
@@ -414,7 +404,6 @@ export default class AudioDisplayComponent extends Vue {
     newChartData[0].data = pistes;
     this.chart.data(newChartData);
     this.chartData = newChartData;
-    this.updateTimelineLocal();
   }
 
 
@@ -435,7 +424,16 @@ export default class AudioDisplayComponent extends Vue {
         if (elt.audioId == audio.id) {
           this.removeSoundTimeline(elt.id, elt.pisteNumber-1);
         }
-      })
+      });
+      let updatedData = [... this.chart.data()];
+      for (let i = updatedData[0].data.length; i>0; i--) {
+        if (updatedData[0].data[i-1].data.length == 0 && updatedData[0].data.length > 1) {
+          this.removePiste(i);
+        }
+      }
+      updatedData = JSON.parse(JSON.stringify(updatedData));
+      this.chart.data(updatedData);
+      this.chartData = updatedData;
     }
     this.audioRecord = newAudioRecord;
   }
@@ -463,7 +461,6 @@ export default class AudioDisplayComponent extends Vue {
       const soundTimelineId = await this.$store.dispatch('project/createSoundTimeline', {audioId, start, end, pisteNumber : this.activePiste, title});
 
       this.addAudioToPiste(audioId, title, soundTimelineId, this.activePiste, start, end);
-      this.updateTimelineLocal();
     }
 
 
@@ -485,12 +482,6 @@ export default class AudioDisplayComponent extends Vue {
     }
     return true;
   }
-
-  public async updateTimelineLocal() {
-    this.chart.data(this.chartData);
-    this.chart.refresh();
-  }
-
 
   addAudioToPiste (audioId : string, title : string, soundTimelineId : string, numPiste : number, start : number, end : number) {
     let timeRange = [start, end];
@@ -524,7 +515,6 @@ export default class AudioDisplayComponent extends Vue {
     this.chart.data(newChartData);
     this.chartData = newChartData;
     this.activePiste = numPiste;
-    this.updateTimelineLocal();
   }
 
 
@@ -547,7 +537,6 @@ export default class AudioDisplayComponent extends Vue {
     
       this.chart.data(newDataUpdate);
       this.chartData = newDataUpdate;
-      this.updateTimelineLocal();
     }
     
   }

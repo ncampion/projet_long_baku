@@ -235,11 +235,8 @@ public class HistoryServiceImpl implements HistoryService {
                 }
                 case AUDIO_REMOVE: {
                     String audioId = element.getValue().get("audioId").asText();
-                    System.out.println(audioId);
                     for (Audio audio : audios) {
-                        System.out.println(audio.getId());
                         if (audio.getId().equals(audioId)) {
-                            System.out.println("Je suis passé ici");
                             audios.remove(audio);
                             break;
                         }
