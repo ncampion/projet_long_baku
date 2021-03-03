@@ -235,8 +235,11 @@ public class HistoryServiceImpl implements HistoryService {
                 }
                 case AUDIO_REMOVE: {
                     String audioId = element.getValue().get("audioId").asText();
+                    System.out.println(audioId);
                     for (Audio audio : audios) {
-                        if (audio.getId() == audioId) {
+                        System.out.println(audio.getId());
+                        if (audio.getId().equals(audioId)) {
+                            System.out.println("Je suis passé ici");
                             audios.remove(audio);
                             break;
                         }
@@ -247,7 +250,7 @@ public class HistoryServiceImpl implements HistoryService {
                     String audioId = element.getValue().get("audioId").asText();
                     String title = element.getValue().get("title").asText();
                     for (Audio audio : audios) {
-                        if (audio.getId() == audioId) {
+                        if (audio.getId().equals(audioId)) {
                             audio.setTitle(title);
                             break;
                         }
@@ -258,7 +261,7 @@ public class HistoryServiceImpl implements HistoryService {
                     String audioId = element.getValue().get("audioId").asText();
                     InputStream sound = IOUtils.toInputStream(element.getValue().get("sound").asText());
                     for (Audio audio : audios) {
-                        if (audio.getId() == audioId) {
+                        if (audio.getId().equals(audioId)) {
                             audio.setSound(sound);
                             break;
                         }
@@ -269,7 +272,7 @@ public class HistoryServiceImpl implements HistoryService {
                     String audioId = element.getValue().get("audioId").asText();
                     double volume = element.getValue().get("volume").asDouble();
                     for (Audio audio : audios) {
-                        if (audio.getId() == audioId) {
+                        if (audio.getId().equals(audioId)) {
                             audio.setVolume(volume);
                             break;
                         }
@@ -280,7 +283,7 @@ public class HistoryServiceImpl implements HistoryService {
                     String audioId = element.getValue().get("audioId").asText();
                     double duration = element.getValue().get("duration").asDouble();
                     for (Audio audio : audios) {
-                        if (audio.getId() == audioId) {
+                        if (audio.getId().equals(audioId)) {
                             audio.setDuration(duration);
                             break;
                         }
@@ -291,7 +294,7 @@ public class HistoryServiceImpl implements HistoryService {
                     String audioId = element.getValue().get("audioId").asText();
                     InputStream waveform = IOUtils.toInputStream(element.getValue().get("waveform").asText());
                     for (Audio audio : audios) {
-                        if (audio.getId() == audioId) {
+                        if (audio.getId().equals(audioId)) {
                             audio.setWaveform(waveform);
                             break;
                         }
@@ -310,7 +313,7 @@ public class HistoryServiceImpl implements HistoryService {
                 case SOUNDTIMELINE_REMOVE: {
                     String soundTimelineId = element.getValue().get("soundTimelineId").asText();
                     for (SoundTimeLine soundTimeline : soundsTimeline) {
-                        if (soundTimeline.getSoundTimelineId() == soundTimelineId) {
+                        if (soundTimeline.getSoundTimelineId().equals(soundTimelineId)) {
                             soundsTimeline.remove(soundTimeline);
                             break;
                         }
@@ -322,7 +325,7 @@ public class HistoryServiceImpl implements HistoryService {
                     double start = element.getValue().get("start").asDouble();
                     double end = element.getValue().get("end").asDouble();
                     for (SoundTimeLine soundTimeline : soundsTimeline) {
-                        if (soundTimeline.getSoundTimelineId() == soundTimelineId) {
+                        if (soundTimeline.getSoundTimelineId().equals(soundTimelineId)) {
                             soundTimeline.setStart(start);
                             soundTimeline.setEnd(end);
                             break;

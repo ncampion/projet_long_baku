@@ -109,8 +109,6 @@ export default class HistoryComponent extends Vue {
           return 'change la durée d\'un son';
         case BakuAction.AUDIO_UPDATE_WAVEFORM:
           return 'change la waveform d\'un son';
-        case BakuAction.TIMELINE_UPDATE_DATA:
-          return 'met à jour la timeline des sons';
         case BakuAction.SOUNDTIMELINE_ADD:
           return 'ajoute un son sur le film';
         case BakuAction.SOUNDTIMELINE_REMOVE:
