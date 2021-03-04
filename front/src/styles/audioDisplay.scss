@@ -1,6 +1,6 @@
 .audioDisplay-root-div {
     z-index: 2;
-    height: 400px;
+    height: 40%;
 }
 
 .toolbar {
@@ -12,36 +12,17 @@
     padding: 6px 28px;
 }
 
-.soundContainer {
+.movie-container {
     background: white;
     width: 100%;
-    height: calc(100% - 40px);
-    display: inline-flex;
-    flex-wrap: nowrap;
-    padding: 12px 21px;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.movieContainer {
-    background: white;
-    width: 100%;
-    height: calc(100% - 40px);
-    display: inline-flex;
-    flex-wrap: nowrap;
-    padding: 12px 21px;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.sounds {
-    display: inline-block;
-    padding: 10px 10px
+    height: 80%;
+    flex-direction: column;
+    overflow: auto;
 }
 
 .horizontal-align {
     .padding-button {
-        display: inline-block;
+        display: inline-flex;
         padding: 10px 20px
     }
 }

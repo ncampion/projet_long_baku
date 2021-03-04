@@ -132,15 +132,12 @@ export default class AudioDisplayComponent extends Vue {
 
 
     mounted() {
-      //pour le build
-      //console.log(this.mode);
-
       this.chartData = this.getChart();
-
+      window.addEventListener('resize', this.reportWindowSize);
       this.chart.data(this.chartData)
             .xTickFormat((n: number): number => +n)
             .timeFormat('%Q')
-            .maxHeight(330)
+            .maxHeight(window.innerHeight*0.256-1.136)
             .onSegmentClick(this.segmentClick)
             .maxLineHeight(70)
             .zQualitative(true)
@@ -152,6 +149,11 @@ export default class AudioDisplayComponent extends Vue {
 
     }
 
+    reportWindowSize() {
+      const height = Math.round(window.innerHeight*0.256-1.136);
+      this.chart.maxHeight(height)
+                .refresh();
+    }
 
     getChart(){
       return [

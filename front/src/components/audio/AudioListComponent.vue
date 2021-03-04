@@ -8,38 +8,31 @@
         <div
           v-for="audio in getAudioRecord"
           class="sounds"
+          draggable="true"
+          @dragstart="handleDragStart($event,audio.id);"
         >
+          <div class="border">
           
-          <div
-            class="horizontal-align"
-            draggable="true"
-            @dragstart="handleDragStart($event,audio.id);"
-          >
-              {{ audio.title }}
-          </div>
-          
-          <div class="horizontal-align">
-            <i class="baku-button" @click="openEditSoundPopup(audio.id,projectId)">Modifier le son</i>
-          </div>
+            <div
+              class="horizontal-align"
+            >
+                {{ audio.title }}
+            </div>
+            
+            <span class="tools">
+              <div class="tool create-button-modify" @click="openEditSoundPopup(audio.id)">
+              </div>
 
 
-          <div class="horizontal-align">
-            <i class="baku-button" @click="playSound(audio.id)">Jouer le son</i>
-          </div>
+              <div class="tool create-button-play" @click="playSound(audio.id)">
+              </div>
 
-          <div class="horizontal-align">
-            <i class="baku-button" @click="deleteSound(audio.id)">Supprimer le son</i>
+              <div class="tool create-button-delete" @click="deleteSound(audio.id)">
+              </div>
+            </span>
           </div>
         </div>
-        
-
-
     </div>
-
-
-
-    <!-- TODO Ajouter l'icone quand on l'aura = remplacer "baku-button" par "icon-name baku-button"-->
-    
 
     <div class="record-Button">
       <button class="button is-primary" @click="openRecordPopup(projectId)">Enregistrer un son</button>
@@ -86,12 +79,6 @@ export default class AudioListComponent extends Vue {
     private alreadyPlayedOnce: boolean = false;
 
     public async mounted() {
-      // const sound = new Blob();
-      // await this.$store.dispatch('project/createAudio', { title : "son 1", sound, });
-      // await this.$store.dispatch('project/createAudio', { title : "son 2", sound, });
-      // await this.$store.dispatch('project/createAudio', { title : "son 3", sound, });
-      // await this.$store.dispatch('project/createAudio', { title : "son 4", sound, });
-            
       await this.$store.dispatch('project/loadProject', this.$route.params.projectId); 
       await this.loadSounds();
     }
