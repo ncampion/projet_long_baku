@@ -20,7 +20,7 @@
             </div>
             
             <span class="tools">
-              <div class="tool create-button-modify" @click="openEditSoundPopup(audio.id)">
+              <div class="tool create-button-modify" @click="openEditSoundPopup(audio.id,projectId)">
               </div>
 
 

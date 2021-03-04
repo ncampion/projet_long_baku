@@ -102,7 +102,6 @@ export default class EditSoundPopup extends Vue {
       title = this.nameSound;
     }
     this.audioDuration = this.waveSurfer.getDuration();
-    //console.log(this.audioDuration);
     await this.$store.dispatch('project/changeAudioTitle', { audioId: this.id, title });
     await this.$store.dispatch('project/changeAudioVolume', { audioId: this.id, volume: this.audioVolume });
     await this.$store.dispatch('project/changeAudioSound', { audioId: this.id, sound: this.audioBlob, projectId: this.projectId });
