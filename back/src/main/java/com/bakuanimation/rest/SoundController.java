@@ -57,12 +57,43 @@ public class SoundController {
         return Single.fromPublisher(uploadPublisher)
                 .subscribeOn(Schedulers.io())
                 .map(uploadSound -> {
-                    //imageService.writeSmallerImages(permissionService.getProject(projectId).getId(), new FileInputStream(tempFile), file.getFilename());
                     soundService.save(permissionService.getProject(projectId).getId(),new FileInputStream(tempFile),file.getFilename());
                     Files.delete(tempFile.toPath());
                     return file.getFilename();
                 });
 
     }
+
+    @Post(value = "/api/{projectId}/uploadExistantSound", consumes = MediaType.MULTIPART_FORM_DATA)
+    public Single<String> uploadExistantSound(@PathVariable String projectId, StreamingFileUpload file) {
+        File tempFile;
+        try {
+            tempFile = File.createTempFile(file.getFilename(), "temp");
+        } catch (IOException e) {
+            return Single.error(e);
+        }
+        Publisher<Boolean> uploadPublisher = file.transferTo(tempFile);
+        return Single.fromPublisher(uploadPublisher)
+                .subscribeOn(Schedulers.io())
+                .map(uploadSound -> {
+                    soundService.delete(permissionService.getProject(projectId).getId(),file.getFilename());
+                    soundService.save(permissionService.getProject(projectId).getId(),new FileInputStream(tempFile),file.getFilename());
+                    Files.delete(tempFile.toPath());
+                    return file.getFilename();
+                });
+
+    }
+
+    @Get("/api/{projectId}/sounds/{audioId}")
+    public HttpResponse<Object> getSound(@PathVariable String projectId,
+                                         @PathVariable String audioId) {
+        var path = pathService.getSoundFile(permissionService.getProject(projectId).getId(), audioId);
+        if (Files.exists(path)) {
+            return HttpResponse.ok(new SystemFile(path.toFile()).attach(audioId));
+        } else {
+            return HttpResponse.notFound(audioId + " not found");
+        }
+    }
+
 
 }

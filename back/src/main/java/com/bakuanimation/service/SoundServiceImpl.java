@@ -55,7 +55,6 @@ public class SoundServiceImpl implements SoundService {
     }
 
 
-
     public void save(String projectId, InputStream inputStream, String filename){
         Path path = pathService.getSoundFile(projectId, filename);
         try {
@@ -72,39 +71,14 @@ public class SoundServiceImpl implements SoundService {
         
 
     }
-    // private void save(BufferedImage image, Path file, float quality) throws IOException {
-    //     
 
-    //     ImageWriter jpgWriter = ImageIO.getImageWritersByFormatName("jpg").next();
-    //     ImageWriteParam jpgWriteParam = jpgWriter.getDefaultWriteParam();
-    //     jpgWriteParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-    //     jpgWriteParam.setCompressionQuality(quality);
-
-    //     try (ImageOutputStream outputStream = new FileImageOutputStream(file.toFile())) {
-    //         jpgWriter.setOutput(outputStream);
-    //         jpgWriter.write(null, new IIOImage(image, null, null), jpgWriteParam);
-    //         jpgWriter.dispose();
-    //     }
-    // }
-
-    // @Override
-    // public void writeSmallerImages(String projectId, InputStream inputStream, String filename) {
-    //     try {
-    //         BufferedImage image = ImageIO.read(inputStream);
-    //         writeSmallerImages(image, projectId, filename);
-    //     } catch (IOException e) {
-    //         throw new RuntimeException(e);
-    //     }
-    // }
-
-    // private void writeSmallerImages(BufferedImage image, String projectId, String filename) {
-    //     try {
-    //         save(reduce(image, 1280), pathService.getImageFile(projectId, "original", filename), 1f);
-    //         save(reduce(image, 1280), pathService.getImageFile(projectId, "lightweight", filename), .3f);
-    //         save(reduce(image, 355), pathService.getImageFile(projectId, "thumbnail", filename), .6f);
-    //     } catch (IOException e) {
-    //         throw new RuntimeException(e);
-    //     }
-    // }
+    public void delete(String projectId, String filename){
+        Path path = pathService.getSoundFile(projectId, filename);
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+    }
 
 }

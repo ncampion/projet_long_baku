@@ -30,6 +30,7 @@
 
 
 <script lang="ts">
+import {bufferToWave} from '@/utils/convert';
 import { Component,Prop,Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import WaveSurfer from "wavesurfer.js";
@@ -193,6 +194,9 @@ export default class RecordPopup extends Vue {
       if(title == ""){
         title = this.nameSound;
       }
+      let originalAudioBuffer = this.waveSurfer.backend.buffer;
+      let lengthInSamples = Math.floor(this.waveSurfer.getDuration() * originalAudioBuffer.sampleRate);
+      this.audioBlob = bufferToWave(originalAudioBuffer,0,lengthInSamples);
       await this.$store.dispatch('project/createAudio', { title, sound: this.audioBlob, duration: this.audioDuration, projectId : this.projectId});
     }
   }

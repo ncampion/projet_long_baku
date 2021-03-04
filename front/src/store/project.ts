@@ -25,6 +25,7 @@ export function computeHours(imageNumber: number, fps: number): number {
   return Math.floor(imageNumber / fps / 60 / 60) % 60;
 }
 
+
 const makeEvent = (context: BakuActionContext<ProjectState>, action: BakuAction, value: any) => {
   return {
     action,
@@ -197,14 +198,20 @@ export const ProjectStore: BakuModule<ProjectState> = {
       await store.dispatch('user/updateCurrentSeenProject');
     },
 
+    async loadAudioSound(context, params : {audioId : string, sound : Blob}) {
+      const event = makeEvent(context, BakuAction.AUDIO_UPDATE_SOUND, params);
+      loadEvents(context, [event]);
+    },
+
     async changeAudioTitle(context, params : {audioId : string, title : string}) {
       const event = makeEvent(context, BakuAction.AUDIO_UPDATE_TITLE, params);
       loadEvents(context, [event]);
     },
 
-    async changeAudioSound(context, params : {audioId : string, sound : Blob}) {
+    async changeAudioSound(context, params : {audioId : string, sound : Blob, projectId : string}) {
       const event = makeEvent(context, BakuAction.AUDIO_UPDATE_SOUND, params);
       loadEvents(context, [event]);
+      await api.uploadExistantSound(params.projectId, params.sound,  params.audioId);
     },
 
     async changeAudioVolume(context, params : {audioId : string, volume : number}) {

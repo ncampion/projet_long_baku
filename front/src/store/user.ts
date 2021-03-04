@@ -161,7 +161,7 @@ export const UserStore: BakuModule<UserState> = {
             lastUpdate: MovieService.getLastUpdate(history)
           });
         } catch (e) {
-          console.log(`Movie ${seenProject.id} not found on server : remove from loca storage`);
+          console.log(`Movie ${seenProject.id} not found on server : remove from local storage`);
         }
       }
       await context.commit("updateSeenProjects", updatedSeenProjects);

@@ -52,6 +52,24 @@ export function uploadSound(projectId: string, blob: Blob, name: string): Promis
     .then();
 }
 
+
+export function uploadExistantSound(projectId: string, blob: Blob, name: string): Promise<void> {
+  const formData = new FormData();
+  formData.set('file', blob, name);
+  return axios
+    .post(`/api/${projectId}/uploadExistantSound`, formData,
+      {
+        headers: {
+          'content-type': 'multipart/form-data',
+        }
+      })
+    .then();
+}
+
+export function getSoundUrl(projectId: string, soundId : string): string {
+  return `/api/${projectId}/sounds/${soundId}`;
+}
+
 export function getVideoStatus(projectId: string): Promise<VideoStatus> {
   return axios
     .get<VideoStatus>(`/api/${projectId}/video/status`)

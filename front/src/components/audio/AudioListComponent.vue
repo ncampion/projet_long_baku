@@ -19,7 +19,7 @@
           </div>
           
           <div class="horizontal-align">
-            <i class="baku-button" @click="openEditSoundPopup(audio.id)">Modifier le son</i>
+            <i class="baku-button" @click="openEditSoundPopup(audio.id,projectId)">Modifier le son</i>
           </div>
 
 
@@ -57,6 +57,8 @@ import { Howl } from 'howler';
 // import { ImageCacheService } from "@/utils/imageCache.service";
 import RecordPopup from '@/components/RecordPopup.vue';
 import EditSoundPopup from '@/components/EditSoundPopup.vue';
+import * as api from '@/api';
+
 const ProjectNS = namespace('project');
 @Component
 export default class AudioListComponent extends Vue {
@@ -71,7 +73,7 @@ export default class AudioListComponent extends Vue {
     public isPlaying: 'animation' | 'selection' | null = null;
 
     @Prop()
-    public projectId!: String;
+    public projectId!: string;
 
     @ProjectNS.State
     public id!: string;
@@ -89,6 +91,30 @@ export default class AudioListComponent extends Vue {
       // await this.$store.dispatch('project/createAudio', { title : "son 2", sound, });
       // await this.$store.dispatch('project/createAudio', { title : "son 3", sound, });
       // await this.$store.dispatch('project/createAudio', { title : "son 4", sound, });
+            
+      await this.$store.dispatch('project/loadProject', this.$route.params.projectId); 
+      await this.loadSounds();
+    }
+
+    private async loadSounds(){
+      this.getAudioRecord.forEach((audio: any) => {
+        console.log(audio);
+        let path : string = api.getSoundUrl(this.projectId, audio.id);
+        fetch(path)
+        .then(res => res.blob())
+        .then(async data => {
+          var blob = new Blob([data], { type: 'audio/wav' });
+          console.log(audio);
+          console.log(blob);
+          await this.$store.dispatch('project/loadAudioSound', { id : audio.id, sound : blob});
+        })
+        // if(audio.sound == undefined){
+        //   appel -> path
+        //   let blob = new Blob();
+        //   await this.$store.dispatch('project/changeAudioSound', { id : audio.id, sound : blob });
+        // }
+      });
+
     }
 
 
@@ -108,14 +134,15 @@ export default class AudioListComponent extends Vue {
       });
     }
 
-    public async openEditSoundPopup(id: String) {
+    public async openEditSoundPopup(id: string, projectId: string) {
       this.$buefy.modal.open({
         parent: this,
         component: EditSoundPopup,
         hasModalCard: true,
         canCancel: ['escape', 'outside'],
         props: {
-          "id": id
+          "id": id,
+          "projectId": projectId
         }
       });
     }
