@@ -97,24 +97,11 @@ export default class AudioListComponent extends Vue {
     }
 
     private async loadSounds(){
-      this.getAudioRecord.forEach((audio: any) => {
-        console.log(audio);
+      this.getAudioRecord.forEach(async (audio: any) => {
         let path : string = api.getSoundUrl(this.projectId, audio.id);
-        fetch(path)
-        .then(res => res.blob())
-        .then(async data => {
-          var blob = new Blob([data], { type: 'audio/wav' });
-          console.log(audio);
-          console.log(blob);
-          await this.$store.dispatch('project/loadAudioSound', { id : audio.id, sound : blob});
-        })
-        // if(audio.sound == undefined){
-        //   appel -> path
-        //   let blob = new Blob();
-        //   await this.$store.dispatch('project/changeAudioSound', { id : audio.id, sound : blob });
-        // }
+        let blob = await fetch(path).then(res => res.blob()).then(data => new Blob([data], { type: 'audio/wav' }));
+        await this.$store.dispatch('project/loadAudioSound', { audioId : audio.id, sound : blob});
       });
-
     }
 
 

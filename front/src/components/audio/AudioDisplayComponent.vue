@@ -33,7 +33,7 @@
       </div>
 
       <div class="padding-button">
-          Mode : {{ mode }}
+          Mode : {{ this.mode }}
       </div>
 
       <div class="padding-button">
@@ -123,7 +123,7 @@ export default class AudioDisplayComponent extends Vue {
     private goBackward1 : boolean = false;
     private goBackward10 : boolean = false;
     private deleteSound : boolean = false;
-    private mode : string = "Avancer de 10 frames";
+    public mode : string = "Avancer de 10 frames";
     private nbTotalFrames : number = 0;
     private nbPistes : number = 1;
     private activePiste : number = 1;
@@ -133,7 +133,7 @@ export default class AudioDisplayComponent extends Vue {
 
     mounted() {
       //pour le build
-      console.log(this.mode);
+      //console.log(this.mode);
 
       this.chartData = this.getChart();
 
