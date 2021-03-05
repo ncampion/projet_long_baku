@@ -131,8 +131,10 @@ export default class AudioDisplayComponent extends Vue {
 
 
 
-    mounted() {
-      this.chartData = this.getChart();
+    async mounted() {
+      await this.$store.dispatch('project/loadProject', this.$route.params.projectId); 
+      this.initializeChart();
+            
       window.addEventListener('resize', this.reportWindowSize);
       this.chart.data(this.chartData)
             .xTickFormat((n: number): number => +n)
@@ -179,7 +181,9 @@ export default class AudioDisplayComponent extends Vue {
     }
 
     public initializeChart(){
-      let localChart = this.getChart();
+      let localChart = this.chartData;
+      if (!localChart) {
+        localChart = this.getChart();        
 
       for (let sound of this.getSoundTimeline) {
         if(!localChart[0].data[sound.pisteNumber-1]) {
@@ -213,7 +217,8 @@ export default class AudioDisplayComponent extends Vue {
         localChart[0].data[sound.pisteNumber-1].data = dataActivePiste;
 
       }
-      return localChart;
+      }
+      this.chartData = localChart;
     }
 
     public actualizeDateMarker(newFrame: number){
@@ -225,8 +230,16 @@ export default class AudioDisplayComponent extends Vue {
       for (let shot of this.allShots) {
         this.nbTotalFrames = this.nbTotalFrames + shot.images.length;
       }
-      this.chartData = this.initializeChart();
-      this.chart.data(this.chartData);
+      let updatedData = [...this.chartData];
+      updatedData[1].data = [
+              {
+                label: "",
+                data: this.getChartFromShots(),
+              },
+            ];
+      updatedData = JSON.parse(JSON.stringify(updatedData));
+      this.chart.data(updatedData);
+      this.chartData = updatedData;
     }
 
     getChartFromShots(){
@@ -440,6 +453,34 @@ export default class AudioDisplayComponent extends Vue {
     this.audioRecord = newAudioRecord;
   }
 
+
+  @Watch('getMovieFps')
+  public async onFpsChange(movieFps : number) {
+    let soundsTimeline = this.getSoundTimeline;
+    let audios = this.getAudioRecord;
+    soundsTimeline.forEach(async (elt : any) => {
+      const audio = audios.find((p : any) => p.id === elt.audioId);
+      let duration = Math.round(audio.duration*movieFps);
+      let end = elt.start + duration;
+      await this.$store.dispatch('project/updateSoundTimelineStart', {soundTimelineId : elt.id, start : elt.start, end});
+    });
+
+    this.initializeChart();
+    let updatedData = [...this.chartData];
+    for (let i = 0; i < updatedData[0].data.length; i++) {
+      for (let j = 0; j < updatedData[0].data[i].data.length; j++) {
+        const audio = audios.find((p : any) => p.id === updatedData[0].data[i].data[j].audioId);
+        let start = updatedData[0].data[i].data[j].timeRange[0];
+        let duration = Math.round(audio.duration*movieFps);
+        updatedData[0].data[i].data[j].timeRange = [start, start+duration];
+      }
+    }
+
+    updatedData = JSON.parse(JSON.stringify(updatedData));
+    this.chart.data(updatedData);
+    this.chartData = updatedData;
+    this.chart.refresh();
+  }
 
   // Drop from the Record sounds list
 
